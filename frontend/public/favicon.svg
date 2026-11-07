@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1438"/>
+      <stop offset="50%" stop-color="#060814"/>
+      <stop offset="100%" stop-color="#141b4d"/>
+    </linearGradient>
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="eGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#e0e7ff"/>
+      <stop offset="70%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="14" flood-color="#7c3aed" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded card -->
+  <rect x="24" y="24" width="464" height="464" rx="120" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="14" filter="url(#glow)"/>
+
+  <!-- Futuristic E Matrix Emblem -->
+  <!-- Top Bar -->
+  <rect x="145" y="135" width="222" height="44" rx="22" fill="url(#eGrad)"/>
+  <!-- Middle Bar with Network Node -->
+  <rect x="145" y="234" width="160" height="44" rx="22" fill="url(#eGrad)"/>
+  <circle cx="348" cy="256" r="22" fill="#38bdf8"/>
+  <circle cx="348" cy="256" r="12" fill="#ffffff"/>
+  <!-- Bottom Bar -->
+  <rect x="145" y="333" width="222" height="44" rx="22" fill="url(#eGrad)"/>
+  <!-- Vertical Spine -->
+  <rect x="145" y="135" width="48" height="242" rx="24" fill="url(#eGrad)"/>
+
+  <!-- Accent Sparkles -->
+  <circle cx="390" cy="120" r="12" fill="#c084fc"/>
+</svg>

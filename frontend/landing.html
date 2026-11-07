@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TetherXStream — Decentralized Trading Income on BNB Smart Chain</title>
+<style>
+  :root{
+    --green:#22e59a;--green2:#12b866;--green-dark:#0a5c39;--bg:#03060a;
+    --panel:rgba(10,20,24,0.55);--panel-line:rgba(34,229,154,0.22);
+    --text:#e8fff5;--muted:#8ba79b;--silver:#cfd8dc;--glow:0 0 40px rgba(34,229,154,0.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;}
+  a{color:inherit;text-decoration:none;}
+  #three-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  .vignette{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(circle at 50% 30%,transparent 40%,rgba(3,6,10,0.55) 100%),linear-gradient(180deg,rgba(3,6,10,0.2) 0%,rgba(3,6,10,0.75) 100%);}
+  .content{position:relative;z-index:3;}
+  nav{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 5vw;backdrop-filter:blur(14px);background:rgba(3,6,10,0.5);border-bottom:1px solid var(--panel-line);}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.5px;}
+  .brand img{height:46px;filter:drop-shadow(0 0 16px rgba(34,229,154,0.6));}
+  .brand span{font-size:1.15rem;background:linear-gradient(90deg,#cfd8dc,#22e59a);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .nav-links{display:flex;gap:26px;font-size:.92rem;color:var(--muted);}
+  .nav-links a:hover{color:var(--green);}
+  .btn{cursor:pointer;border:none;font-weight:700;letter-spacing:.4px;padding:12px 22px;border-radius:14px;font-size:.9rem;white-space:nowrap;
+    background:linear-gradient(135deg,var(--green),var(--green2));color:#02120b;box-shadow:var(--glow);
+    transition:transform .15s ease,box-shadow .2s ease;position:relative;overflow:hidden;}
+  .btn::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;
+    background:linear-gradient(120deg,transparent,rgba(255,255,255,0.55),transparent);transform:skewX(-20deg);animation:shine 3.2s infinite;}
+  @keyframes shine{0%{left:-120%}45%,100%{left:130%}}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 0 55px rgba(34,229,154,0.6);}
+  .btn.ghost{background:transparent;color:var(--green);border:1px solid var(--panel-line);box-shadow:none;}
+  .btn.ghost::after{display:none;}
+  .wallet-pill{display:flex;align-items:center;gap:10px;}
+  #walletAddr{font-family:monospace;font-size:.8rem;color:var(--green);display:none;padding:8px 12px;
+    border:1px solid var(--panel-line);border-radius:12px;background:rgba(34,229,154,0.06);}
+  header{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 6vw;position:relative;}
+  .badge{display:inline-flex;align-items:center;gap:8px;margin-bottom:26px;padding:8px 16px;border-radius:100px;
+    font-size:.78rem;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--panel-line);background:rgba(34,229,154,0.06);color:var(--green);
+    opacity:0;animation:rise .8s ease .1s forwards;}
+  .badge i{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.6)}}
+  @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  .hero-logo{width:min(340px,64vw);filter:drop-shadow(0 24px 70px rgba(34,229,154,0.5));opacity:0;animation:rise 1s ease .25s forwards,float 6s ease-in-out 1.2s infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+  h1{font-size:clamp(2.2rem,6vw,4.6rem);line-height:1.04;margin:14px 0 12px;font-weight:900;letter-spacing:-1.5px;
+    background:linear-gradient(120deg,#ffffff 5%,#22e59a 55%,#0f9d5a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;opacity:0;animation:rise 1s ease .4s forwards;}
+  .sub{max-width:640px;color:var(--muted);font-size:clamp(1rem,2vw,1.18rem);margin-bottom:32px;opacity:0;animation:rise 1s ease .55s forwards;}
+  .hero-cta{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;opacity:0;animation:rise 1s ease .7s forwards;}
+  .stats{display:flex;gap:44px;flex-wrap:wrap;justify-content:center;margin-top:60px;opacity:0;animation:rise 1s ease .85s forwards;}
+  .stat b{display:block;font-size:clamp(1.6rem,4vw,2.4rem);background:linear-gradient(90deg,#22e59a,#cfd8dc);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900;}
+  .stat span{color:var(--muted);font-size:.82rem;letter-spacing:1px;text-transform:uppercase;}
+  .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);color:var(--muted);font-size:.75rem;letter-spacing:2px;text-transform:uppercase;}
+  .scroll-hint span{display:block;width:1px;height:34px;margin:8px auto 0;background:linear-gradient(var(--green),transparent);animation:drop 1.8s infinite;}
+  @keyframes drop{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}100%{transform:scaleY(0);transform-origin:bottom}}
+  section{padding:100px 6vw;max-width:1200px;margin:0 auto;}
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .8s ease,transform .8s ease;}
+  .reveal.in{opacity:1;transform:none;}
+  .eyebrow{color:var(--green);letter-spacing:3px;text-transform:uppercase;font-size:.78rem;font-weight:700;text-align:center;}
+  h2{font-size:clamp(1.8rem,4vw,2.9rem);text-align:center;margin:12px 0 10px;font-weight:900;background:linear-gradient(90deg,#ffffff,#22e59a);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .lead{text-align:center;color:var(--muted);max-width:680px;margin:0 auto 50px;}
+  .packages{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:26px;perspective:1600px;}
+  .pkg{position:relative;border-radius:22px;padding:36px 30px;background:var(--panel);border:1px solid var(--panel-line);
+    backdrop-filter:blur(14px);transform-style:preserve-3d;transition:transform .25s ease,box-shadow .35s ease;overflow:hidden;}
+  .pkg::before{content:"";position:absolute;inset:0;border-radius:22px;padding:1px;background:linear-gradient(140deg,rgba(34,229,154,0.7),transparent 55%);
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;}
+  .pkg .coin3d{position:absolute;top:-30px;right:-30px;width:130px;height:130px;opacity:.2;pointer-events:none;}
+  .pkg:hover{box-shadow:0 34px 70px rgba(0,0,0,0.55),0 0 46px rgba(34,229,154,0.3);}
+  .pkg.featured{border-color:var(--green);box-shadow:0 0 55px rgba(34,229,154,0.3);}
+  .pkg .tag{position:absolute;top:18px;right:18px;font-size:.65rem;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border-radius:8px;
+    background:rgba(34,229,154,0.14);color:var(--green);border:1px solid var(--panel-line);z-index:2;}
+  .pkg h3{font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;color:var(--silver);position:relative;z-index:2;}
+  .pkg .price{font-size:3rem;font-weight:900;margin:8px 0 4px;background:linear-gradient(120deg,#22e59a,#0f9d5a);-webkit-background-clip:text;background-clip:text;color:transparent;position:relative;z-index:2;}
+  .pkg .price small{font-size:1rem;color:var(--muted);font-weight:600;}
+  .pkg ul{list-style:none;margin:22px 0;display:flex;flex-direction:column;gap:12px;position:relative;z-index:2;}
+  .pkg li{display:flex;align-items:flex-start;gap:10px;color:var(--text);font-size:.92rem;}
+  .pkg .buy{width:100%;margin-top:10px;position:relative;z-index:2;}
+  .income-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+  @media(max-width:1000px){.income-grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.income-grid{grid-template-columns:1fr;}}
+  .icard{border-radius:20px;padding:30px;background:var(--panel);border:1px solid var(--panel-line);backdrop-filter:blur(10px);transition:transform .3s ease,border-color .3s ease;position:relative;overflow:hidden;}
+  .icard:hover{transform:translateY(-8px);border-color:var(--green);}
+  .icard .ic{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;margin-bottom:16px;font-size:1.5rem;background:linear-gradient(135deg,rgba(34,229,154,0.22),rgba(18,184,102,0.06));border:1px solid var(--panel-line);}
+  .icard h4{font-size:1.12rem;margin-bottom:8px;color:#fff;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .icard .pct{color:var(--green);font-weight:800;font-size:1.3rem;}
+  .icard p{color:var(--muted);font-size:.9rem;}
+  .levels{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:30px;}
+  .lvl{flex:1;min-width:120px;text-align:center;border-radius:16px;padding:24px 14px;background:var(--panel);border:1px solid var(--panel-line);backdrop-filter:blur(8px);transition:transform .3s ease;}
+  .lvl:hover{transform:translateY(-6px);}
+  .lvl b{display:block;color:var(--muted);font-size:.78rem;letter-spacing:1px;text-transform:uppercase;}
+  .lvl .v{font-size:1.9rem;font-weight:900;color:var(--green);margin-top:6px;}
+  .tblwrap{overflow-x:auto;border-radius:18px;border:1px solid var(--panel-line);background:var(--panel);margin-top:30px;backdrop-filter:blur(8px);}
+  table{width:100%;border-collapse:collapse;min-width:420px;}
+  th,td{padding:16px 20px;text-align:left;border-bottom:1px solid rgba(34,229,154,0.1);}
+  th{color:var(--green);font-size:.8rem;letter-spacing:1px;text-transform:uppercase;}
+  td{color:var(--text);font-size:.92rem;}
+  tr:last-child td{border-bottom:none;}
+  td .fast{color:var(--green);font-weight:700;}
+  .flow{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px;margin-top:20px;}
+  .step{border-radius:18px;padding:28px;background:var(--panel);border:1px solid var(--panel-line);backdrop-filter:blur(8px);transition:transform .3s ease;}
+  .step:hover{transform:translateY(-6px);}
+  .step .n{font-size:2.6rem;font-weight:900;color:rgba(34,229,154,0.28);line-height:1;}
+  .step h4{margin:8px 0 6px;color:#fff;}
+  .step p{color:var(--muted);font-size:.88rem;}
+  .pool{border-radius:24px;padding:46px;margin-top:20px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(10,92,57,0.42),rgba(3,6,10,0.6));border:1px solid var(--green);box-shadow:0 0 60px rgba(34,229,154,0.22);}
+  .pool h3{font-size:1.6rem;color:#fff;margin-bottom:8px;}
+  .pool .cond{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:24px;}
+  .cond div{background:rgba(3,6,10,0.5);border:1px solid var(--panel-line);border-radius:14px;padding:18px;}
+  .cond b{color:var(--green);display:block;margin-bottom:4px;font-size:.85rem;}
+  footer{padding:64px 6vw 44px;text-align:center;border-top:1px solid var(--panel-line);margin-top:60px;color:var(--muted);}
+  footer .fbrand{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:16px;}
+  footer .fbrand img{height:42px;filter:drop-shadow(0 0 14px rgba(34,229,154,0.5));}
+  .chain{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:100px;border:1px solid var(--panel-line);background:rgba(34,229,154,0.05);color:var(--green);font-size:.82rem;margin-top:10px;}
+  .disclaimer{font-size:.72rem;color:#4d6157;max-width:640px;margin:24px auto 0;line-height:1.6;}
+  #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(140px);z-index:200;background:var(--panel);border:1px solid var(--green);border-radius:14px;padding:14px 22px;color:#fff;box-shadow:var(--glow);transition:transform .35s cubic-bezier(.2,.9,.3,1.2);max-width:90vw;font-size:.9rem;backdrop-filter:blur(10px);}
+  #toast.show{transform:translateX(-50%) translateY(0);}
+  #loader{position:fixed;inset:0;z-index:500;background:var(--bg);display:grid;place-items:center;transition:opacity .6s ease;}
+  #loader.hide{opacity:0;pointer-events:none;}
+  .ring{width:64px;height:64px;border-radius:50%;border:3px solid rgba(34,229,154,0.2);border-top-color:var(--green);animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+  @media(max-width:720px){
+    .nav-links{display:none;}
+    section{padding:76px 6vw;}
+    nav{padding:12px 4vw;gap:10px;}
+    .brand{gap:8px;flex-shrink:1;min-width:0;}
+    .brand img{height:36px;}
+    .brand span{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #connectBtn{padding:10px 14px;font-size:.82rem;flex-shrink:0;}
+    #walletAddr{font-size:.72rem;padding:6px 9px;}
+  }
+  @media(max-width:420px){
+    .brand span{display:none;}
+    #connectBtn{padding:10px 16px;}
+  }
+</style>
+</head>
+<body>
+<div id="loader"><div class="ring"></div></div>
+<canvas id="three-canvas"></canvas>
+<div class="vignette"></div>
+
+<div class="content">
+  <nav>
+    <div class="brand"><img src="assets/logo.png" alt="TetherXStream" /><span>TETHERXSTREAM</span></div>
+    <div class="nav-links"><a href="#packages">Packages</a><a href="#income">Income</a><a href="#levels">Levels</a><a href="#pool">Global Pool</a><a href="#how">How it works</a></div>
+    <div class="wallet-pill"><span id="walletAddr"></span><button class="btn" id="connectBtn">🔗 Connect Wallet</button></div>
+  </nav>
+
+  <header>
+    <span class="badge"><i></i> Live on BNB Smart Chain</span>
+    <img src="assets/logo.png" class="hero-logo" alt="TetherXStream logo" />
+    <h1>Decentralized Trading Income,<br/>Streamed to Your Wallet</h1>
+    <p class="sub">Stake USDT, run automated trade cycles, and earn instant, rebuy, level and global-pool income — fully on-chain, transparent and non-custodial on BNB Smart Chain.</p>
+    <div class="hero-cta"><button class="btn" id="heroConnect">🔗 Connect Wallet</button><a href="#packages" class="btn ghost">View Packages</a></div>
+    <div class="stats"><div class="stat"><b>5%</b><span>Per Trade</span></div><div class="stat"><b>25</b><span>Trades / Cycle</span></div><div class="stat"><b>5</b><span>Income Levels</span></div><div class="stat"><b>4h</b><span>Fastest Trade</span></div></div>
+    <div class="scroll-hint">Scroll<span></span></div>
+  </header>
+
+  <section id="packages" class="reveal">
+    <div class="eyebrow">Choose Your Plan</div>
+    <h2>Staking Packages</h2>
+    <p class="lead">1 cycle = 25 trades · one trade every 8 hours · each trade returns <b style="color:var(--green)">5%</b> of your package.</p>
+    <div class="packages">
+      <div class="pkg"><canvas class="coin3d" data-coin></canvas><div class="tag">Starter</div><h3>Regular</h3><div class="price">$25<small>/ USDT</small></div>
+        <ul><li>✦ 25 trades per cycle</li><li>✦ 5% return per trade</li><li>✦ Trade income + Rebuy income</li><li>✦ 5-level referral income</li></ul>
+        <button class="btn ghost buy" data-pkg="Regular ($25)">Stake Regular</button></div>
+      <div class="pkg featured"><canvas class="coin3d" data-coin></canvas><div class="tag">★ Popular</div><h3>Standard</h3><div class="price">$50<small>/ USDT</small></div>
+        <ul><li>✦ 25 trades per cycle</li><li>✦ 5% return per trade</li><li>✦ Trade income + Rebuy income</li><li>✦ 5-level referral income</li><li>✦ Faster trade unlocks</li></ul>
+        <button class="btn buy" data-pkg="Standard ($50)">Stake Standard</button></div>
+      <div class="pkg"><canvas class="coin3d" data-coin></canvas><div class="tag">Elite</div><h3>Premium</h3><div class="price">$100<small>/ USDT</small></div>
+        <ul><li>✦ 25 trades per cycle</li><li>✦ 5% return per trade</li><li>✦ Trade + Rebuy + Level income</li><li>✦ 🌐 Global Pool eligible</li><li>✦ Priority faster trading</li></ul>
+        <button class="btn ghost buy" data-pkg="Premium ($100)">Stake Premium</button></div>
+    </div>
+  </section>
+
+  <section id="income" class="reveal">
+    <div class="eyebrow">Earn Multiple Ways</div>
+    <h2>Types of Income</h2>
+    <p class="lead">Every trade splits your 5% return across instant payouts and re-staked growth — while your network keeps paying you.</p>
+    <div class="income-grid">
+      <div class="icard"><div class="ic">⚡</div><h4>Trade Income <span class="pct">0.6%</span></h4><p>Instant. 0.6% of your package is paid straight to your wallet on every trade.</p></div>
+      <div class="icard"><div class="ic">🔁</div><h4>Rebuy Income <span class="pct">4%</span></h4><p>4% of your package on every trade is added to your Rebuy Wallet and re-staked so it keeps compounding.</p></div>
+      <div class="icard"><div class="ic">👥</div><h4>Level Income <span class="pct">0.5% ×5</span></h4><p>Earn 0.5% from each of your 5 downline levels. Direct and level income share the same 0.5% rate.</p></div>
+      <div class="icard"><div class="ic">🌐</div><h4>Global Pool <span class="pct">Shared</span></h4><p>A shared reward pool for qualified top Premium members. Passive income from platform-wide activity.</p></div>
+    </div>
+  </section>
+
+  <section id="levels" class="reveal">
+    <div class="eyebrow">Referral Structure</div>
+    <h2>Direct + 5 Levels</h2>
+    <p class="lead">You earn <b style="color:var(--green)">0.5%</b> from every level of your team, on every trade they make.</p>
+    <div class="levels">
+      <div class="lvl"><b>Level 1</b><div class="v">0.5%</div></div><div class="lvl"><b>Level 2</b><div class="v">0.5%</div></div><div class="lvl"><b>Level 3</b><div class="v">0.5%</div></div><div class="lvl"><b>Level 4</b><div class="v">0.5%</div></div><div class="lvl"><b>Level 5</b><div class="v">0.5%</div></div>
+    </div>
+  </section>
+
+  <section id="pool" class="reveal">
+    <div class="eyebrow">For Top Performers</div>
+    <h2>Global Pool Income</h2>
+    <p class="lead">A shared pool for top members — reserved for Premium members who meet all conditions.</p>
+    <div class="pool"><h3>🌐 Qualification Requirements</h3><p style="color:var(--muted)">Meet every condition below to unlock your share of the global pool.</p>
+      <div class="cond"><div><b>Package</b>Premium ($100) only</div><div><b>Direct Referrals</b>Minimum 25 directs</div><div><b>Their Package</b>All 25 must be Premium ($100)</div></div>
+    </div>
+  </section>
+
+  <section id="how" class="reveal">
+    <div class="eyebrow">Speed Bonus</div>
+    <h2>Faster Trading</h2>
+    <p class="lead">More directs = faster trades = your cycle finishes sooner (same income, quicker).</p>
+    <div class="tblwrap"><table><thead><tr><th>Direct Referrals</th><th>Trade Time</th></tr></thead>
+      <tbody><tr><td>Default</td><td>Every 8 hours</td></tr><tr><td>10+ directs</td><td class="fast">Every 6 hours ⚡</td></tr><tr><td>20+ directs</td><td class="fast">Every 4 hours ⚡⚡</td></tr></tbody></table></div>
+    <div style="margin-top:76px"><div class="eyebrow">Simple Steps</div><h2>How It Works</h2>
+      <div class="flow">
+        <div class="step"><div class="n">01</div><h4>Connect Wallet</h4><p>Link your BNB Smart Chain wallet — MetaMask, Trust, or any Web3 wallet. Non-custodial, you stay in control.</p></div>
+        <div class="step"><div class="n">02</div><h4>Choose Package</h4><p>Stake $25, $50, or $100 in USDT to activate your automated trade cycle.</p></div>
+        <div class="step"><div class="n">03</div><h4>Auto Trade</h4><p>The protocol runs 25 trades per cycle, each returning 5% — split into instant + rebuy income.</p></div>
+        <div class="step"><div class="n">04</div><h4>Grow & Withdraw</h4><p>Build your team for level & pool income, unlock faster trades, and withdraw earnings on-chain.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="fbrand"><img src="assets/logo.png" alt="TetherXStream" /><span style="font-weight:800;font-size:1.1rem;background:linear-gradient(90deg,#cfd8dc,#22e59a);-webkit-background-clip:text;background-clip:text;color:transparent;">TETHERXSTREAM</span></div>
+    <div class="chain">◆ Built on BNB Smart Chain</div>
+    <p class="disclaimer">TetherXStream is a decentralized smart-contract protocol. All transactions are executed on-chain and are irreversible. Participation involves financial risk; income depends on protocol activity and your own network. This website is informational and not financial advice. Do your own research before staking.</p>
+    <p style="margin-top:18px;font-size:.78rem;">© 2026 TetherXStream · All rights reserved.</p>
+  </footer>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+let scene,camera,renderer,coinGroup,nodeGroup,ringGroup,tokens=[],lines,mouse={x:0,y:0},clock;
+function initThree(){
+  const canvas=document.getElementById('three-canvas');
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
+  scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x03060a,0.055);
+  camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,0.1,200);camera.position.set(0,0,16);
+  clock=new THREE.Clock();
+  scene.add(new THREE.AmbientLight(0x1a3d2e,1.2));
+  const key=new THREE.PointLight(0x22e59a,2.2,120);key.position.set(10,14,18);scene.add(key);
+  const fill=new THREE.PointLight(0x0f9d5a,1.6,120);fill.position.set(-16,-8,10);scene.add(fill);
+  const rim=new THREE.PointLight(0xffffff,0.8,80);rim.position.set(0,0,-20);scene.add(rim);
+  coinGroup=new THREE.Group();
+  const coinMat=new THREE.MeshStandardMaterial({color:0x0d6b45,metalness:0.9,roughness:0.25,emissive:0x0a3b28,emissiveIntensity:0.5});
+  const edgeMat=new THREE.MeshStandardMaterial({color:0x22e59a,metalness:1,roughness:0.15,emissive:0x0f9d5a,emissiveIntensity:0.7});
+  const coin=new THREE.Mesh(new THREE.CylinderGeometry(4.2,4.2,0.7,64),coinMat);coin.rotation.x=Math.PI/2;coinGroup.add(coin);
+  coinGroup.add(new THREE.Mesh(new THREE.TorusGeometry(4.2,0.28,24,80),edgeMat));
+  function makeT(z){const g=new THREE.Group();const barMat=new THREE.MeshStandardMaterial({color:0xffffff,metalness:0.6,roughness:0.3,emissive:0x224433,emissiveIntensity:0.2});
+    const top=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.7,0.35),barMat);top.position.y=1.3;
+    const stem=new THREE.Mesh(new THREE.BoxGeometry(0.8,3.2,0.35),barMat);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(1.5,0.16,16,48),barMat);ring.position.y=0.4;
+    g.add(top,stem,ring);g.position.z=z;return g;}
+  coinGroup.add(makeT(0.42));const tb=makeT(-0.42);tb.rotation.y=Math.PI;coinGroup.add(tb);
+  coinGroup.position.set(0,0.5,0);coinGroup.scale.setScalar(1.15);scene.add(coinGroup);
+  ringGroup=new THREE.Group();
+  for(let i=0;i<3;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(6+i*1.6,0.05,12,120),new THREE.MeshBasicMaterial({color:0x22e59a,transparent:true,opacity:0.35-i*0.08}));
+    r.rotation.x=Math.PI/2.2+i*0.3;r.rotation.y=i*0.5;ringGroup.add(r);}
+  scene.add(ringGroup);
+  nodeGroup=new THREE.Group();
+  const nodeGeo=new THREE.IcosahedronGeometry(0.16,0);
+  const nodeMat=new THREE.MeshStandardMaterial({color:0x22e59a,emissive:0x22e59a,emissiveIntensity:0.9,metalness:0.6,roughness:0.3});
+  const pts=[];const N=60;
+  for(let i=0;i<N;i++){const radius=9+Math.random()*10;const theta=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1);
+    const x=radius*Math.sin(phi)*Math.cos(theta),y=radius*Math.sin(phi)*Math.sin(theta)*0.6,z=radius*Math.cos(phi);
+    const m=new THREE.Mesh(nodeGeo,nodeMat);m.position.set(x,y,z);m.userData.base=new THREE.Vector3(x,y,z);m.userData.speed=0.3+Math.random();
+    nodeGroup.add(m);pts.push(new THREE.Vector3(x,y,z));}
+  const linePos=[];
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){if(pts[i].distanceTo(pts[j])<6){linePos.push(pts[i].x,pts[i].y,pts[i].z,pts[j].x,pts[j].y,pts[j].z);}}
+  const lineGeo=new THREE.BufferGeometry();lineGeo.setAttribute('position',new THREE.Float32BufferAttribute(linePos,3));
+  lines=new THREE.LineSegments(lineGeo,new THREE.LineBasicMaterial({color:0x22e59a,transparent:true,opacity:0.14}));nodeGroup.add(lines);scene.add(nodeGroup);
+  const cubeGeo=new THREE.BoxGeometry(0.5,0.5,0.5),octaGeo=new THREE.OctahedronGeometry(0.4);
+  for(let i=0;i<24;i++){const geo=Math.random()>0.5?cubeGeo:octaGeo;
+    const mat=new THREE.MeshStandardMaterial({color:0x0f9d5a,metalness:0.8,roughness:0.3,emissive:0x0a5c39,emissiveIntensity:0.6,transparent:true,opacity:0.8});
+    const t=new THREE.Mesh(geo,mat);t.position.set((Math.random()-0.5)*36,(Math.random()-0.5)*22,(Math.random()-0.5)*20-4);
+    t.userData.rot=new THREE.Vector3(Math.random()*0.02,Math.random()*0.02,Math.random()*0.02);t.userData.floatY=Math.random()*Math.PI*2;
+    scene.add(t);tokens.push(t);}
+  addEventListener('resize',onResize);
+  addEventListener('mousemove',e=>{mouse.x=(e.clientX/innerWidth)*2-1;mouse.y=-(e.clientY/innerHeight)*2+1;});
+  animate();
+}
+function onResize(){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);}
+function animate(){
+  requestAnimationFrame(animate);const t=clock.getElapsedTime();const scrollY=window.scrollY||0;
+  coinGroup.rotation.y=t*0.6;coinGroup.rotation.x=Math.sin(t*0.4)*0.15;coinGroup.position.y=0.5+Math.sin(t*0.8)*0.3;
+  ringGroup.rotation.z=t*0.15;ringGroup.rotation.y=t*0.1;nodeGroup.rotation.y=t*0.05;
+  nodeGroup.children.forEach((m,i)=>{if(m.userData.base){const b=m.userData.base;m.position.y=b.y+Math.sin(t*m.userData.speed+i)*0.4;}});
+  tokens.forEach(tk=>{tk.rotation.x+=tk.userData.rot.x;tk.rotation.y+=tk.userData.rot.y;tk.position.y+=Math.sin(t+tk.userData.floatY)*0.004;});
+  camera.position.x+=(mouse.x*2.4-camera.position.x)*0.04;camera.position.y+=(mouse.y*1.6-camera.position.y)*0.04;
+  camera.position.z=16+scrollY*0.004;camera.lookAt(0,0.5,0);renderer.render(scene,camera);
+}
+function initCardCoins(){
+  document.querySelectorAll('[data-coin]').forEach(cv=>{
+    const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(130,130);
+    const s=new THREE.Scene();const c=new THREE.PerspectiveCamera(45,1,0.1,100);c.position.z=6;
+    s.add(new THREE.AmbientLight(0x224433,1.5));const l=new THREE.PointLight(0x22e59a,3,50);l.position.set(4,5,6);s.add(l);
+    const coin=new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.6,0.3,48),new THREE.MeshStandardMaterial({color:0x0d6b45,metalness:0.9,roughness:0.25,emissive:0x0a3b28,emissiveIntensity:0.6}));coin.rotation.x=Math.PI/2;s.add(coin);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(1.6,0.12,16,48),new THREE.MeshStandardMaterial({color:0x22e59a,metalness:1,roughness:0.1,emissive:0x0f9d5a,emissiveIntensity:0.8}));s.add(ring);
+    (function loop(){requestAnimationFrame(loop);coin.rotation.z+=0.02;ring.rotation.z+=0.02;coin.rotation.y+=0.03;ring.rotation.y+=0.03;r.render(s,c);})();
+  });
+}
+function initReveal(){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:0.15});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),4200);}
+const BSC={chainId:'0x38',chainName:'BNB Smart Chain',nativeCurrency:{name:'BNB',symbol:'BNB',decimals:18},rpcUrls:['https://bsc-dataseed.binance.org/'],blockExplorerUrls:['https://bscscan.com/']};
+let account=null;const short=a=>a.slice(0,6)+'…'+a.slice(-4);
+function setConnected(addr){account=addr;const p=document.getElementById('walletAddr');p.style.display='inline-block';p.textContent=short(addr);document.getElementById('connectBtn').textContent='Connected';document.getElementById('heroConnect').textContent='✔ '+short(addr);toast('Wallet connected: '+short(addr));}
+async function connectWallet(){
+  if(typeof window.ethereum==='undefined'){toast('No Web3 wallet found. Install MetaMask or Trust Wallet.');window.open('https://metamask.io/download/','_blank');return;}
+  try{const accounts=await ethereum.request({method:'eth_requestAccounts'});
+    try{await ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:BSC.chainId}]});}catch(sw){if(sw.code===4902){await ethereum.request({method:'wallet_addEthereumChain',params:[BSC]});}}
+    setConnected(accounts[0]);}catch(err){toast(err.code===4001?'Connection request rejected.':'Connection failed.');}
+}
+document.getElementById('connectBtn').addEventListener('click',connectWallet);
+document.getElementById('heroConnect').addEventListener('click',connectWallet);
+document.querySelectorAll('.buy').forEach(b=>b.addEventListener('click',()=>{if(!account){toast('Connect your wallet first to stake '+b.dataset.pkg);connectWallet();return;}toast('Ready to stake '+b.dataset.pkg+' — confirm in your wallet.');}));
+if(window.ethereum){ethereum.on&&ethereum.on('accountsChanged',a=>{a.length?setConnected(a[0]):location.reload();});ethereum.request({method:'eth_accounts'}).then(a=>{if(a.length)setConnected(a[0]);}).catch(()=>{});}
+document.querySelectorAll('.pkg').forEach(card=>{
+  card.addEventListener('mousemove',e=>{const r=card.getBoundingClientRect();const x=(e.clientX-r.left)/r.width-0.5;const y=(e.clientY-r.top)/r.height-0.5;card.style.transform=`translateY(-6px) rotateY(${x*10}deg) rotateX(${-y*10}deg)`;});
+  card.addEventListener('mouseleave',()=>card.style.transform='');
+});
+window.addEventListener('load',()=>{try{initThree();initCardCoins();}catch(e){console.warn('3D init failed',e);}initReveal();setTimeout(()=>document.getElementById('loader').classList.add('hide'),500);});
+</script>
+</body>
+</html>

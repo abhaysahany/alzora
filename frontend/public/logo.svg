@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" width="600" height="160">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1438"/>
+      <stop offset="50%" stop-color="#060814"/>
+      <stop offset="100%" stop-color="#141b4d"/>
+    </linearGradient>
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="50%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="eGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#e0e7ff"/>
+      <stop offset="70%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#f8fafc"/>
+      <stop offset="65%" stop-color="#c084fc"/>
+      <stop offset="85%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#7c3aed" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Left Icon Emblem -->
+  <g transform="translate(10, 10)">
+    <rect x="0" y="0" width="140" height="140" rx="36" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="5" filter="url(#glow)"/>
+    <!-- Top bar -->
+    <rect x="36" y="35" width="68" height="14" rx="7" fill="url(#eGrad)"/>
+    <!-- Mid bar -->
+    <rect x="36" y="63" width="48" height="14" rx="7" fill="url(#eGrad)"/>
+    <circle cx="98" cy="70" r="7" fill="#38bdf8"/>
+    <!-- Bot bar -->
+    <rect x="36" y="91" width="68" height="14" rx="7" fill="url(#eGrad)"/>
+    <!-- Spine -->
+    <rect x="36" y="35" width="16" height="70" rx="8" fill="url(#eGrad)"/>
+  </g>
+
+  <!-- Brand Typography -->
+  <text x="175" y="96" font-family="'Space Grotesk', 'Orbitron', 'Montserrat', sans-serif" font-size="64" font-weight="900" letter-spacing="8" fill="url(#textGrad)">ELZORA</text>
+  <text x="178" y="124" font-family="'Space Grotesk', sans-serif" font-size="14" font-weight="700" letter-spacing="4" fill="#a78bfa">DECENTRALIZED MATRIX PROTOCOL</text>
+</svg>
+

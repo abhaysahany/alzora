@@ -1,0 +1,826 @@
+import React, { useEffect, useRef, useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useWalletAuth } from '../hooks/useWalletAuth'
+import { useTetherStream } from '../hooks/useTetherStream'
+import { ConnectWalletButton } from '../components/ConnectWalletButton'
+import BackgroundCanvas from '../components/BackgroundCanvas'
+import {
+  Sparkles,
+  GitCommit,
+  Award,
+  RefreshCw,
+  TrendingUp,
+  DollarSign,
+  ShieldCheck,
+  ArrowRight,
+  Layers,
+  Users,
+  CheckCircle2,
+  Clock,
+  Zap,
+  Crown,
+  Gift,
+  Coins,
+  ChevronRight,
+  Lock,
+  Menu,
+  X,
+  Wallet,
+} from 'lucide-react'
+
+export function LandingPage() {
+  const navigate = useNavigate()
+  const { isConnected, address } = useWalletAuth()
+  const { profile, overview, CONTRACT_ADDRESSES } = useTetherStream()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const isRegistered = Boolean(profile?.isRegistered || profile?.active)
+
+  const handleAction = () => {
+    if (!isConnected) {
+      navigate('/login')
+    } else if (isRegistered) {
+      navigate('/dashboard')
+    } else {
+      navigate('/register')
+    }
+  }
+
+  const streams = [
+    {
+      title: 'Direct Referral Commission',
+      pct: '20%',
+      amount: '$10.00',
+      color: '#c084fc',
+      icon: Zap,
+      desc: 'Instant direct reward credited immediately for every member who registers using your referral link.',
+    },
+    {
+      title: '20-Level Network Affiliate',
+      pct: '14%',
+      amount: '$7.00',
+      color: '#38bdf8',
+      icon: Layers,
+      desc: '$0.40 allocated across Levels 1–10 and $0.30 across Levels 11–20 to fuel deep team expansion.',
+    },
+    {
+      title: '8 Club Matrix Queues',
+      pct: '24%',
+      amount: '$12.00',
+      color: '#a855f7',
+      icon: Award,
+      desc: 'Cascading automated queue advancing members from Starter up to Legend with auto-funded upgrades.',
+    },
+    {
+      title: 'Binary Matching Pool',
+      pct: '20%',
+      amount: '$10.00',
+      color: '#4ade80',
+      icon: GitCommit,
+      desc: '$2.00 per 1:1 matched binary pair. Daily capping scales dynamically with your Club Rank.',
+    },
+    {
+      title: 'Champion Royalty Pool',
+      pct: '6%',
+      amount: '$3.00',
+      color: '#fbbf24',
+      icon: Crown,
+      desc: 'Lifetime royalty dividend pool shared among leaders who achieve ≥ 30 direct active referrals.',
+    },
+    {
+      title: 'Weekly Performance Pool',
+      pct: '6%',
+      amount: '$3.00',
+      color: '#ec4899',
+      icon: Gift,
+      desc: 'Equal revenue share pool distributed weekly among performers sponsoring ≥ 3 direct members.',
+    },
+    {
+      title: '27 Lifetime Milestones',
+      pct: '10%',
+      amount: '$5.00',
+      color: '#f97316',
+      icon: TrendingUp,
+      desc: 'Cumulative dual-team milestones starting from $25 up to a staggering $21,000,000 USDT reward.',
+    },
+  ]
+
+  const ranks = [
+    { rank: 1, name: 'Starter', members: 2, gross: '$24', upgrade: '$14', sponsor: '$0', net: '$10' },
+    { rank: 2, name: 'Leader', members: 4, gross: '$56', upgrade: '$30', sponsor: '$0', net: '$26' },
+    { rank: 3, name: 'Achiever', members: 8, gross: '$240', upgrade: '$96', sponsor: '$24', net: '$120' },
+    { rank: 4, name: 'Mentor', members: 16, gross: '$1,536', upgrade: '$500', sponsor: '$125', net: '$911' },
+    { rank: 5, name: 'Director', members: 32, gross: '$16,000', upgrade: '$5,000', sponsor: '$1,250', net: '$9,750' },
+    { rank: 6, name: 'Elite', members: 64, gross: '$320,000', upgrade: '$15,000', sponsor: '$3,750', net: '$301,250' },
+    { rank: 7, name: 'Crown', members: 128, gross: '$1,920,000', upgrade: '$30,000', sponsor: '$7,500', net: '$1,882,500' },
+    { rank: 8, name: 'Legend', members: 256, gross: '$7,680,000', upgrade: 'Re-top Up', sponsor: '$0', net: '$7,680,000' },
+  ]
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#060814',
+        color: '#f8fafc',
+        fontFamily: "'Space Grotesk', sans-serif",
+        position: 'relative',
+        overflowX: 'hidden',
+      }}
+    >
+      <BackgroundCanvas />
+
+      {/* AMBIENT LIGHT BLOBS */}
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          background: `
+            radial-gradient(ellipse 60% 40% at 50% -10%, rgba(139, 92, 246, 0.22), transparent 70%),
+            radial-gradient(ellipse 50% 50% at 85% 30%, rgba(99, 102, 241, 0.16), transparent 60%),
+            radial-gradient(ellipse 45% 45% at 15% 70%, rgba(217, 70, 239, 0.12), transparent 60%)
+          `,
+        }}
+      />
+
+      {/* TOP NAVIGATION BAR */}
+      <nav
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 100,
+          backdropFilter: 'blur(20px)',
+          background: 'rgba(6, 8, 20, 0.85)',
+          borderBottom: '1px solid rgba(139, 92, 246, 0.25)',
+          padding: '16px 24px',
+        }}
+      >
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          
+          {/* Logo & Network Badge */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span
+                style={{
+                  fontSize: '1.9rem',
+                  fontWeight: 900,
+                  letterSpacing: '0.08em',
+                  background: 'linear-gradient(135deg, #f8fafc 10%, #c084fc 45%, #6366f1 80%, #38bdf8)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                ELZORA
+              </span>
+            </Link>
+
+            <div
+              className="landing-network-badge"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '4px 10px',
+                borderRadius: 20,
+                background: 'rgba(234, 179, 8, 0.12)',
+                border: '1px solid rgba(234, 179, 8, 0.3)',
+                color: '#facc15',
+                fontSize: '0.72rem',
+                fontWeight: 800,
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#facc15', boxShadow: '0 0 8px #facc15' }} />
+              BSC Testnet (97)
+            </div>
+          </div>
+
+          {/* Desktop Nav Links */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: '0.9rem', fontWeight: 700 }} className="desktop-nav">
+            <a href="#plan" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>The $50 Plan</a>
+            <a href="#streams" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>7 Streams</a>
+            <a href="#ranks" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>8 Club Ranks</a>
+            <a href="#globalclub" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>Global Club ($25)</a>
+            <a href="#security" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>Security</a>
+          </div>
+
+          {/* Wallet & Auth Action Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {isConnected ? (
+              <button
+                onClick={handleAction}
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: 12,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Wallet size={16} />
+                <span>{isRegistered ? 'Dashboard' : 'Complete Registration'}</span>
+                <ArrowRight size={16} />
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 12,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Wallet size={16} />
+                <span>Connect Wallet</span>
+              </button>
+            )}
+
+            {/* Mobile Hamburger Button */}
+            <button
+              className="landing-burger-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* MOBILE DRAWER */}
+      {mobileMenuOpen && (
+        <>
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(6, 8, 20, 0.85)',
+              backdropFilter: 'blur(8px)',
+              zIndex: 198,
+            }}
+          />
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              bottom: 0,
+              width: 'min(85vw, 320px)',
+              background: 'linear-gradient(180deg, #0e1438 0%, #060814 100%)',
+              borderLeft: '1px solid rgba(139, 92, 246, 0.35)',
+              padding: '24px 20px',
+              zIndex: 199,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '-10px 0 40px rgba(0,0,0,0.85)',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                <span style={{ fontSize: '1.4rem', fontWeight: 900, background: 'linear-gradient(135deg, #f8fafc, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  ELZORA
+                </span>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  style={{ background: 'transparent', border: 'none', color: '#c084fc', cursor: 'pointer', padding: 4 }}
+                >
+                  <X size={22} />
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, fontSize: '1rem', fontWeight: 700 }}>
+                <a href="#plan" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>The $50 Plan</a>
+                <a href="#streams" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>7 Streams</a>
+                <a href="#ranks" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>8 Club Ranks</a>
+                <a href="#globalclub" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>Global Club ($25)</a>
+                <a href="#security" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>Security</a>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 20, borderTop: '1px solid rgba(139, 92, 246, 0.2)' }}>
+              {isConnected ? (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    handleAction()
+                  }}
+                  style={{
+                    padding: '12px 18px',
+                    borderRadius: 12,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <Wallet size={18} />
+                  <span>{isRegistered ? 'Launch Dashboard' : 'Complete Registration'}</span>
+                  <ArrowRight size={16} />
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    navigate('/login')
+                  }}
+                  style={{
+                    padding: '12px 18px',
+                    borderRadius: 12,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                    boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)',
+                  }}
+                >
+                  <Wallet size={18} />
+                  <span>Connect Wallet</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* HERO SECTION */}
+      <header style={{ position: 'relative', zIndex: 10, padding: '90px 24px 70px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 940, margin: '0 auto' }}>
+          
+          {/* Status Pill */}
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 8,
+              padding: '6px 20px',
+              borderRadius: 30,
+              background: 'rgba(124, 58, 237, 0.15)',
+              border: '1px solid rgba(192, 132, 252, 0.4)',
+              color: '#c084fc',
+              fontSize: '0.82rem',
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+              marginBottom: 24,
+              boxShadow: '0 4px 20px rgba(124, 58, 237, 0.2)',
+            }}
+          >
+            <Sparkles size={16} color="#c084fc" />
+            <span>100% NON-CUSTODIAL BINARY MATRIX & SMART CLUB PROTOCOL</span>
+          </div>
+
+          {/* Main Headline */}
+          <h1
+            style={{
+              fontSize: 'clamp(2.4rem, 5.5vw, 4.2rem)',
+              fontWeight: 900,
+              lineHeight: 1.15,
+              letterSpacing: '-0.03em',
+              margin: '0 0 24px',
+              background: 'linear-gradient(135deg, #ffffff 0%, #cbd5e1 35%, #c084fc 70%, #6366f1 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Autonomous Decentralized Binary Matrix & Perpetual Global Club
+          </h1>
+
+          {/* Subtitle */}
+          <p
+            style={{
+              fontSize: '1.15rem',
+              color: '#94a3b8',
+              lineHeight: 1.65,
+              maxWidth: 740,
+              margin: '0 auto 40px',
+            }}
+          >
+            Join ELZORA with <strong>$50 USDT</strong> on BNB Smart Chain. 100% of registration fees are mathematically routed in real-time across 7 transparent income streams with automated cascading upgrades and zero admin delays.
+          </p>
+
+          {/* CTA Buttons */}
+          <div className="landing-hero-actions" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <button
+              onClick={handleAction}
+              style={{
+                padding: '16px 36px',
+                borderRadius: 16,
+                border: 'none',
+                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                color: '#fff',
+                fontWeight: 900,
+                fontSize: '1.05rem',
+                cursor: 'pointer',
+                boxShadow: '0 10px 30px rgba(124, 58, 237, 0.5)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 10,
+                transition: 'all 0.2s',
+              }}
+            >
+              <span>{isRegistered ? 'Launch Dashboard' : 'Join ELZORA ($50 USDT)'}</span>
+              <ArrowRight size={20} />
+            </button>
+
+            <a
+              href="#plan"
+              style={{
+                padding: '16px 30px',
+                borderRadius: 16,
+                background: 'rgba(15, 23, 42, 0.8)',
+                border: '1px solid rgba(139, 92, 246, 0.35)',
+                color: '#f8fafc',
+                fontWeight: 800,
+                fontSize: '1.02rem',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <span>Explore The 7 Streams</span>
+              <ChevronRight size={18} color="#c084fc" />
+            </a>
+          </div>
+
+          {/* 4 PRIMARY PROTOCOL METRIC CARDS */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 16,
+              marginTop: 64,
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#38bdf8' }}>100%</div>
+              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Mathematical Allocation</div>
+            </div>
+
+            <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#c084fc' }}>7 Streams</div>
+              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Comprehensive Financial Channels</div>
+            </div>
+
+            <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(217, 70, 239, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#f472b6' }}>8 Ranks</div>
+              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Starter up to Legend</div>
+            </div>
+
+            <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(74, 222, 128, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#4ade80' }}>$25 Queue</div>
+              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Perpetual Global Club Re-entry</div>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      {/* SECTION 1: THE $50 MEMBERSHIP ALLOCATION (100% SOLVENCY) */}
+      <section id="plan" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <div style={{ color: '#c084fc', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+            Zero Inflation • Pure Solvency
+          </div>
+          <h2 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 14px', letterSpacing: '-0.02em' }}>
+            $50 Membership: Exact 100% USDT Allocation
+          </h2>
+          <p style={{ color: '#94a3b8', maxWidth: 680, margin: '0 auto', fontSize: '1rem' }}>
+            Every cent of the $50 registration fee is distributed across the protocol in the exact same transaction block. Zero unbacked liabilities.
+          </p>
+        </div>
+
+        {/* Visual Allocation Ribbon */}
+        <div
+          style={{
+            background: 'rgba(15, 23, 42, 0.8)',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+            borderRadius: 20,
+            padding: 24,
+            marginBottom: 36,
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#f8fafc' }}>
+              Real-Time Protocol Allocation Matrix ($50 = 100%)
+            </span>
+            <span style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800 }}>
+              Audit Verified: $50.00 Distributed (100.0%)
+            </span>
+          </div>
+
+          <div style={{ height: 14, borderRadius: 8, overflow: 'hidden', display: 'flex', background: 'rgba(255,255,255,0.05)', marginBottom: 16 }}>
+            <div style={{ width: '20%', background: '#c084fc' }} title="Direct 20%" />
+            <div style={{ width: '14%', background: '#38bdf8' }} title="Affiliate 14%" />
+            <div style={{ width: '24%', background: '#a855f7' }} title="Club Matrix 24%" />
+            <div style={{ width: '20%', background: '#4ade80' }} title="Matching 20%" />
+            <div style={{ width: '6%', background: '#fbbf24' }} title="Champion 6%" />
+            <div style={{ width: '6%', background: '#ec4899' }} title="Weekly 6%" />
+            <div style={{ width: '10%', background: '#f97316' }} title="Lifetime 10%" />
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 18px', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#c084fc' }} />
+              Direct (20% - $10)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#38bdf8' }} />
+              Affiliate (14% - $7)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#a855f7' }} />
+              Club Matrix (24% - $12)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80' }} />
+              Matching (20% - $10)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#fbbf24' }} />
+              Champion (6% - $3)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ec4899' }} />
+              Weekly (6% - $3)
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f97316' }} />
+              Lifetime (10% - $5)
+            </div>
+          </div>
+        </div>
+
+        {/* 7 STREAMS CARDS GRID */}
+        <div id="streams" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+          {streams.map((stream, idx) => {
+            const Icon = stream.icon
+            return (
+              <div
+                key={idx}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
+                  border: `1px solid ${stream.color}35`,
+                  borderRadius: 22,
+                  padding: 26,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    <div style={{ padding: 10, borderRadius: 12, background: `${stream.color}18`, color: stream.color }}>
+                      <Icon size={22} />
+                    </div>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: stream.color }}>
+                      {stream.pct} Share
+                    </span>
+                  </div>
+
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#f8fafc', margin: '0 0 6px' }}>
+                    {stream.title}
+                  </h3>
+
+                  <div style={{ fontSize: '1.8rem', fontWeight: 900, color: stream.color, marginBottom: 10 }}>
+                    {stream.amount} <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>USDT</span>
+                  </div>
+
+                  <p style={{ color: '#94a3b8', fontSize: '0.86rem', lineHeight: 1.6, margin: 0 }}>
+                    {stream.desc}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* SECTION 2: 8 CLUB RANKS (STARTER TO LEGEND) */}
+      <section id="ranks" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <div style={{ color: '#c084fc', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+            Cascading Queue Progression
+          </div>
+          <h2 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 14px', letterSpacing: '-0.02em' }}>
+            The 8 Club Matrix Progression Ranks
+          </h2>
+          <p style={{ color: '#94a3b8', maxWidth: 680, margin: '0 auto', fontSize: '1rem' }}>
+            Qualifying members advance through automatic 2-matrix queues where gross earnings fund package upgrades, direct sponsor bonuses, and exponential net profits.
+          </p>
+        </div>
+
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
+            border: '1px solid rgba(139, 92, 246, 0.35)',
+            borderRadius: 24,
+            padding: 26,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+            overflowX: 'auto',
+          }}
+        >
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(139, 92, 246, 0.35)', color: '#c084fc', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <th style={{ padding: '14px 16px' }}>Rank</th>
+                <th style={{ padding: '14px 16px' }}>Rank Name</th>
+                <th style={{ padding: '14px 16px' }}>Matrix Team</th>
+                <th style={{ padding: '14px 16px' }}>Gross Revenue</th>
+                <th style={{ padding: '14px 16px' }}>Package Upgrade</th>
+                <th style={{ padding: '14px 16px' }}>Sponsor Bonus</th>
+                <th style={{ padding: '14px 16px' }}>Net Profit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ranks.map((r) => (
+                <tr
+                  key={r.rank}
+                  style={{
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  <td style={{ padding: '16px', fontWeight: 800, color: '#c084fc' }}>#{r.rank}</td>
+                  <td style={{ padding: '16px', fontWeight: 900, color: '#f8fafc' }}>{r.name}</td>
+                  <td style={{ padding: '16px', color: '#cbd5e1', fontWeight: 600 }}>{r.members} Members</td>
+                  <td style={{ padding: '16px', color: '#38bdf8', fontWeight: 800 }}>{r.gross}</td>
+                  <td style={{ padding: '16px', color: '#f472b6', fontWeight: 600 }}>{r.upgrade}</td>
+                  <td style={{ padding: '16px', color: '#fbbf24', fontWeight: 600 }}>{r.sponsor}</td>
+                  <td style={{ padding: '16px', color: '#4ade80', fontWeight: 900, fontSize: '1.05rem' }}>{r.net}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* SECTION 3: GLOBAL CLUB ($25 RE-ENTRY) */}
+      <section id="globalclub" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
+        <div
+          style={{
+            background: 'linear-gradient(135deg, rgba(25, 15, 60, 0.95), rgba(9, 13, 35, 0.98))',
+            border: '1px solid rgba(217, 70, 239, 0.4)',
+            borderRadius: 28,
+            padding: '52px 36px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+          }}
+        >
+          <div style={{ maxWidth: 740, margin: '0 auto', textAlign: 'center', marginBottom: 40 }}>
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '5px 16px',
+                borderRadius: 20,
+                background: 'rgba(217, 70, 239, 0.2)',
+                color: '#f472b6',
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                marginBottom: 14,
+              }}
+            >
+              <RefreshCw size={14} /> AUTONOMOUS $25 CYCLING ALGORITHM
+            </div>
+            <h2 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 14px' }}>
+              Global Club Perpetual Re-entry Engine
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: 1.6 }}>
+              An independent 1-to-2 automated queue: When 2 members join behind you in the global queue, you instantly receive a <strong>$25 payout (100% ROI)</strong> plus an <strong>auto-funded re-entry spot</strong> at the end of the line.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 16, textAlign: 'center' }}>
+            <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 22, borderRadius: 18, border: '1px solid rgba(217, 70, 239, 0.25)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>CYCLE #1</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginTop: 8 }}>Entries #2 & #3 enter queue</div>
+              <div style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800, marginTop: 6 }}>→ Earn $25 + Re-entry #4 created!</div>
+            </div>
+
+            <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 22, borderRadius: 18, border: '1px solid rgba(217, 70, 239, 0.25)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>CYCLE #2</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginTop: 8 }}>Entries #4 & #5 enter queue</div>
+              <div style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800, marginTop: 6 }}>→ Earn $25 + Re-entry #6 created!</div>
+            </div>
+
+            <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 22, borderRadius: 18, border: '1px solid rgba(217, 70, 239, 0.25)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>CYCLE #3</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginTop: 8 }}>Entries #6 & #7 enter queue</div>
+              <div style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800, marginTop: 6 }}>→ Earn $25 + Re-entry #8 created!</div>
+            </div>
+
+            <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 22, borderRadius: 18, border: '1px solid rgba(217, 70, 239, 0.25)' }}>
+              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>CYCLE #4</div>
+              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginTop: 8 }}>Entries #8 & #9 enter queue</div>
+              <div style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800, marginTop: 6 }}>→ Earn $25 + Re-entry #10 created!</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 4: PROTOCOL ADVANTAGES & TRANSPARENCY */}
+      <section id="security" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <div style={{ color: '#38bdf8', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+            Built for Longevity & Trust
+          </div>
+          <h2 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 14px', letterSpacing: '-0.02em' }}>
+            Why ELZORA Outperforms Traditional Matrices
+          </h2>
+          <p style={{ color: '#94a3b8', maxWidth: 680, margin: '0 auto', fontSize: '1rem' }}>
+            Pure algorithmic execution eliminating central custody, arbitrary withdrawal restrictions, and mathematical imbalance.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.95))', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: 22, padding: 26 }}>
+            <div style={{ padding: 10, borderRadius: 12, background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', width: 'fit-content', marginBottom: 16 }}>
+              <Lock size={24} />
+            </div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>Non-Custodial Reserves</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
+              All member funds reside directly within the open-source smart contract vault. The protocol owner cannot confiscate or alter your earned balance.
+            </p>
+          </div>
+
+          <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.95))', border: '1px solid rgba(74, 222, 128, 0.3)', borderRadius: 22, padding: 26 }}>
+            <div style={{ padding: 10, borderRadius: 12, background: 'rgba(74, 222, 128, 0.15)', color: '#4ade80', width: 'fit-content', marginBottom: 16 }}>
+              <Zap size={24} />
+            </div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>1-Click Instant Payouts</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
+              Zero withdrawal deductions, zero mandatory wait windows. Whenever you want your rewards, trigger an on-chain transfer to your Web3 wallet.
+            </p>
+          </div>
+
+          <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.95))', border: '1px solid rgba(192, 132, 252, 0.3)', borderRadius: 22, padding: 26 }}>
+            <div style={{ padding: 10, borderRadius: 12, background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', width: 'fit-content', marginBottom: 16 }}>
+              <GitCommit size={24} />
+            </div>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>Automated Dual-Leg Spillover</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
+              Smart placement resolution automatically locates the nearest vacant leaf on your chosen leg, maximizing team binary matching pairs.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(139, 92, 246, 0.2)', padding: '50px 24px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.08em', color: '#f8fafc', marginBottom: 8 }}>
+            ELZORA
+          </div>
+          <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: 20 }}>
+            Next-Generation Decentralized Binary Matrix & Smart Club Ecosystem • Powered by BNB Smart Chain
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 24, fontSize: '0.82rem', fontWeight: 700, marginBottom: 24, flexWrap: 'wrap' }}>
+            <Link to="/login" style={{ color: '#c084fc', textDecoration: 'none' }}>Member Login</Link>
+            <Link to="/register" style={{ color: '#38bdf8', textDecoration: 'none' }}>Register ($50 USDT)</Link>
+            <Link to="/lookup" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Public Account Explorer</Link>
+            <a href="https://testnet.bscscan.com" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', textDecoration: 'none' }}>BSC Testnet Explorer</a>
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#475569' }}>
+            © 2026 ELZORA Protocol. All rights reserved.
+          </div>
+        </div>
+      </footer>
+    </div>
+  )
+}
+
+export default LandingPage

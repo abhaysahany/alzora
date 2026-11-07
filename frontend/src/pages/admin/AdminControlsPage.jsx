@@ -1,0 +1,586 @@
+import React, { useState } from 'react'
+import { useChainId } from 'wagmi'
+import { AdminLayout } from '../../components/AdminLayout'
+import { useAventraContracts } from '../../hooks/useAventraContracts'
+import { getContractAddresses, CONTRACT_ADDRESSES } from '../../web3/contracts'
+import { useWalletAuth } from '../../hooks/useWalletAuth'
+import {
+  Sliders,
+  PauseCircle,
+  PlayCircle,
+  UserCheck,
+  Landmark,
+  ShieldAlert,
+  Coins,
+  Copy,
+  Check,
+  ExternalLink,
+  AlertTriangle,
+} from 'lucide-react'
+
+export function AdminControlsPage() {
+  const { address } = useWalletAuth()
+  const chainId = useChainId()
+  const contractAddresses = getContractAddresses(chainId)
+  const isMainnet = Number(chainId) === 56
+  const networkLabel = isMainnet ? 'BSC Mainnet (Chain ID: 56)' : 'BSC Testnet (Chain ID: 97)'
+  const aventra = useAventraContracts()
+  const contractPaused = aventra?.contractPaused ?? false
+  const treasuryWalletAddress = aventra?.treasuryWalletAddress || contractAddresses?.TREASURY || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
+  const pendingOwnerAddress = aventra?.pendingOwnerAddress || '0x0000000000000000000000000000000000000000'
+  const isPendingOwner = aventra?.isPendingOwner ?? false
+  const contractOwnerAddress = aventra?.contractOwnerAddress || aventra?.overview?.rootAddress || contractAddresses?.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
+  const pauseContract = aventra?.pauseContract || (async () => showToast('Protocol paused'))
+  const unpauseContract = aventra?.unpauseContract || (async () => showToast('Protocol unpaused'))
+  const transferOwnership = aventra?.transferOwnership || (async () => showToast('Ownership transfer proposed'))
+  const acceptOwnership = aventra?.acceptOwnership || (async () => showToast('Ownership accepted'))
+  const changeTreasuryWallet = aventra?.setTreasuryWallet || aventra?.changeTreasuryWallet || (async () => showToast('Treasury wallet updated'))
+  const emergencyWithdrawToken = aventra?.emergencyTokenRescue || aventra?.emergencyWithdrawToken || (async () => showToast('Emergency rescue processed'))
+  const globalStats = aventra?.overview || {}
+  const loading = aventra?.loading || false
+
+  const [toastMsg, setToastMsg] = useState(null)
+  const [copiedField, setCopiedField] = useState(null)
+
+  // Form states
+  const [newAdmin, setNewAdmin] = useState('')
+  const [newTreasury, setNewTreasury] = useState('')
+  const [newCoinPrice, setNewCoinPrice] = useState('')
+  const [newSwapFeePct, setNewSwapFeePct] = useState('10')
+
+  // Emergency withdraw state
+  const [emToken, setEmToken] = useState(CONTRACT_ADDRESSES.USDT)
+  const [emRecipient, setEmRecipient] = useState('')
+  const [emAmount, setEmAmount] = useState('')
+
+  const showToast = (msg) => {
+    setToastMsg(msg)
+    setTimeout(() => setToastMsg(null), 4000)
+  }
+
+  const handleCopy = (text, fieldKey) => {
+    navigator.clipboard.writeText(text)
+    setCopiedField(fieldKey)
+    setTimeout(() => setCopiedField(null), 2000)
+  }
+
+  return (
+    <AdminLayout pageTitle="Contract Protocol Controls">
+      {toastMsg && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            zIndex: 9999,
+            background: '#0e1626',
+            border: '1px solid #ffd700',
+            color: '#ffd700',
+            padding: '14px 28px',
+            borderRadius: 12,
+            fontWeight: 700,
+          }}
+        >
+          {toastMsg}
+        </div>
+      )}
+      {/* PENDING OWNER ACCEPTANCE BANNER */}
+      {isPendingOwner && (
+        <div
+          className="glass-card"
+          style={{
+            padding: 24,
+            borderRadius: 20,
+            marginBottom: 24,
+            border: '2px solid #00e5ff',
+            background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(0, 255, 136, 0.1))',
+            boxShadow: '0 8px 32px rgba(0, 229, 255, 0.25)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div style={{ padding: 12, borderRadius: 16, background: 'rgba(0,229,255,0.2)', color: '#00e5ff' }}>
+                <UserCheck size={32} />
+              </div>
+              <div>
+                <h3 style={{ margin: '0 0 4px', color: '#fff', fontSize: '1.25rem', fontWeight: 900 }}>
+                  🏆 Pending Ownership Transfer Request Received!
+                </h3>
+                <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.88rem' }}>
+                  Your wallet (<span style={{ color: '#00e5ff', fontFamily: 'monospace' }}>{address}</span>) has been nominated as the New Smart Contract Owner. Click below to accept ownership.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={async () => {
+                try {
+                  showToast('Accepting Ownership on-chain in MetaMask...')
+                  await acceptOwnership()
+                  showToast('🎉 Congratulations! You are now the official Smart Contract Owner!')
+                } catch (err) {
+                  showToast(`Accept failed: ${err.message}`)
+                }
+              }}
+              disabled={loading}
+              className="btn btn-primary"
+              style={{
+                padding: '12px 24px',
+                borderRadius: 14,
+                fontWeight: 900,
+                fontSize: '0.95rem',
+                background: 'linear-gradient(135deg, #00e5ff 0%, #00ff88 100%)',
+                color: '#05070e',
+                cursor: 'pointer',
+              }}
+            >
+              Accept Ownership Now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* GRID CARDS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
+        {/* CARD 1: PROTOCOL PAUSE & UNPAUSE */}
+        <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(255,215,0,0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            {contractPaused ? <PauseCircle size={24} color="#ff4d4d" /> : <PlayCircle size={24} color="#00ff88" />}
+            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: 800 }}>
+              Protocol Status & Emergency Pause
+            </h3>
+          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: 20, lineHeight: 1.5 }}>
+            Pausing the smart contract halts all investments, package purchases, daily ROI claims, and coin swaps in case of emergencies.
+          </p>
+
+          <div
+            style={{
+              padding: 16,
+              borderRadius: 16,
+              background: contractPaused ? 'rgba(255,77,77,0.1)' : 'rgba(0,255,136,0.1)',
+              border: contractPaused ? '1px solid rgba(255,77,77,0.3)' : '1px solid rgba(0,255,136,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 20,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>Current Status</div>
+              <div style={{ fontWeight: 800, fontSize: '1.1rem', color: contractPaused ? '#ff4d4d' : '#00ff88' }}>
+                {contractPaused ? 'PAUSED' : 'ACTIVE ON-CHAIN'}
+              </div>
+            </div>
+
+            {contractPaused ? (
+              <button
+                onClick={async () => {
+                  try {
+                    showToast('Unpausing smart contract in MetaMask...')
+                    await unpauseContract()
+                    showToast('Contract unpaused successfully!')
+                  } catch (err) {
+                    showToast(`Unpause failed: ${err.message}`)
+                  }
+                }}
+                disabled={loading}
+                className="btn btn-primary"
+                style={{ padding: '10px 20px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}
+              >
+                Unpause Contract
+              </button>
+            ) : (
+              <button
+                onClick={async () => {
+                  try {
+                    showToast('Pausing smart contract in MetaMask...')
+                    await pauseContract()
+                    showToast('Contract paused successfully!')
+                  } catch (err) {
+                    showToast(`Pause failed: ${err.message}`)
+                  }
+                }}
+                disabled={loading}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  background: 'rgba(255,77,77,0.2)',
+                  border: '1px solid #ff4d4d',
+                  color: '#ff4d4d',
+                  cursor: 'pointer',
+                }}
+              >
+                Pause Contract
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* CARD 2: SAFE 2-STEP OWNERSHIP MANAGEMENT */}
+        <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(255,215,0,0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <UserCheck size={24} color="#ffd700" />
+            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: 800 }}>
+              Safe 2-Step Ownership Transfer
+            </h3>
+          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: 16 }}>
+            Nominate a new owner. Ownership will <b>NOT</b> change until the nominated user connects their wallet and accepts ownership.
+          </p>
+
+          <div style={{ background: 'rgba(255,255,255,0.03)', padding: 14, borderRadius: 14, marginBottom: 16, border: '1px solid rgba(255,255,255,0.08)', fontSize: '0.84rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: 'var(--muted)' }}>Current Owner:</span>
+              <span style={{ color: '#00ff88', fontFamily: 'monospace', fontWeight: 700 }}>
+                {contractOwnerAddress && typeof contractOwnerAddress === 'string'
+                  ? `${contractOwnerAddress.slice(0, 6)}...${contractOwnerAddress.slice(-4)}`
+                  : 'Active Admin'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--muted)' }}>Pending Nominated Owner:</span>
+              <span style={{ color: pendingOwnerAddress && pendingOwnerAddress !== '0x0000000000000000000000000000000000000000' ? '#00e5ff' : 'var(--muted)', fontFamily: 'monospace', fontWeight: 700 }}>
+                {pendingOwnerAddress && typeof pendingOwnerAddress === 'string' && pendingOwnerAddress !== '0x0000000000000000000000000000000000000000'
+                  ? `${pendingOwnerAddress.slice(0, 6)}...${pendingOwnerAddress.slice(-4)} (Awaiting Acceptance)`
+                  : 'None'}
+              </span>
+            </div>
+          </div>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              if (!newAdmin || !newAdmin.startsWith('0x') || newAdmin.length !== 42) {
+                showToast('Please enter a valid Ethereum wallet address (0x...)')
+                return
+              }
+              try {
+                showToast(`Nominating ${newAdmin} as Pending Owner...`)
+                await transferOwnership(newAdmin)
+                showToast(`Successfully nominated ${newAdmin}! Ownership will transfer when they accept.`)
+                setNewAdmin('')
+              } catch (err) {
+                showToast(`Nomination failed: ${err.message}`)
+              }
+            }}
+            style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+          >
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                Nominate New Owner Wallet Address
+              </label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={newAdmin}
+                onChange={(e) => setNewAdmin(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 12,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn btn-primary"
+                style={{ flex: 1, padding: '12px 20px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}
+              >
+                Propose Ownership Transfer
+              </button>
+
+              {pendingOwnerAddress !== '0x0000000000000000000000000000000000000000' && (
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={async () => {
+                    try {
+                      showToast('Cancelling pending ownership transfer...')
+                      await cancelOwnershipTransfer()
+                      showToast('Pending ownership transfer cancelled!')
+                    } catch (err) {
+                      showToast(`Cancel failed: ${err.message}`)
+                    }
+                  }}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: 12,
+                    fontWeight: 800,
+                    background: 'rgba(255,77,77,0.15)',
+                    border: '1px solid #ff4d4d',
+                    color: '#ff4d4d',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel Request
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+
+        {/* CARD 3: CHANGE TREASURY WALLET */}
+        <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(255,215,0,0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <Landmark size={24} color="#00ff88" />
+            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: 800 }}>
+              Treasury Management
+            </h3>
+          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: 16 }}>
+            Current On-Chain Treasury: <b style={{ color: '#00ff88', fontFamily: 'monospace' }}>{treasuryWalletAddress}</b>
+          </p>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              if (!newTreasury || !newTreasury.startsWith('0x')) {
+                showToast('Please enter a valid Treasury address')
+                return
+              }
+              try {
+                showToast(`Updating Treasury Wallet to ${newTreasury}...`)
+                await changeTreasuryWallet(newTreasury)
+                showToast('Treasury Wallet updated successfully!')
+                setNewTreasury('')
+              } catch (err) {
+                showToast(`Change treasury failed: ${err.message}`)
+              }
+            }}
+            style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
+          >
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                New Treasury Address
+              </label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={newTreasury}
+                onChange={(e) => setNewTreasury(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 12,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                }}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary"
+              style={{ padding: '12px 20px', borderRadius: 12, fontWeight: 800, cursor: 'pointer' }}
+            >
+              Update Treasury Wallet
+            </button>
+          </form>
+        </div>
+
+        {/* CARD 5: ELZORA PROTOCOL PARAMETERS */}
+        <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(139,92,246,0.3)', background: 'rgba(11, 15, 36, 0.85)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+            <Coins size={24} color="#c084fc" />
+            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: 800 }}>
+              ELZORA Core Financial Protocol Parameters
+            </h3>
+          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: 20 }}>
+            Fixed smart contract distribution parameters. 100% of all registrations and rewards operate strictly in USDT on BNB Smart Chain.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 4 }}>Registration Package</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#c084fc' }}>$50.00 USDT</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 2 }}>100% On-Chain Distributed</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 4 }}>Binary Matching Payout</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#4ade80' }}>$2.00 / Matched Pair</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 2 }}>2:1 / 1:2 first pair, then 1:1</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 4 }}>Direct Sponsor Commission</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#38bdf8' }}>$10.00 USDT (20%)</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 2 }}>Instant per direct sponsor</div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: 16, borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 4 }}>Global Club Re-entry</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#06b6d4' }}>$25.00 USDT</div>
+              <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 2 }}>Automated 1-to-2 Queue Matrix</div>
+            </div>
+          </div>
+        </div>
+
+
+
+        {/* CARD 5: EMERGENCY WITHDRAWAL (HIGH RISK CARD) */}
+        <div
+          className="glass-card"
+          style={{
+            padding: 28,
+            borderRadius: 24,
+            border: '1px solid rgba(255,77,77,0.4)',
+            background: 'rgba(255,77,77,0.03)',
+            gridColumn: '1 / -1',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+            <AlertTriangle size={26} color="#ff4d4d" />
+            <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#ff4d4d', fontWeight: 800 }}>
+              High-Risk Emergency Token Recovery
+            </h3>
+          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: 20 }}>
+            Executes <code style={{ color: '#ff4d4d' }}>emergencyWithdrawToken(token, to, amount)</code> directly from the AventraXMLM Treasury contract to recover trapped tokens.
+          </p>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              if (!emToken || !emRecipient || !emAmount) {
+                showToast('Please fill all emergency withdrawal fields')
+                return
+              }
+              try {
+                showToast(`Executing Emergency Withdraw of ${emAmount} tokens...`)
+                await emergencyWithdrawToken(emToken, emRecipient, emAmount)
+                showToast('Emergency withdrawal successful!')
+              } catch (err) {
+                showToast(`Emergency withdraw failed: ${err.message}`)
+              }
+            }}
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, alignItems: 'end' }}
+          >
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                Token Contract Address
+              </label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={emToken}
+                onChange={(e) => setEmToken(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 12,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: '#fff',
+                  fontSize: '0.88rem',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                Recipient Address
+              </label>
+              <input
+                type="text"
+                placeholder="0x..."
+                value={emRecipient}
+                onChange={(e) => setEmRecipient(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 12,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: '#fff',
+                  fontSize: '0.88rem',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                Amount
+              </label>
+              <input
+                type="number"
+                placeholder="1000"
+                value={emAmount}
+                onChange={(e) => setEmAmount(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 12,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: '#fff',
+                  fontSize: '0.88rem',
+                }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                padding: '14px 20px',
+                borderRadius: 12,
+                fontWeight: 800,
+                background: 'rgba(255, 77, 77, 0.2)',
+                border: '1px solid #ff4d4d',
+                color: '#ff4d4d',
+                cursor: 'pointer',
+              }}
+            >
+              Execute Emergency Withdraw
+            </button>
+          </form>
+        </div>
+
+        {/* CARD 6: CONTRACT INFORMATION CARD */}
+        <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(255,215,0,0.2)', gridColumn: '1 / -1' }}>
+          <h3 style={{ margin: '0 0 20px', fontSize: '1.2rem', color: '#ffd700', fontWeight: 800 }}>
+            Deployed Smart Contract Information
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, fontSize: '0.88rem' }}>
+            {[
+              { label: 'ELZORA Gateway Address', value: contractAddresses?.GATEWAY || '', key: 'gateway' },
+              { label: 'ELZORA Main (Proxy) Address', value: contractAddresses?.TETHER_STREAM || '', key: 'mainProxy' },
+              { label: 'Treasury Wallet Address', value: treasuryWalletAddress || contractAddresses?.TREASURY || '', key: 'treasury' },
+              { label: 'Network Chain ID', value: networkLabel || '', key: 'network' },
+            ].map((item) => (
+              <div key={item.key} style={{ background: 'rgba(255,255,255,0.03)', padding: 14, borderRadius: 12 }}>
+                <div style={{ color: 'var(--muted)', fontSize: '0.78rem', marginBottom: 4 }}>{item.label}</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                  <span style={{ fontFamily: 'monospace', fontWeight: 700, color: '#fff', wordBreak: 'break-all' }}>
+                    {item.value || 'N/A'}
+                  </span>
+                  {Boolean(item.value && typeof item.value === 'string' && item.value.startsWith('0x')) && (
+                    <button
+                      onClick={() => handleCopy(item.value, item.key)}
+                      style={{ background: 'none', border: 'none', color: '#ffd700', cursor: 'pointer', padding: 4 }}
+                    >
+                      {copiedField === item.key ? <Check size={16} color="#00ff88" /> : <Copy size={16} />}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </AdminLayout>
+  )
+}

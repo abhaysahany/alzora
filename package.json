@@ -1,0 +1,40 @@
+{
+  "name": "tetherstream",
+  "version": "1.0.0",
+  "description": "TetherStream MLM & Smart Contract System",
+  "main": "index.js",
+  "scripts": {
+    "build": "hardhat build && tsc --noEmit",
+    "test": "hardhat test",
+    "test:elzora": "hardhat test test/Elzora.test.ts",
+    "deploy:elzora-main": "hardhat run scripts/deploy-elzora-main.ts --network bscTestnet",
+    "deploy:elzora-gateway": "hardhat run scripts/deploy-elzora-gateway.ts --network bscTestnet",
+    "deploy:elzora": "hardhat run scripts/deploy-elzora.ts --network bscTestnet",
+    "deploy:tetherstream": "hardhat run scripts/deploy-tetherstream.ts --network bscTestnet",
+    "deploy:gateway": "hardhat run scripts/deploy-gateway.ts --network bscTestnet"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^4.0.15",
+    "@nomicfoundation/hardhat-ignition": "^3.1.8",
+    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.7",
+    "@types/chai": "^5.2.3",
+    "@types/chai-as-promised": "^8.0.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.20.1",
+    "chai": "^6.2.2",
+    "dotenv": "^17.4.2",
+    "ethers": "^6.17.0",
+    "forge-std": "github:foundry-rs/forge-std#v1.9.4",
+    "hardhat": "^3.14.0",
+    "mocha": "^11.8.0",
+    "typescript": "~6.0.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.6.1",
+    "@openzeppelin/contracts-upgradeable": "^5.6.1"
+  }
+}
