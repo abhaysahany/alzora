@@ -1,7 +1,7 @@
 {
-  "name": "tetherstream",
+  "name": "elzora",
   "version": "1.0.0",
-  "description": "TetherStream MLM & Smart Contract System",
+  "description": "ELZORA MLM & Binary Matrix Smart Contract System",
   "main": "index.js",
   "scripts": {
     "build": "hardhat build && tsc --noEmit",
@@ -9,9 +9,7 @@
     "test:elzora": "hardhat test test/Elzora.test.ts",
     "deploy:elzora-main": "hardhat run scripts/deploy-elzora-main.ts --network bscTestnet",
     "deploy:elzora-gateway": "hardhat run scripts/deploy-elzora-gateway.ts --network bscTestnet",
-    "deploy:elzora": "hardhat run scripts/deploy-elzora.ts --network bscTestnet",
-    "deploy:tetherstream": "hardhat run scripts/deploy-tetherstream.ts --network bscTestnet",
-    "deploy:gateway": "hardhat run scripts/deploy-gateway.ts --network bscTestnet"
+    "deploy:elzora": "hardhat run scripts/deploy-elzora.ts --network bscTestnet"
   },
   "keywords": [],
   "author": "",
