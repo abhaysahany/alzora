@@ -15,6 +15,55 @@ const RANK_NAMES = {
   8: 'Legend',
 }
 
+/** BFS-traverse the sponsor tree via getDirectReferrals and return all discovered addresses */
+async function discoverAllMembersViaBFS(publicClient, gatewayAddr, rootAddr, ELZORA_GATEWAY_ABI) {
+  const visited = new Set()
+  const queue = [rootAddr]
+  visited.add(rootAddr.toLowerCase())
+
+  let safety = 0
+  const MAX_ITERATIONS = 500 // prevent infinite loops
+
+  while (queue.length > 0 && safety < MAX_ITERATIONS) {
+    safety++
+    // Process in batches of 10 to avoid overwhelming the RPC
+    const batch = queue.splice(0, 10)
+
+    const results = await Promise.allSettled(
+      batch.map((addr) =>
+        publicClient.readContract({
+          address: gatewayAddr,
+          abi: ELZORA_GATEWAY_ABI,
+          functionName: 'getDirectReferrals',
+          args: [addr],
+        })
+      )
+    )
+
+    for (let i = 0; i < batch.length; i++) {
+      const result = results[i]
+      if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+        for (const child of result.value) {
+          if (!child || typeof child !== 'string') continue
+          const lc = child.toLowerCase()
+          if (
+            lc &&
+            lc.startsWith('0x') &&
+            lc.length === 42 &&
+            lc !== '0x0000000000000000000000000000000000000000' &&
+            !visited.has(lc)
+          ) {
+            visited.add(lc)
+            queue.push(child) // keep original casing for contract calls
+          }
+        }
+      }
+    }
+  }
+
+  return Array.from(visited)
+}
+
 export function useAdminMembers() {
   const chainId = useChainId()
   const contractAddresses = getContractAddresses(chainId)
@@ -52,50 +101,65 @@ export function useAdminMembers() {
       })
 
       const gatewayAddr = contractAddresses.GATEWAY
-      const mainAddr = contractAddresses.TETHER_STREAM // Linked to ElzoraMain proxy
-      const rootAddr = (contractAddresses.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5').toLowerCase()
+      const mainAddr = contractAddresses.TETHER_STREAM
+      const rootAddr = (contractAddresses.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5')
 
-      const memberAddressesSet = new Set([rootAddr])
+      // ── PRIMARY: BFS traversal via getDirectReferrals ──────────────────────
+      const bfsAddresses = await discoverAllMembersViaBFS(
+        publicClient,
+        gatewayAddr,
+        rootAddr,
+        ELZORA_GATEWAY_ABI
+      )
 
-      const addAddr = (addr) => {
-        if (!addr || typeof addr !== 'string') return
-        const clean = addr.toLowerCase().trim()
-        if (clean && clean.startsWith('0x') && clean.length === 42 && clean !== '0x0000000000000000000000000000000000000000') {
-          memberAddressesSet.add(clean)
-        }
-      }
+      const memberAddressesSet = new Set(bfsAddresses.map((a) => a.toLowerCase()))
 
-      // 1. Add connected wallet if available
-      if (typeof window !== 'undefined' && window.ethereum?.selectedAddress) {
-        addAddr(window.ethereum.selectedAddress)
-      }
-
-      // 2. Fetch UserRegistered logs from ElzoraMain
+      // ── SECONDARY: Event log discovery (catches any BFS gaps) ──────────────
       try {
-        const userRegEvent = parseAbiItem('event UserRegistered(address indexed user, address indexed sponsor, address indexed parent, uint8 position)')
-        const logs = await publicClient.getLogs({
-          address: mainAddr,
-          event: userRegEvent,
-          fromBlock: 'earliest',
-          toBlock: 'latest',
-        }).catch(() => [])
+        const userRegEvent = parseAbiItem(
+          'event UserRegistered(address indexed user, address indexed sponsor, address indexed parent, uint8 position, uint256 timestamp)'
+        )
+        const logs = await publicClient
+          .getLogs({
+            address: mainAddr,
+            event: userRegEvent,
+            fromBlock: 'earliest',
+            toBlock: 'latest',
+          })
+          .catch(() => [])
 
         logs.forEach((l) => {
+          const addAddr = (addr) => {
+            if (!addr || typeof addr !== 'string') return
+            const clean = addr.toLowerCase().trim()
+            if (
+              clean &&
+              clean.startsWith('0x') &&
+              clean.length === 42 &&
+              clean !== '0x0000000000000000000000000000000000000000'
+            ) {
+              memberAddressesSet.add(clean)
+            }
+          }
           if (l.args?.user) addAddr(l.args.user)
           if (l.args?.sponsor) addAddr(l.args.sponsor)
           if (l.args?.parent) addAddr(l.args.parent)
         })
       } catch (e) {
-        console.warn('Could not fetch logs from earliest block, trying recent:', e)
+        console.warn('Event log fetch failed (non-critical):', e)
       }
 
-      // 3. Check localStorage for any cached known users
+      // ── TERTIARY: localStorage cache ───────────────────────────────────────
       if (typeof localStorage !== 'undefined') {
         try {
           const cacheKey = `elzora_known_users_${mainAddr.toLowerCase()}`
           const stored = JSON.parse(localStorage.getItem(cacheKey) || '[]')
           if (Array.isArray(stored)) {
-            stored.forEach(addAddr)
+            stored.forEach((addr) => {
+              if (addr && addr.startsWith('0x') && addr.length === 42) {
+                memberAddressesSet.add(addr.toLowerCase())
+              }
+            })
           }
         } catch {}
       }
@@ -110,7 +174,9 @@ export function useAdminMembers() {
         } catch {}
       }
 
-      // 4. Batch query member dossiers via Gateway or Main
+      // ── Batch query member dashboards ──────────────────────────────────────
+      const rootLower = rootAddr.toLowerCase()
+
       const memberList = await Promise.all(
         allAddrs.map(async (addr, index) => {
           try {
@@ -124,7 +190,7 @@ export function useAdminMembers() {
             const prof = dash.profile
             const inc = dash.income
 
-            const isReg = Boolean(prof.isRegistered) || addr.toLowerCase() === rootAddr
+            const isReg = Boolean(prof.isRegistered) || addr.toLowerCase() === rootLower
             const currentRank = Number(prof.currentRank || 1)
             const directCount = Number(prof.directCount || 0n)
             const leftTeam = Number(prof.leftTeamCount || 0n)
@@ -138,10 +204,10 @@ export function useAdminMembers() {
             return {
               id: index + 1,
               address: addr,
-              wallet: addr, // Alias for backward compatibility
+              wallet: addr,
               sponsor: prof.sponsor || '0x0000000000000000000000000000000000000000',
               binaryParent: prof.binaryParent || '0x0000000000000000000000000000000000000000',
-              position: Number(prof.position || 1), // 1 = Left, 2 = Right
+              position: Number(prof.position || 1),
               active: isReg,
               status: isReg ? 'ACTIVE' : 'INACTIVE',
               packageId: 1,
@@ -177,6 +243,7 @@ export function useAdminMembers() {
               isChampionEligible: Boolean(dash.isChampionEligible),
             }
           } catch (err) {
+            // Return minimal stub so the address still appears in the list
             return {
               id: index + 1,
               address: addr,
@@ -184,12 +251,12 @@ export function useAdminMembers() {
               sponsor: '0x0000000000000000000000000000000000000000',
               binaryParent: '0x0000000000000000000000000000000000000000',
               position: 1,
-              active: addr.toLowerCase() === rootAddr,
-              status: addr.toLowerCase() === rootAddr ? 'ACTIVE' : 'INACTIVE',
+              active: addr.toLowerCase() === rootLower,
+              status: addr.toLowerCase() === rootLower ? 'ACTIVE' : 'INACTIVE',
               packageId: 1,
               packageAmount: 50,
               packageName: 'Core Registration ($50)',
-              investment: addr.toLowerCase() === rootAddr ? 50 : 0,
+              investment: addr.toLowerCase() === rootLower ? 50 : 0,
               currentRank: 1,
               rank: 1,
               rankName: 'Starter',
@@ -222,26 +289,35 @@ export function useAdminMembers() {
         })
       )
 
-      setMembers(memberList)
+      // Filter to only show registered members
+      const registeredMembers = memberList.filter((m) => m.active)
+
+      // Re-assign sequential IDs
+      registeredMembers.forEach((m, i) => { m.id = i + 1 })
+
+      setMembers(registeredMembers)
 
       // Calculate aggregates
-      const activeCount = memberList.filter((m) => m.active).length
+      const activeCount = registeredMembers.filter((m) => m.active).length
       const totalInvestedUsd = activeCount * 50
-      const totalIncomePaidUsd = memberList.reduce((acc, m) => acc + (m.totalIncome || 0), 0)
-      const totalDirects = memberList.reduce((acc, m) => acc + (m.directCount || 0), 0)
-      const totalLeftMembers = memberList.reduce((acc, m) => acc + (m.leftTeamCount || 0), 0)
-      const totalRightMembers = memberList.reduce((acc, m) => acc + (m.rightTeamCount || 0), 0)
+      const totalIncomePaidUsd = registeredMembers.reduce((acc, m) => acc + (m.totalIncome || 0), 0)
+      const totalDirects = registeredMembers.reduce((acc, m) => acc + (m.directCount || 0), 0)
+      const totalLeftMembers = registeredMembers.reduce((acc, m) => acc + (m.leftTeamCount || 0), 0)
+      const totalRightMembers = registeredMembers.reduce((acc, m) => acc + (m.rightTeamCount || 0), 0)
 
       setStats({
-        totalCount: memberList.length,
+        totalCount: registeredMembers.length,
         activeCount,
-        inactiveCount: memberList.length - activeCount,
+        inactiveCount: registeredMembers.length - activeCount,
         totalInvestedUsd,
         totalIncomePaidUsd,
         totalDirects,
         totalLeftMembers,
         totalRightMembers,
-        activeRate: memberList.length > 0 ? ((activeCount / memberList.length) * 100).toFixed(1) : 100,
+        activeRate:
+          registeredMembers.length > 0
+            ? ((activeCount / registeredMembers.length) * 100).toFixed(1)
+            : 100,
       })
     } catch (err) {
       console.error('Error fetching admin members:', err)

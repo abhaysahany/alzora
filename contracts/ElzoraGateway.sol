@@ -63,6 +63,7 @@ contract ElzoraGateway {
         uint256 championPoolBalance;
         uint256 weeklyPoolBalance;
         uint256 currentWeeklyEpoch;
+        uint256 currentMonthEpoch;
         uint256 globalClubTotalEntries;
         bool isPaused;
     }
@@ -112,10 +113,17 @@ contract ElzoraGateway {
     }
 
     /**
-     * @notice Claim reached Lifetime Milestone reward.
+     * @notice Automatic instant Lifetime Milestone check & award.
      */
-    function claimLifetimeMilestone(uint256 milestoneIndex) external {
-        elzoraMain.claimLifetimeMilestone(milestoneIndex);
+    function checkAndAwardLifetimeMilestones(address user) external {
+        elzoraMain.checkAndAwardLifetimeMilestones(user);
+    }
+
+    /**
+     * @notice Backwards-compatible claim function that triggers automatic instant award.
+     */
+    function claimLifetimeMilestone(uint256 /* milestoneIndex */) external {
+        elzoraMain.checkAndAwardLifetimeMilestones(msg.sender);
     }
 
     // --- Query & View Aggregator Functions ---
@@ -134,7 +142,10 @@ contract ElzoraGateway {
 
         uint256 pendingChamp = 0;
         uint256 currMonth = elzoraMain.getCurrentMonthEpoch();
-        if (currMonth > 0) {
+        (,, uint256 rPerMemberCurr,, bool isSnapCurr, bool isFullyCurr) = elzoraMain.championMonthlyRecords(currMonth);
+        if (isSnapCurr && !isFullyCurr && champEligible && !elzoraMain.hasReceivedChampionMonth(currMonth, user)) {
+            pendingChamp = rPerMemberCurr;
+        } else if (currMonth > 0) {
             uint256 prevMonth = currMonth - 1;
             (,, uint256 rPerMember,, bool isSnap, bool isFully) = elzoraMain.championMonthlyRecords(prevMonth);
             if (isSnap && !isFully && champEligible && !elzoraMain.hasReceivedChampionMonth(prevMonth, user)) {
@@ -217,9 +228,18 @@ contract ElzoraGateway {
             championPoolBalance: stats.championPoolBalance,
             weeklyPoolBalance: stats.weeklyPoolBalance,
             currentWeeklyEpoch: stats.currentWeeklyEpoch,
+            currentMonthEpoch: stats.currentMonthEpoch,
             globalClubTotalEntries: stats.globalClubTotalEntries,
             isPaused: stats.isPaused
         });
+    }
+
+    function getCurrentMonthEpoch() external view returns (uint256) {
+        return elzoraMain.getCurrentMonthEpoch();
+    }
+
+    function getCurrentWeeklyEpoch() external view returns (uint256) {
+        return elzoraMain.getCurrentWeeklyEpoch();
     }
 
     /**

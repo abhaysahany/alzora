@@ -1,0 +1,999 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "elzoraMainAddress",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "milestoneIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "claimLifetimeMilestone",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "elzoraMain",
+    "outputs": [
+      {
+        "internalType": "contract ElzoraMain",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getBinaryTeamSummary",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "leftChild",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "rightChild",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftDirects",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightDirects",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftTotalMembers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightTotalMembers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftCarryVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightCarryVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isMatchingQualified",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct ElzoraGateway.BinaryTeamSummary",
+        "name": "summary",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentMonthEpoch",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentWeeklyEpoch",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getDirectReferrals",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getIncomeBreakdown",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "directIncome",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "affiliateIncome",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "clubIncome",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "matchingIncome",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "championIncome",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "weeklyIncome",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "lifetimeIncome",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "globalClubIncome",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IElzora.IncomeBreakdown",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "users",
+        "type": "address[]"
+      }
+    ],
+    "name": "getMultipleUserDashboards",
+    "outputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "userAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "sponsor",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "parent",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "leftChild",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "rightChild",
+                "type": "address"
+              },
+              {
+                "internalType": "enum IElzora.BinaryPosition",
+                "name": "position",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "isRegistered",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "directCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "leftDirectCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "rightDirectCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "leftTeamCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "rightTeamCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "leftCarryVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "rightCarryVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "currentRank",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalIncomeEarned",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "completedLifetimeMilestones",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IElzora.UserProfile",
+            "name": "profile",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "directIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "affiliateIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "clubIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "matchingIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "championIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "weeklyIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lifetimeIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "globalClubIncome",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IElzora.IncomeBreakdown",
+            "name": "income",
+            "type": "tuple"
+          },
+          {
+            "internalType": "address[]",
+            "name": "directReferrals",
+            "type": "address[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "isChampionEligible",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "pendingChampionReward",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isWeeklyEligibleCurrentEpoch",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentWeeklyDirects",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentWeeklyEpoch",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "todayMatchingPairs",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[27]",
+            "name": "milestoneStatus",
+            "type": "uint256[27]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "globalClubEntriesCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "globalClubCyclesCompleted",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ElzoraGateway.UserDashboard[]",
+        "name": "dashboards",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getProtocolOverview",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "elzoraMainAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "gatewayAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "paymentToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "treasuryWallet",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "rootAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalRegistrationVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalIncomeDistributed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalLiabilities",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "contractTokenBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isSolvent",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "championPoolBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "weeklyPoolBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentWeeklyEpoch",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentMonthEpoch",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "globalClubTotalEntries",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isPaused",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct ElzoraGateway.ProtocolOverview",
+        "name": "overview",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getUser",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "userAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "sponsor",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "parent",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "leftChild",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "rightChild",
+            "type": "address"
+          },
+          {
+            "internalType": "enum IElzora.BinaryPosition",
+            "name": "position",
+            "type": "uint8"
+          },
+          {
+            "internalType": "bool",
+            "name": "isRegistered",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "directCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftDirectCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightDirectCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftTeamCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightTeamCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftCarryVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightCarryVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentRank",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalIncomeEarned",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "completedLifetimeMilestones",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IElzora.UserProfile",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getUserDashboard",
+    "outputs": [
+      {
+        "components": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "userAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "sponsor",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "parent",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "leftChild",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "rightChild",
+                "type": "address"
+              },
+              {
+                "internalType": "enum IElzora.BinaryPosition",
+                "name": "position",
+                "type": "uint8"
+              },
+              {
+                "internalType": "bool",
+                "name": "isRegistered",
+                "type": "bool"
+              },
+              {
+                "internalType": "uint256",
+                "name": "directCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "leftDirectCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "rightDirectCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "leftTeamCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "rightTeamCount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "leftCarryVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "rightCarryVolume",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "currentRank",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalIncomeEarned",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "completedLifetimeMilestones",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IElzora.UserProfile",
+            "name": "profile",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "directIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "affiliateIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "clubIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "matchingIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "championIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "weeklyIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "lifetimeIncome",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "globalClubIncome",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct IElzora.IncomeBreakdown",
+            "name": "income",
+            "type": "tuple"
+          },
+          {
+            "internalType": "address[]",
+            "name": "directReferrals",
+            "type": "address[]"
+          },
+          {
+            "internalType": "bool",
+            "name": "isChampionEligible",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "pendingChampionReward",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isWeeklyEligibleCurrentEpoch",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentWeeklyDirects",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentWeeklyEpoch",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "todayMatchingPairs",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256[27]",
+            "name": "milestoneStatus",
+            "type": "uint256[27]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "globalClubEntriesCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "globalClubCyclesCompleted",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct ElzoraGateway.UserDashboard",
+        "name": "dash",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "offset",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "getUserGlobalClubHistory",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "entryId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "isReentry",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "originalEntryId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isCompleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "cycleTimestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IElzora.GlobalClubEntryInfo[]",
+        "name": "entries",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "total",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "epoch",
+        "type": "uint256"
+      }
+    ],
+    "name": "getWeeklyQualifiers",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "joinGlobalClub",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "paymentToken",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "sponsor",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "parent",
+        "type": "address"
+      },
+      {
+        "internalType": "enum IElzora.BinaryPosition",
+        "name": "position",
+        "type": "uint8"
+      }
+    ],
+    "name": "register",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "rootAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

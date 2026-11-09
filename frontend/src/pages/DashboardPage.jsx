@@ -37,6 +37,8 @@ export function DashboardPage() {
     weekly,
     matching,
     globalClub,
+    milestoneStatus,
+    claimLifetimeMilestone,
     usdtBalance,
     loading,
     error,
@@ -48,6 +50,26 @@ export function DashboardPage() {
   const [copiedLeg, setCopiedLeg] = useState(null)
   const [copiedAddress, setCopiedAddress] = useState(false)
   const [txSuccessMsg, setTxSuccessMsg] = useState('')
+
+  const leftTeam = Number(profile?.leftTeamCount || 0)
+  const rightTeam = Number(profile?.rightTeamCount || 0)
+  const completedMilestones = Number(profile?.completedLifetimeMilestones || 0)
+
+  // Find first claimable milestone that hasn't already been completed
+  const claimableMilestoneIdx = Array.isArray(milestoneStatus)
+    ? milestoneStatus.findIndex((status, idx) => status === 1 && idx >= completedMilestones)
+    : -1
+
+  const handleClaimMilestone = async (idx) => {
+    setTxSuccessMsg('')
+    try {
+      await claimLifetimeMilestone(idx)
+      setTxSuccessMsg(`🎉 Lifetime Milestone #${idx + 1} Reward Claimed Successfully!`)
+      setTimeout(() => setTxSuccessMsg(''), 6000)
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   const handleWithdraw = async () => {
     setTxSuccessMsg('')
@@ -227,6 +249,58 @@ export function DashboardPage() {
         </div>
 
         {/* NOTIFICATIONS */}
+        {claimableMilestoneIdx >= 0 && (
+          <div
+            style={{
+              padding: '16px 20px',
+              borderRadius: 16,
+              background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.25) 100%)',
+              border: '1px solid rgba(16, 185, 129, 0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 12,
+              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.2)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ padding: 10, borderRadius: 12, background: 'rgba(16, 185, 129, 0.25)', color: '#34d399' }}>
+                <Award size={24} />
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '1rem' }}>
+                  🎉 Lifetime Milestone #{claimableMilestoneIdx + 1} Qualified & Ready to Claim!
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#6ee7b7' }}>
+                  You have achieved the required binary matching ({leftTeam} Left : {rightTeam} Right)!
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => handleClaimMilestone(claimableMilestoneIdx)}
+              disabled={loading}
+              style={{
+                padding: '10px 20px',
+                borderRadius: 10,
+                border: 'none',
+                background: 'linear-gradient(135deg, #10b981, #059669)',
+                color: '#fff',
+                fontWeight: 900,
+                fontSize: '0.88rem',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <Award size={16} />
+              <span>{loading ? 'Claiming Reward...' : `Claim Milestone #${claimableMilestoneIdx + 1} Reward`}</span>
+            </button>
+          </div>
+        )}
+
         {txSuccessMsg && (
           <div
             style={{
@@ -726,17 +800,48 @@ export function DashboardPage() {
             </div>
 
             {/* Stream 7: Lifetime Rewards */}
-            <div style={{ background: 'rgba(13, 18, 45, 0.75)', border: '1px solid rgba(249, 115, 22, 0.25)', borderRadius: 18, padding: 20 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.05em' }}>7. LIFETIME MILESTONES (10%)</span>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f97316' }} />
+            <div style={{ background: 'rgba(13, 18, 45, 0.75)', border: '1px solid rgba(249, 115, 22, 0.25)', borderRadius: 18, padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.05em' }}>7. LIFETIME MILESTONES (10%)</span>
+                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f97316' }} />
+                </div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#f8fafc', margin: '2px 0 6px' }}>
+                  ${Number(incomeBreakdown?.lifetimeIncome || 0).toFixed(2)}
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#fb923c', fontWeight: 600, marginBottom: 8 }}>
+                  {profile?.completedLifetimeMilestones || 0}/27 Milestones Claimed
+                </div>
               </div>
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#f8fafc', margin: '2px 0 6px' }}>
-                ${Number(incomeBreakdown?.lifetimeIncome || 0).toFixed(2)}
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#fb923c', fontWeight: 600 }}>
-                {profile?.completedLifetimeMilestones || 0}/27 Milestones Claimed
-              </div>
+              {claimableMilestoneIdx >= 0 ? (
+                <button
+                  onClick={() => handleClaimMilestone(claimableMilestoneIdx)}
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    borderRadius: 10,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.8rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                    boxShadow: '0 4px 14px rgba(16, 185, 129, 0.4)',
+                  }}
+                >
+                  <Award size={14} />
+                  <span>{loading ? 'Claiming...' : `Claim Milestone #${claimableMilestoneIdx + 1}`}</span>
+                </button>
+              ) : (
+                <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                  Matching: {leftTeam} Left • {rightTeam} Right
+                </div>
+              )}
             </div>
 
             {/* Stream 8: Single Leg Income */}

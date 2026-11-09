@@ -18,7 +18,7 @@ const projectId =
 
 const testnetRpc =
   import.meta.env.VITE_BSC_TESTNET_RPC ||
-  'https://bsc-testnet-dataseed.bnbchain.org'
+  'https://bsc-testnet.publicnode.com'
 
 const connectors = connectorsForWallets(
   [

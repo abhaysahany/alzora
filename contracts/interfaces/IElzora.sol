@@ -81,6 +81,7 @@ interface IElzora {
         uint256 championPoolBalance;
         uint256 weeklyPoolBalance;
         uint256 currentWeeklyEpoch;
+        uint256 currentMonthEpoch;
         bool isPaused;
     }
 

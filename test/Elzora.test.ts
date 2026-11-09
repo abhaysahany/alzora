@@ -380,6 +380,38 @@ describe("ELZORA Smart Contracts - Comprehensive System Test Suite", function ()
       // $3 * 3 = $9 accumulated in pool for that week, instantly paid to root
       expect(rootBalAfter - rootBalBefore).to.equal(ethers.parseUnits("9", 6));
     });
+
+    it("should start epoch counting from 0 and allow admin to snapshot active week 0 and month 0", async function () {
+      const { elzoraMain, mockUSDT, deployer, root, user1, user2, user3 } =
+        await networkHelpers.loadFixture(deployElzoraFixture);
+
+      // Verify epochs start from 0
+      expect(await elzoraMain.getCurrentWeeklyEpoch()).to.equal(0n);
+      expect(await elzoraMain.getCurrentMonthEpoch()).to.equal(0n);
+
+      // Register 3 users in week 0
+      await elzoraMain.connect(user1).register(root.address, root.address, 1);
+      await elzoraMain.connect(user2).register(root.address, root.address, 2);
+      await elzoraMain.connect(user3).register(root.address, user1.address, 1);
+
+      // Verify weekly pool has 3 * $3 = $9 in week 0
+      expect(await elzoraMain.weeklyPoolBalance(0)).to.equal(ethers.parseUnits("9", 6));
+      expect(await elzoraMain.championPoolBalance()).to.equal(ethers.parseUnits("9", 6));
+
+      // Admin can snapshot active week 0 without waiting 7 days
+      await expect(elzoraMain.connect(deployer).createWeeklyPoolSnapshot(0))
+        .to.emit(elzoraMain, "WeeklyPoolSnapshot");
+
+      // Admin can snapshot active month 0
+      await expect(elzoraMain.connect(deployer).createChampionMonthlySnapshot(0))
+        .to.emit(elzoraMain, "ChampionMonthlyPoolSnapshot");
+
+      // Root is qualified for both and receives payouts on batch distribution
+      await expect(elzoraMain.connect(deployer).distributeWeeklyBatch(0, 50))
+        .to.emit(elzoraMain, "WeeklyBatchDistributed");
+      await expect(elzoraMain.connect(deployer).distributeChampionBatch(0, 50))
+        .to.emit(elzoraMain, "ChampionBatchDistributed");
+    });
   });
 
   describe("7. Global Club ($25 Re-entry Algorithm)", function () {

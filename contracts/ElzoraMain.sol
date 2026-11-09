@@ -66,6 +66,7 @@ contract ElzoraMain is
     uint256 public totalRegistrationVolume;
     uint256 public totalIncomeDistributed;
     uint256 public totalLiabilities;
+    uint256 public systemStartTime;
 
     // User Mappings
     mapping(address => UserProfile) private _users;
@@ -159,6 +160,7 @@ contract ElzoraMain is
         paymentToken = initialPaymentToken;
         treasuryWallet = initialTreasury;
         rootAddress = initialRoot;
+        systemStartTime = block.timestamp;
 
         _updateTokenDecimals(initialPaymentToken);
         _initializeClubRanks();
@@ -328,6 +330,9 @@ contract ElzoraMain is
         // Process Personal Team Club Progression for parent
         _notifyTeamClubProgression(parent, 0);
 
+        // Check and award Lifetime Milestones for sponsor (in case new direct qualifies sponsor)
+        _checkAndAwardLifetimeMilestones(sponsor);
+
         // Distribute 100% of the $50 registration across 7 streams
         _distributeRegistrationFunds(user, sponsor);
 
@@ -352,6 +357,9 @@ contract ElzoraMain is
 
             // Check Binary Matching eligibility and process pairs
             _processBinaryMatching(curr);
+
+            // Check and award Lifetime Milestones instantly upon binary placement
+            _checkAndAwardLifetimeMilestones(curr);
 
             // Traverse upward to next parent
             address nextParent = node.parent;
@@ -529,7 +537,8 @@ contract ElzoraMain is
     uint256 public constant MAX_CHAMPION_BATCH_SIZE = 100;
 
     function getCurrentMonthEpoch() public view returns (uint256) {
-        return block.timestamp / SECONDS_PER_MONTH;
+        if (systemStartTime == 0 || block.timestamp <= systemStartTime) return 0;
+        return (block.timestamp - systemStartTime) / SECONDS_PER_MONTH;
     }
 
     /**
@@ -633,7 +642,7 @@ contract ElzoraMain is
      * @notice Admin creates snapshot and calculation table of concluded Weekly Pool (Sunday Morning)
      */
     function createWeeklyPoolSnapshot(uint256 epoch) external onlyOwner {
-        if (epoch >= getCurrentWeeklyEpoch()) revert WeekNotClosed();
+        if (epoch > getCurrentWeeklyEpoch()) revert WeekNotClosed();
         WeeklyEpochRecord storage record = weeklyEpochRecords[epoch];
         if (record.isSnapshotCreated) revert WeekAlreadyDistributed();
 
@@ -737,44 +746,60 @@ contract ElzoraMain is
         return 6; // index 24 to 26
     }
 
+    function _checkAndAwardLifetimeMilestones(address user) internal {
+        if (!_users[user].isRegistered) return;
+        UserProfile storage u = _users[user];
+
+        for (uint256 i = u.completedLifetimeMilestones; i < 27; i++) {
+            if (hasClaimedMilestone[user][i]) continue;
+
+            LifetimeMilestone memory milestone = lifetimeMilestones[i];
+            if (u.leftTeamCount < milestone.requiredLeft || u.rightTeamCount < milestone.requiredRight) {
+                break; // Milestones are strictly sequential and cumulative
+            }
+
+            uint256 reqDirects = getRequiredDirectsForMilestone(i);
+            if (u.directCount < reqDirects) {
+                break; // Milestone waits safely without lapsing for direct referrals
+            }
+
+            hasClaimedMilestone[user][i] = true;
+            u.completedLifetimeMilestones++;
+
+            uint256 rewardAmount = milestone.rewardAmount * tokenUnit;
+
+            // Milestone 1 ($25):
+            // If user has already joined Single Leg manually, user gets $25 instantly.
+            // If user has NOT joined Single Leg, $25 is used to auto-activate Single Leg entry.
+            if (i == 0) {
+                if (_userGlobalClubEntries[user].length == 0) {
+                    // Auto-activate Single Leg entry with this $25 (funded internally)
+                    _joinGlobalClub(user, false, 0, true);
+                } else {
+                    _creditIncome(user, rewardAmount, 7);
+                }
+            } else {
+                _creditIncome(user, rewardAmount, 7);
+            }
+
+            emit LifetimeRewardClaimed(user, i, rewardAmount);
+        }
+    }
+
+    /**
+     * @notice Automatic instant Lifetime Milestones check & award for any user.
+     * Callable by anyone for any user without restrictions.
+     */
+    function checkAndAwardLifetimeMilestones(address user) external whenNotPaused {
+        _checkAndAwardLifetimeMilestones(user);
+    }
+
+    /**
+     * @notice Backwards-compatible claim function that triggers automatic instant award.
+     */
     function claimLifetimeMilestone(uint256 milestoneIndex) external whenNotPaused nonReentrant {
         if (milestoneIndex >= 27) revert InvalidMilestoneIndex();
-        if (hasClaimedMilestone[msg.sender][milestoneIndex]) revert LifetimeMilestoneAlreadyClaimed();
-
-        LifetimeMilestone memory milestone = lifetimeMilestones[milestoneIndex];
-        UserProfile storage u = _users[msg.sender];
-
-        // 1. Team Left & Right Count Condition
-        if (u.leftTeamCount < milestone.requiredLeft || u.rightTeamCount < milestone.requiredRight) {
-            revert LifetimeMilestoneNotReached();
-        }
-
-        // 2. Direct Referral Requirement Condition (Waits safely without lapsing or sending to treasury)
-        uint256 reqDirects = getRequiredDirectsForMilestone(milestoneIndex);
-        if (u.directCount < reqDirects) {
-            revert LifetimeMilestoneDirectsNotMet();
-        }
-
-        hasClaimedMilestone[msg.sender][milestoneIndex] = true;
-        u.completedLifetimeMilestones++;
-
-        uint256 rewardAmount = milestone.rewardAmount * tokenUnit;
-
-        // Special rule for Milestone 1 ($25):
-        // If user has NOT yet joined Single Leg (Global Club), auto-activate Single Leg entry with $25
-        // If user has already joined Single Leg, user gets the full $25 directly to wallet.
-        if (milestoneIndex == 0) {
-            if (_userGlobalClubEntries[msg.sender].length == 0) {
-                // Auto-activate Single Leg entry with this $25 (funded internally)
-                _joinGlobalClub(msg.sender, false, 0, true);
-            } else {
-                _creditIncome(msg.sender, rewardAmount, 7);
-            }
-        } else {
-            _creditIncome(msg.sender, rewardAmount, 7);
-        }
-
-        emit LifetimeRewardClaimed(msg.sender, milestoneIndex, rewardAmount);
+        _checkAndAwardLifetimeMilestones(msg.sender);
     }
 
     // --- Single Leg / Global Club ($25 Re-entry Algorithm) ---
@@ -922,8 +947,12 @@ contract ElzoraMain is
     // --- View Functions ---
 
     function getCurrentWeeklyEpoch() public view returns (uint256) {
-        if (block.timestamp <= WEEK_EPOCH_ANCHOR) return 0;
-        return (block.timestamp - WEEK_EPOCH_ANCHOR) / SECONDS_PER_WEEK;
+        if (systemStartTime == 0 || block.timestamp <= systemStartTime) return 0;
+        return (block.timestamp - systemStartTime) / SECONDS_PER_WEEK;
+    }
+
+    function setSystemStartTime(uint256 newStartTime) external onlyOwner {
+        systemStartTime = newStartTime;
     }
 
     function getUser(address user) external view returns (UserProfile memory) {
@@ -975,6 +1004,7 @@ contract ElzoraMain is
             championPoolBalance: championPoolBalance,
             weeklyPoolBalance: weeklyPoolBalance[getCurrentWeeklyEpoch()],
             currentWeeklyEpoch: getCurrentWeeklyEpoch(),
+            currentMonthEpoch: getCurrentMonthEpoch(),
             isPaused: paused()
         });
     }

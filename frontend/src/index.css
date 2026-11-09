@@ -2145,8 +2145,8 @@
       }
 
       .sidebar-header {
-        height: 84px;
-        padding: 0 20px;
+        height: 96px;
+        padding: 0 16px;
         border-bottom: 1px solid rgba(139, 92, 246, 0.2);
         display: flex;
         align-items: center;
@@ -2829,18 +2829,18 @@
       }
 
       .elzora-logo-sidebar {
-        height: 52px;
+        height: 68px;
         width: auto;
-        max-width: 200px;
+        max-width: 230px;
         object-fit: contain;
         display: block;
         margin: 0 auto;
-        filter: drop-shadow(0 2px 14px rgba(245, 158, 11, 0.45));
+        filter: drop-shadow(0 4px 18px rgba(245, 158, 11, 0.55));
         transition: transform 0.25s ease, filter 0.25s ease;
       }
       .elzora-logo-sidebar:hover {
-        transform: scale(1.05);
-        filter: drop-shadow(0 4px 22px rgba(245, 158, 11, 0.75));
+        transform: scale(1.06);
+        filter: drop-shadow(0 6px 26px rgba(245, 158, 11, 0.85));
       }
 
       .elzora-logo-card {

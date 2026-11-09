@@ -13,18 +13,18 @@ export const CHAIN_CONTRACTS = {
   // BSC Testnet (Chain ID 97)
   97: {
     USDT: import.meta.env.VITE_USDT_CONTRACT_ADDRESS || '0x90a1De2cC063786fC7e6C69514988cBb03E6665e',
-    ELZORA: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x3290Fe9b7FF7C801FC1351957F81C974eC560Ec2',
-    TETHER_STREAM: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x3290Fe9b7FF7C801FC1351957F81C974eC560Ec2',
-    XMLM: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x3290Fe9b7FF7C801FC1351957F81C974eC560Ec2',
+    ELZORA: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x476Fa8Bb20B79d1EffcF417EBaBb14E89f785809',
+    TETHER_STREAM: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x476Fa8Bb20B79d1EffcF417EBaBb14E89f785809',
+    XMLM: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x476Fa8Bb20B79d1EffcF417EBaBb14E89f785809',
     AVX: import.meta.env.VITE_USDT_CONTRACT_ADDRESS || '0x90a1De2cC063786fC7e6C69514988cBb03E6665e',
-    GATEWAY: import.meta.env.VITE_ELZORA_GATEWAY_ADDRESS || import.meta.env.ELZORA_GATEWAY_ADDRESS || '0xE1f52AEE54AE7D25A841bA787E59bbcA956c1c80',
+    GATEWAY: import.meta.env.VITE_ELZORA_GATEWAY_ADDRESS || import.meta.env.ELZORA_GATEWAY_ADDRESS || '0xC2CD75Fa7dF6eBC67acec5Ad0C0cda6Cf379e093',
     TREASURY: import.meta.env.VITE_TREASURY_WALLET || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
     ROOT_ID: import.meta.env.VITE_ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
   },
 }
 
-export const MAINNET_RPC_URL = import.meta.env.VITE_BSC_MAINNET_RPC || 'https://bsc-mainnet.core.chainstack.com/546d5ce392ea50bf39b9f0bde229ea3d'
-export const TESTNET_RPC_URL = import.meta.env.VITE_BSC_TESTNET_RPC || 'https://bsc-testnet-dataseed.bnbchain.org'
+export const MAINNET_RPC_URL = import.meta.env.VITE_BSC_MAINNET_RPC || 'https://bsc-dataseed.binance.org'
+export const TESTNET_RPC_URL = import.meta.env.VITE_BSC_TESTNET_RPC || 'https://bsc-testnet.publicnode.com'
 
 export function getRpcUrl(chainId) {
   const num = Number(chainId)
@@ -257,6 +257,19 @@ export const ELZORA_GATEWAY_ABI = [
       }
     ],
     "name": "claimLifetimeMilestone",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "checkAndAwardLifetimeMilestones",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2409,6 +2422,19 @@ export const ELZORA_MAIN_ABI = [
       }
     ],
     "name": "claimLifetimeMilestone",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "checkAndAwardLifetimeMilestones",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

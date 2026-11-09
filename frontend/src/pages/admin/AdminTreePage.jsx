@@ -29,6 +29,9 @@ import {
   DollarSign,
   TrendingUp,
   Sparkles,
+  Network,
+  FolderPlus,
+  FolderMinus,
 } from 'lucide-react'
 
 const CLUB_RANKS = {
@@ -42,6 +45,18 @@ const CLUB_RANKS = {
   8: 'Legend',
 }
 
+const RANK_BADGE_COLORS = {
+  None: { bg: 'rgba(148, 163, 184, 0.15)', border: 'rgba(148, 163, 184, 0.3)', text: '#94a3b8' },
+  Starter: { bg: 'rgba(99, 102, 241, 0.2)', border: 'rgba(99, 102, 241, 0.4)', text: '#818cf8' },
+  Leader: { bg: 'rgba(56, 189, 248, 0.2)', border: 'rgba(56, 189, 248, 0.4)', text: '#38bdf8' },
+  Achiever: { bg: 'rgba(168, 85, 247, 0.2)', border: 'rgba(168, 85, 247, 0.4)', text: '#c084fc' },
+  Mentor: { bg: 'rgba(236, 72, 153, 0.2)', border: 'rgba(236, 72, 153, 0.4)', text: '#f472b6' },
+  Director: { bg: 'rgba(251, 191, 36, 0.2)', border: 'rgba(251, 191, 36, 0.4)', text: '#fbbf24' },
+  Elite: { bg: 'rgba(74, 222, 128, 0.2)', border: 'rgba(74, 222, 128, 0.4)', text: '#4ade80' },
+  Crown: { bg: 'rgba(249, 115, 22, 0.2)', border: 'rgba(249, 115, 22, 0.4)', text: '#fb923c' },
+  Legend: { bg: 'rgba(239, 68, 68, 0.2)', border: 'rgba(239, 68, 68, 0.4)', text: '#f87171' },
+}
+
 export function AdminTreePage() {
   const chainId = useChainId()
   const activeChainId = Number(chainId) === 56 ? 56 : 97
@@ -50,7 +65,7 @@ export function AdminTreePage() {
   const CONTRACT_ADDRESSES = getContractAddresses(activeChainId)
   const rootAddress = CONTRACT_ADDRESSES.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
 
-  const [activeTab, setActiveTab] = useState('binary') // 'binary' or 'single_leg'
+  const [activeTab, setActiveTab] = useState('binary') // 'binary', 'sponsor', or 'single_leg'
   const [focusAddress, setFocusAddress] = useState(rootAddress)
   const [searchInput, setSearchInput] = useState('')
   const [copiedAddr, setCopiedAddr] = useState(null)
@@ -61,6 +76,17 @@ export function AdminTreePage() {
   // Binary Tree State
   const [binaryNodesMap, setBinaryNodesMap] = useState({})
   const [levelCounts, setLevelCounts] = useState({ left: 0, right: 0, total: 0 })
+
+  // Sponsor Tree (Genealogy / Directs) State
+  const [sponsorFocusAddress, setSponsorFocusAddress] = useState(rootAddress)
+  const [sponsorSearchInput, setSponsorSearchInput] = useState('')
+  const [sponsorLoading, setSponsorLoading] = useState(false)
+  const [sponsorMaxDepth, setSponsorMaxDepth] = useState(5)
+  const [sponsorExpandedNodes, setSponsorExpandedNodes] = useState({})
+  const [sponsorNodesMap, setSponsorNodesMap] = useState({})
+  const [sponsorChildrenMap, setSponsorChildrenMap] = useState({})
+  const [sponsorLevelMap, setSponsorLevelMap] = useState({})
+  const [sponsorBreadcrumbs, setSponsorBreadcrumbs] = useState([])
 
   // Single Leg Tree State
   const [singleLegEntries, setSingleLegEntries] = useState([])
@@ -239,9 +265,126 @@ export function AdminTreePage() {
     }
   }, [activeChain, rpcUrl, CONTRACT_ADDRESSES.TETHER_STREAM])
 
+  // Load Sponsor Tree (Genealogy / Direct Referrals) BFS up to sponsorMaxDepth levels
+  const loadSponsorGenealogy = useCallback(
+    async (rootAddr = sponsorFocusAddress, targetDepth = sponsorMaxDepth) => {
+      if (!rootAddr || !CONTRACT_ADDRESSES.GATEWAY) return
+      setSponsorLoading(true)
+
+      try {
+        const client = createPublicClient({
+          chain: activeChain,
+          transport: viemHttp(rpcUrl),
+        })
+
+        const newNodesMap = {}
+        const newChildrenMap = {}
+        const newLevelMap = {}
+        const newExpanded = {}
+
+        // Fetch Root node details
+        let rootDetails = await fetchBinaryUser(client, rootAddr)
+        if (!rootDetails) {
+          rootDetails = {
+            address: rootAddr,
+            sponsor: '0x0000000000000000000000000000000000000000',
+            parent: '0x0000000000000000000000000000000000000000',
+            position: 0,
+            isRegistered: true,
+            directCount: 0,
+            leftDirectCount: 0,
+            rightDirectCount: 0,
+            leftTeamCount: 0,
+            rightTeamCount: 0,
+            leftCarryVolume: 0,
+            rightCarryVolume: 0,
+            rank: 1,
+            rankName: 'Starter',
+            totalIncomeEarned: 0,
+          }
+        }
+
+        const rootKey = rootAddr.toLowerCase()
+        newNodesMap[rootKey] = rootDetails
+        newLevelMap[rootKey] = 0
+        newExpanded[rootKey] = true
+
+        let currentLevelQueue = [rootAddr]
+
+        for (let level = 1; level <= targetDepth; level++) {
+          if (currentLevelQueue.length === 0) break
+
+          const directPromises = currentLevelQueue.map((addr) =>
+            client.readContract({
+              address: CONTRACT_ADDRESSES.GATEWAY,
+              abi: ELZORA_GATEWAY_ABI,
+              functionName: 'getDirectReferrals',
+              args: [addr],
+            }).catch((err) => {
+              console.warn('Failed getDirectReferrals for:', addr, err)
+              return []
+            })
+          )
+
+          const directsResults = await Promise.all(directPromises)
+
+          const nextLevelQueue = []
+          const membersToFetch = []
+
+          for (let i = 0; i < currentLevelQueue.length; i++) {
+            const parentAddr = currentLevelQueue[i].toLowerCase()
+            const children = (directsResults[i] || []).filter(
+              (c) => c && c !== '0x0000000000000000000000000000000000000000'
+            )
+            newChildrenMap[parentAddr] = children
+
+            if (level <= 2) {
+              newExpanded[parentAddr] = true
+            }
+
+            for (const child of children) {
+              const childKey = child.toLowerCase()
+              newLevelMap[childKey] = level
+              if (!newNodesMap[childKey]) {
+                membersToFetch.push(child)
+                nextLevelQueue.push(child)
+              }
+            }
+          }
+
+          if (membersToFetch.length > 0) {
+            const detailsPromises = membersToFetch.map((addr) => fetchBinaryUser(client, addr))
+            const fetchedDetails = await Promise.all(detailsPromises)
+            fetchedDetails.forEach((d) => {
+              if (d) newNodesMap[d.address.toLowerCase()] = d
+            })
+          }
+
+          currentLevelQueue = nextLevelQueue
+        }
+
+        setSponsorNodesMap(newNodesMap)
+        setSponsorChildrenMap(newChildrenMap)
+        setSponsorLevelMap(newLevelMap)
+        setSponsorExpandedNodes(newExpanded)
+      } catch (err) {
+        console.error('Failed to load sponsor genealogy in admin:', err)
+      } finally {
+        setSponsorLoading(false)
+      }
+    },
+    [activeChain, rpcUrl, CONTRACT_ADDRESSES.GATEWAY, fetchBinaryUser, sponsorFocusAddress, sponsorMaxDepth]
+  )
+
   useEffect(() => {
     loadBinaryTree()
   }, [loadBinaryTree])
+
+  useEffect(() => {
+    if (activeTab === 'sponsor') {
+      loadSponsorGenealogy()
+    }
+  }, [activeTab, loadSponsorGenealogy])
 
   useEffect(() => {
     if (activeTab === 'single_leg') {
@@ -262,6 +405,288 @@ export function AdminTreePage() {
       ...prev,
       [key]: !prev[key],
     }))
+  }
+
+  const handleSponsorSearch = (e) => {
+    e.preventDefault()
+    if (!sponsorSearchInput || !isAddress(sponsorSearchInput)) return
+    setSponsorBreadcrumbs((prev) => [...prev, sponsorFocusAddress])
+    setSponsorFocusAddress(sponsorSearchInput.trim())
+    setSponsorSearchInput('')
+  }
+
+  const handleSponsorDrillDown = (memberAddr) => {
+    if (!memberAddr || memberAddr.toLowerCase() === sponsorFocusAddress?.toLowerCase()) return
+    setSponsorBreadcrumbs((prev) => [...prev, sponsorFocusAddress])
+    setSponsorFocusAddress(memberAddr)
+  }
+
+  const handleSponsorBreadcrumbClick = (idx) => {
+    const target = sponsorBreadcrumbs[idx]
+    setSponsorBreadcrumbs((prev) => prev.slice(0, idx))
+    setSponsorFocusAddress(target)
+  }
+
+  const toggleSponsorNode = (addr, e) => {
+    if (e) e.stopPropagation()
+    const key = addr.toLowerCase()
+    setSponsorExpandedNodes((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }))
+  }
+
+  const handleSponsorExpandAll = () => {
+    const allExp = {}
+    Object.keys(sponsorNodesMap).forEach((k) => {
+      allExp[k] = true
+    })
+    setSponsorExpandedNodes(allExp)
+  }
+
+  const handleSponsorCollapseAll = () => {
+    const allCol = {}
+    if (sponsorFocusAddress) allCol[sponsorFocusAddress.toLowerCase()] = true
+    setSponsorExpandedNodes(allCol)
+  }
+
+  // Recursive Sponsor Tree Node Component
+  const renderSponsorNode = (addr, currentLvl = 0) => {
+    if (!addr) return null
+    const key = addr.toLowerCase()
+    const node = sponsorNodesMap[key]
+    if (!node) return null
+
+    const children = sponsorChildrenMap[key] || []
+    const isExpanded = Boolean(sponsorExpandedNodes[key])
+    const hasChildren = children.length > 0
+    const badgeStyle = RANK_BADGE_COLORS[node.rankName] || RANK_BADGE_COLORS.Starter
+    const isSelfRoot = currentLvl === 0
+
+    return (
+      <div key={addr} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        {/* Node Card */}
+        <div
+          style={{
+            background: isSelfRoot
+              ? 'linear-gradient(135deg, rgba(236, 72, 153, 0.3) 0%, rgba(168, 85, 247, 0.35) 100%)'
+              : 'rgba(15, 20, 50, 0.92)',
+            border: isSelfRoot
+              ? '2px solid rgba(236, 72, 153, 0.8)'
+              : '1px solid rgba(139, 92, 246, 0.35)',
+            borderRadius: 18,
+            padding: '14px 18px',
+            minWidth: 230,
+            maxWidth: 270,
+            boxShadow: isSelfRoot
+              ? '0 12px 30px rgba(236, 72, 153, 0.35), 0 0 20px rgba(168, 85, 247, 0.2)'
+              : '0 8px 22px rgba(0, 0, 0, 0.4)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            transition: 'all 0.2s ease',
+            position: 'relative',
+            zIndex: 2,
+          }}
+        >
+          {/* Top Row: Level Tag & Rank */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: 900,
+                color: isSelfRoot ? '#f472b6' : '#cbd5e1',
+                background: isSelfRoot ? 'rgba(236, 72, 153, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+                border: isSelfRoot ? '1px solid rgba(236, 72, 153, 0.5)' : 'none',
+                padding: '2px 9px',
+                borderRadius: 10,
+                letterSpacing: '0.04em',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              {isSelfRoot ? '👑 ROOT / FOCUS' : `LEVEL ${currentLvl}`}
+            </span>
+            <span
+              style={{
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                background: badgeStyle.bg,
+                border: `1px solid ${badgeStyle.border}`,
+                color: badgeStyle.text,
+                padding: '2px 8px',
+                borderRadius: 10,
+              }}
+            >
+              {node.rankName}
+            </span>
+          </div>
+
+          {/* Member Address & Copy */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 6,
+                  background: isSelfRoot ? '#ec4899' : '#8b5cf6',
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.7rem',
+                  fontWeight: 900,
+                }}
+              >
+                {isSelfRoot ? '👑' : `L${currentLvl}`}
+              </div>
+              <span style={{ fontFamily: 'monospace', fontWeight: 800, fontSize: '0.88rem', color: '#f8fafc' }}>
+                {node.address.slice(0, 6)}...{node.address.slice(-4)}
+              </span>
+            </div>
+            <button
+              onClick={(e) => handleCopy(node.address, e)}
+              title="Copy address"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                padding: 2,
+              }}
+            >
+              {copiedAddr === node.address ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+            </button>
+          </div>
+
+          {/* Mini Stats Bar */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: 4,
+              background: 'rgba(6, 8, 20, 0.75)',
+              padding: '6px 8px',
+              borderRadius: 10,
+              fontSize: '0.68rem',
+              textAlign: 'center',
+            }}
+          >
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block' }}>Directs</span>
+              <b style={{ color: '#38bdf8' }}>{node.directCount}</b>
+            </div>
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block' }}>Left</span>
+              <b style={{ color: '#818cf8' }}>{node.leftTeamCount}</b>
+            </div>
+            <div>
+              <span style={{ color: '#94a3b8', display: 'block' }}>Right</span>
+              <b style={{ color: '#c084fc' }}>{node.rightTeamCount}</b>
+            </div>
+          </div>
+
+          {/* Node Action Buttons */}
+          <div style={{ display: 'flex', gap: 6, marginTop: 2 }}>
+            {hasChildren ? (
+              <button
+                onClick={(e) => toggleSponsorNode(node.address, e)}
+                style={{
+                  flex: 1,
+                  padding: '5px 8px',
+                  borderRadius: 8,
+                  background: isExpanded ? 'rgba(236, 72, 153, 0.25)' : 'rgba(99, 102, 241, 0.2)',
+                  border: isExpanded ? '1px solid rgba(236, 72, 153, 0.5)' : '1px solid rgba(99, 102, 241, 0.4)',
+                  color: isExpanded ? '#f472b6' : '#c084fc',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 4,
+                }}
+              >
+                {isExpanded ? <FolderMinus size={13} /> : <FolderPlus size={13} />}
+                <span>{isExpanded ? 'Collapse' : `Directs (${children.length})`}</span>
+              </button>
+            ) : (
+              <div
+                style={{
+                  flex: 1,
+                  padding: '4px 8px',
+                  borderRadius: 8,
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  color: '#64748b',
+                  fontSize: '0.68rem',
+                  textAlign: 'center',
+                }}
+              >
+                0 Directs
+              </div>
+            )}
+
+            {currentLvl > 0 && (
+              <button
+                onClick={() => handleSponsorDrillDown(node.address)}
+                title="Focus this member as subtree root"
+                style={{
+                  padding: '5px 8px',
+                  borderRadius: 8,
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
+                  color: '#cbd5e1',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <ArrowRight size={13} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Connector Line Down to Directs */}
+        {hasChildren && isExpanded && currentLvl < sponsorMaxDepth && (
+          <div style={{ width: 2, height: 26, background: 'rgba(236, 72, 153, 0.5)' }} />
+        )}
+
+        {/* Children Container */}
+        {hasChildren && isExpanded && currentLvl < sponsorMaxDepth && (
+          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {children.length > 1 && (
+              <div
+                style={{
+                  width: `calc(100% - ${240 / children.length}px)`,
+                  height: 2,
+                  background: 'rgba(236, 72, 153, 0.5)',
+                  position: 'absolute',
+                  top: 0,
+                }}
+              />
+            )}
+
+            <div style={{ display: 'flex', gap: 24, justifyContent: 'center', paddingTop: children.length > 1 ? 26 : 0 }}>
+              {children.map((childAddr) => (
+                <div key={childAddr} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  {children.length > 1 && (
+                    <div style={{ width: 2, height: 26, background: 'rgba(236, 72, 153, 0.5)', marginTop: -26 }} />
+                  )}
+                  {renderSponsorNode(childAddr, currentLvl + 1)}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
   }
 
   // Recursive Binary Tree Node Component
@@ -476,7 +901,7 @@ export function AdminTreePage() {
             </div>
 
             {/* TAB SELECTOR */}
-            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', padding: 4, borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', background: 'rgba(0,0,0,0.5)', padding: 4, borderRadius: 14, border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap', gap: 4 }}>
               <button
                 onClick={() => setActiveTab('binary')}
                 style={{
@@ -494,6 +919,25 @@ export function AdminTreePage() {
                 }}
               >
                 <GitCommit size={16} /> Binary Tree (From 1st ID)
+              </button>
+
+              <button
+                onClick={() => setActiveTab('sponsor')}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: activeTab === 'sponsor' ? 'linear-gradient(135deg, #ec4899, #8b5cf6)' : 'transparent',
+                  color: activeTab === 'sponsor' ? '#fff' : 'var(--muted)',
+                  fontWeight: 800,
+                  fontSize: '0.86rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Network size={16} /> Sponsor Lineage Tree (Directs)
               </button>
 
               <button
@@ -671,6 +1115,227 @@ export function AdminTreePage() {
               ) : (
                 <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                   {renderBinaryNode(focusAddress, 'ROOT', 0)}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* TAB 2: SPONSOR LINEAGE TREE (DIRECTS) EXPLORER */}
+        {activeTab === 'sponsor' && (
+          <>
+            {/* CONTROLS & SEARCH BAR */}
+            <div
+              className="glass-card"
+              style={{
+                padding: 20,
+                borderRadius: 20,
+                background: 'rgba(11, 15, 36, 0.85)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 16,
+              }}
+            >
+              <form onSubmit={handleSponsorSearch} style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 280 }}>
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <Search size={16} color="var(--muted)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text"
+                    placeholder="Search any 0x... wallet address to inspect sponsor lineage"
+                    value={sponsorSearchInput}
+                    onChange={(e) => setSponsorSearchInput(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px 12px 38px',
+                      borderRadius: 12,
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      color: '#fff',
+                      fontSize: '0.86rem',
+                      fontFamily: 'monospace',
+                    }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '12px 20px',
+                    borderRadius: 12,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.86rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Inspect
+                </button>
+              </form>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <button
+                  onClick={() => {
+                    setSponsorBreadcrumbs([])
+                    setSponsorFocusAddress(rootAddress)
+                  }}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(236, 72, 153, 0.4)',
+                    background: 'rgba(236, 72, 153, 0.15)',
+                    color: '#f472b6',
+                    fontWeight: 800,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Shield size={14} /> Reset to 1st ID
+                </button>
+
+                {/* Depth selector */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.4)', padding: '6px 12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 700 }}>Depth:</span>
+                  <select
+                    value={sponsorMaxDepth}
+                    onChange={(e) => setSponsorMaxDepth(Number(e.target.value))}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#fff',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      outline: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <option value={3} style={{ background: '#0b0f24' }}>3 Levels</option>
+                    <option value={4} style={{ background: '#0b0f24' }}>4 Levels</option>
+                    <option value={5} style={{ background: '#0b0f24' }}>5 Levels</option>
+                    <option value={6} style={{ background: '#0b0f24' }}>6 Levels</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={handleSponsorExpandAll}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: 10,
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#cbd5e1',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Expand All
+                </button>
+
+                <button
+                  onClick={handleSponsorCollapseAll}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: 10,
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#cbd5e1',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Collapse All
+                </button>
+
+                <button
+                  onClick={() => loadSponsorGenealogy(sponsorFocusAddress, sponsorMaxDepth)}
+                  disabled={sponsorLoading}
+                  style={{
+                    padding: 10,
+                    borderRadius: 12,
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(255,255,255,0.06)',
+                    color: '#fff',
+                    cursor: 'pointer',
+                  }}
+                  title="Refresh Sponsor Lineage"
+                >
+                  <RefreshCw size={16} className={sponsorLoading ? 'spin' : ''} />
+                </button>
+              </div>
+            </div>
+
+            {/* BREADCRUMB NAVIGATION */}
+            {sponsorBreadcrumbs.length > 0 && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 16px',
+                  background: 'rgba(15, 20, 50, 0.6)',
+                  borderRadius: 12,
+                  fontSize: '0.8rem',
+                  color: '#cbd5e1',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <span style={{ color: '#94a3b8', fontWeight: 600 }}>Lineage Path:</span>
+                {sponsorBreadcrumbs.map((addr, idx) => (
+                  <React.Fragment key={addr}>
+                    <button
+                      onClick={() => handleSponsorBreadcrumbClick(idx)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#c084fc',
+                        fontFamily: 'monospace',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        padding: 0,
+                      }}
+                    >
+                      {idx === 0 && addr.toLowerCase() === rootAddress.toLowerCase()
+                        ? '1st Root ID'
+                        : `${addr.slice(0, 6)}...${addr.slice(-4)}`}
+                    </button>
+                    <ChevronRight size={13} color="#64748b" />
+                  </React.Fragment>
+                ))}
+                <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#f472b6' }}>
+                  {sponsorFocusAddress.slice(0, 6)}...{sponsorFocusAddress.slice(-4)} (Current View)
+                </span>
+              </div>
+            )}
+
+            {/* INTERACTIVE SPONSOR TREE CANVAS */}
+            <div
+              className="glass-card"
+              style={{
+                padding: 36,
+                borderRadius: 24,
+                background: 'rgba(11, 15, 36, 0.85)',
+                minHeight: 460,
+                overflowX: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+              }}
+            >
+              {sponsorLoading ? (
+                <div style={{ padding: 80, textAlign: 'center', color: '#ec4899' }}>
+                  <RefreshCw size={36} className="spin" style={{ margin: '0 auto 16px' }} />
+                  <div style={{ fontWeight: 700 }}>Traversing Blockchain Sponsor Lineage & Directs...</div>
+                </div>
+              ) : (
+                <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                  {renderSponsorNode(sponsorFocusAddress, 0)}
                 </div>
               )}
             </div>

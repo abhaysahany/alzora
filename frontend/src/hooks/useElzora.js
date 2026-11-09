@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useReadContract, useWriteContract, useChainId } from 'wagmi'
+import { useReadContract, useWriteContract, useChainId, usePublicClient } from 'wagmi'
 import { formatUnits, parseUnits } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
 import { useWalletAuth } from './useWalletAuth'
 import {
   getContractAddresses,
   ELZORA_GATEWAY_ABI,
+  ELZORA_MAIN_ABI,
   ERC20_ABI,
 } from '../web3/contracts'
 
@@ -30,6 +31,7 @@ export function useElzora() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const { writeContractAsync } = useWriteContract()
+  const publicClient = usePublicClient()
 
   // 1. Fetch User Dashboard via ElzoraGateway
   const {
@@ -44,8 +46,61 @@ export function useElzora() {
     args: [address],
     query: {
       enabled: Boolean(address && isConnected),
-      staleTime: 0,
-      refetchInterval: 8_000,
+      staleTime: 30_000,
+      refetchInterval: 15_000,
+      refetchOnWindowFocus: false,
+    },
+  })
+
+  // 1b. Direct fallback user read (in case getUserDashboard fails due to struct variations)
+  const {
+    data: directUserData,
+    refetch: refetchDirectUser,
+    isFetched: isDirectUserFetched,
+    isLoading: isDirectUserLoading,
+  } = useReadContract({
+    address: CONTRACT_ADDRESSES.GATEWAY,
+    abi: ELZORA_GATEWAY_ABI,
+    functionName: 'getUser',
+    args: [address],
+    query: {
+      enabled: Boolean(address && isConnected),
+      staleTime: 30_000,
+      refetchInterval: 15_000,
+      refetchOnWindowFocus: false,
+    },
+  })
+
+  // 1c. Direct Income Breakdown read (Gateway getIncomeBreakdown)
+  const {
+    data: directIncomeData,
+    refetch: refetchDirectIncome,
+  } = useReadContract({
+    address: CONTRACT_ADDRESSES.GATEWAY,
+    abi: ELZORA_GATEWAY_ABI,
+    functionName: 'getIncomeBreakdown',
+    args: [address],
+    query: {
+      enabled: Boolean(address && isConnected),
+      staleTime: 10_000,
+      refetchInterval: 10_000,
+      refetchOnWindowFocus: true,
+    },
+  })
+
+  // 1d. Direct Referrals list read (Gateway getDirectReferrals)
+  const {
+    data: directRefsData,
+    refetch: refetchDirectRefs,
+  } = useReadContract({
+    address: CONTRACT_ADDRESSES.GATEWAY,
+    abi: ELZORA_GATEWAY_ABI,
+    functionName: 'getDirectReferrals',
+    args: [address],
+    query: {
+      enabled: Boolean(address && isConnected),
+      staleTime: 10_000,
+      refetchInterval: 10_000,
       refetchOnWindowFocus: true,
     },
   })
@@ -70,7 +125,12 @@ export function useElzora() {
     abi: ERC20_ABI,
     functionName: 'balanceOf',
     args: [address],
-    query: { enabled: Boolean(address && isConnected) },
+    query: {
+      enabled: Boolean(address && isConnected),
+      staleTime: 0,
+      refetchInterval: 5_000,
+      refetchOnWindowFocus: true,
+    },
   })
 
   const { data: usdtAllowanceData, refetch: refetchUsdtAllowance } = useReadContract({
@@ -78,24 +138,53 @@ export function useElzora() {
     abi: ERC20_ABI,
     functionName: 'allowance',
     args: [address, CONTRACT_ADDRESSES.GATEWAY],
-    query: { enabled: Boolean(address && isConnected) },
+    query: {
+      enabled: Boolean(address && isConnected),
+      staleTime: 0,
+      refetchInterval: 5_000,
+      refetchOnWindowFocus: true,
+    },
   })
 
   // Format User Profile
-  const rawProfile = dashData?.profile
-  const rawIncome = dashData?.income
-  const directRefs = dashData?.directReferrals || []
+  const rawProfile = dashData?.profile || directUserData
+  const rawIncome = dashData?.income || directIncomeData
+  const directRefs = (dashData?.directReferrals && dashData.directReferrals.length > 0)
+    ? dashData.directReferrals
+    : (directRefsData || [])
 
   const isRoot = Boolean(
     address &&
     CONTRACT_ADDRESSES.ROOT_ID &&
     address.toLowerCase() === CONTRACT_ADDRESSES.ROOT_ID.toLowerCase()
   )
-  const isUserRegistered = Boolean(rawProfile?.isRegistered || isRoot)
+  const isUserRegistered = Boolean(rawProfile?.isRegistered || directUserData?.isRegistered || isRoot)
+
+  // Calculate total income sum from breakdown if totalIncomeEarned is 0 (fallback)
+  const computedTotalIncome = rawIncome
+    ? (
+        BigInt(rawIncome.directIncome || 0n) +
+        BigInt(rawIncome.affiliateIncome || 0n) +
+        BigInt(rawIncome.clubIncome || 0n) +
+        BigInt(rawIncome.matchingIncome || 0n) +
+        BigInt(rawIncome.championIncome || 0n) +
+        BigInt(rawIncome.weeklyIncome || 0n) +
+        BigInt(rawIncome.lifetimeIncome || 0n) +
+        BigInt(rawIncome.globalClubIncome || 0n)
+      )
+    : 0n
+
+  const effectiveTotalIncomeEarned = (rawProfile?.totalIncomeEarned && BigInt(rawProfile.totalIncomeEarned) > 0n)
+    ? rawProfile.totalIncomeEarned
+    : computedTotalIncome
+
+  const effectiveDirectCount = (rawProfile?.directCount && Number(rawProfile.directCount) > 0)
+    ? Number(rawProfile.directCount)
+    : directRefs.length
 
   const profile = rawProfile
     ? {
-        userAddress: rawProfile.userAddress,
+        userAddress: rawProfile.userAddress || address,
         sponsor: rawProfile.sponsor,
         parent: rawProfile.parent,
         leftChild: rawProfile.leftChild,
@@ -105,7 +194,7 @@ export function useElzora() {
         active: isUserRegistered,
         currentRank: Number(rawProfile.currentRank || 1),
         rankName: RANK_NAMES[Number(rawProfile.currentRank || 1)] || 'Starter',
-        directCount: Number(rawProfile.directCount || 0n),
+        directCount: effectiveDirectCount,
         leftDirectCount: Number(rawProfile.leftDirectCount || 0n),
         rightDirectCount: Number(rawProfile.rightDirectCount || 0n),
         leftTeamCount: Number(rawProfile.leftTeamCount || 0n),
@@ -113,26 +202,27 @@ export function useElzora() {
         leftCarryVolume: Number(rawProfile.leftCarryVolume || 0n),
         rightCarryVolume: Number(rawProfile.rightCarryVolume || 0n),
         hasMatchedFirstPair: Boolean(rawProfile.hasMatchedFirstPair),
-        totalIncomeEarned: formatUnits(rawProfile.totalIncomeEarned || 0n, 6),
+        totalIncomeEarned: formatUnits(effectiveTotalIncomeEarned, 6),
         withdrawableBalance: formatUnits(rawProfile.withdrawableBalance || 0n, 6),
         totalWithdrawn: formatUnits(rawProfile.totalWithdrawn || 0n, 6),
         completedLifetimeMilestones: Number(rawProfile.completedLifetimeMilestones || 0n),
         // Compatibility fields
         packageId: 1,
         packagePrice: '50.00',
-        totalEarned: formatUnits(rawProfile.totalIncomeEarned || 0n, 6),
+        totalEarned: formatUnits(effectiveTotalIncomeEarned, 6),
       }
     : {
         isRegistered: isRoot,
         active: isRoot,
         currentRank: 1,
         rankName: 'Starter',
-        directCount: 0,
+        directCount: directRefs.length,
         leftTeamCount: 0,
         rightTeamCount: 0,
-        totalIncomeEarned: '0.00',
+        totalIncomeEarned: formatUnits(computedTotalIncome, 6),
         withdrawableBalance: '0.00',
         totalWithdrawn: '0.00',
+        totalEarned: formatUnits(computedTotalIncome, 6),
       }
 
   const incomeBreakdown = rawIncome
@@ -189,6 +279,8 @@ export function useElzora() {
         isSolvent: Boolean(overviewData.isSolvent),
         championPoolBalance: formatUnits(overviewData.championPoolBalance || 0n, 6),
         weeklyPoolBalance: formatUnits(overviewData.weeklyPoolBalance || 0n, 6),
+        currentWeeklyEpoch: Number(overviewData.currentWeeklyEpoch || 0n),
+        currentMonthEpoch: Number(overviewData.currentMonthEpoch || 0n),
         globalClubTotalEntries: Number(overviewData.globalClubTotalEntries || 0n),
         isPaused: Boolean(overviewData.isPaused),
       }
@@ -217,16 +309,27 @@ export function useElzora() {
     setError(null)
     try {
       const parsedAmount = parseUnits(amount.toString(), 6)
-      const tx = await writeContractAsync({
+      const txHash = await writeContractAsync({
         address: CONTRACT_ADDRESSES.USDT,
         abi: ERC20_ABI,
         functionName: 'approve',
         args: [CONTRACT_ADDRESSES.GATEWAY, parsedAmount],
         chain: activeChain,
       })
-      await refreshAll()
+
+      // Explicitly wait for blockchain confirmation
+      if (publicClient && txHash) {
+        await publicClient.waitForTransactionReceipt({ hash: txHash })
+      }
+
+      // Force immediate refetch
+      await Promise.all([
+        refetchUsdtAllowance(),
+        refetchUsdtBal(),
+      ])
+
       setLoading(false)
-      return tx
+      return txHash
     } catch (err) {
       console.error('Approve failed:', err)
       setError(err.message || 'Approval failed')
@@ -239,16 +342,21 @@ export function useElzora() {
     setLoading(true)
     setError(null)
     try {
-      const tx = await writeContractAsync({
+      const txHash = await writeContractAsync({
         address: CONTRACT_ADDRESSES.GATEWAY,
         abi: ELZORA_GATEWAY_ABI,
         functionName: 'register',
         args: [sponsor, parent, Number(position)],
         chain: activeChain,
       })
+
+      if (publicClient && txHash) {
+        await publicClient.waitForTransactionReceipt({ hash: txHash })
+      }
+
       await refreshAll()
       setLoading(false)
-      return tx
+      return txHash
     } catch (err) {
       console.error('Registration failed:', err)
       setError(err.message || 'Registration failed')
@@ -261,15 +369,18 @@ export function useElzora() {
     setLoading(true)
     setError(null)
     try {
-      const tx = await writeContractAsync({
+      const txHash = await writeContractAsync({
         address: CONTRACT_ADDRESSES.GATEWAY,
         abi: ELZORA_GATEWAY_ABI,
         functionName: 'joinGlobalClub',
         chain: activeChain,
       })
+      if (publicClient && txHash) {
+        await publicClient.waitForTransactionReceipt({ hash: txHash })
+      }
       await refreshAll()
       setLoading(false)
-      return tx
+      return txHash
     } catch (err) {
       console.error('Join Global Club failed:', err)
       setError(err.message || 'Join Global Club failed')
@@ -342,26 +453,34 @@ export function useElzora() {
     }
   }
 
-  const claimLifetimeMilestone = async (milestoneIndex) => {
+  const checkAndAwardLifetimeMilestones = async (userAddr = address) => {
+    if (!userAddr) return
     setLoading(true)
     setError(null)
     try {
       const tx = await writeContractAsync({
-        address: CONTRACT_ADDRESSES.GATEWAY,
-        abi: ELZORA_GATEWAY_ABI,
-        functionName: 'claimLifetimeMilestone',
-        args: [BigInt(milestoneIndex)],
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'checkAndAwardLifetimeMilestones',
+        args: [userAddr],
         chain: activeChain,
       })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
       await refreshAll()
       setLoading(false)
       return tx
     } catch (err) {
-      console.error('Claim milestone failed:', err)
-      setError(err.message || 'Claim milestone failed')
+      console.error('Check & award milestone failed:', err)
+      setError(err.message || 'Check & award milestone failed')
       setLoading(false)
       throw err
     }
+  }
+
+  const claimLifetimeMilestone = async () => {
+    return checkAndAwardLifetimeMilestones(address)
   }
 
   const pauseContract = async () => {
@@ -528,6 +647,9 @@ export function useElzora() {
         args: [BigInt(monthEpoch)],
         chain: activeChain,
       })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
       await refreshAll()
       setLoading(false)
       return tx
@@ -550,6 +672,9 @@ export function useElzora() {
         args: [BigInt(monthEpoch), BigInt(batchSize)],
         chain: activeChain,
       })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
       await refreshAll()
       setLoading(false)
       return tx
@@ -572,6 +697,9 @@ export function useElzora() {
         args: [BigInt(epoch)],
         chain: activeChain,
       })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
       await refreshAll()
       setLoading(false)
       return tx
@@ -594,6 +722,9 @@ export function useElzora() {
         args: [BigInt(epoch), BigInt(batchSize)],
         chain: activeChain,
       })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
       await refreshAll()
       setLoading(false)
       return tx
@@ -633,6 +764,7 @@ export function useElzora() {
     claimChampionReward,
     claimWeeklyReward,
     claimLifetimeMilestone,
+    checkAndAwardLifetimeMilestones,
     // Admin Controls
     pauseContract,
     unpauseContract,
@@ -649,7 +781,7 @@ export function useElzora() {
     isRegistered: isUserRegistered,
     active: isUserRegistered,
     memberInfo: profile,
-    isMemberInfoFetched: isDashFetched,
+    isMemberInfoFetched: Boolean(isDashFetched || isDirectUserFetched),
     isAdmin: isRoot,
   }
 }

@@ -273,9 +273,9 @@ export function EarningsPage() {
             </thead>
             <tbody>
               {LIFETIME_MILESTONES.map((m) => {
-                const status = milestoneStatus[m.index] || 0 // 0=not reached, 1=claimable, 2=claimed
-                const isClaimed = status === 2
-                const isClaimable = status === 1 || (leftTeam >= m.left && rightTeam >= m.right && !isClaimed)
+                const completedMilestones = Number(profile?.completedLifetimeMilestones || 0)
+                const isClaimed = m.index < completedMilestones || milestoneStatus[m.index] === 2
+                const isClaimable = !isClaimed && (milestoneStatus[m.index] === 1 || (leftTeam >= m.left && rightTeam >= m.right))
                 const leftMet = leftTeam >= m.left
                 const rightMet = rightTeam >= m.right
                 const progressPct = Math.min(100, Math.round(((Math.min(leftTeam, m.left) + Math.min(rightTeam, m.right)) / (m.left + m.right)) * 100))
@@ -285,7 +285,7 @@ export function EarningsPage() {
                     key={m.index}
                     style={{
                       borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
-                      background: isClaimable ? 'rgba(16, 185, 129, 0.08)' : 'transparent',
+                      background: isClaimed ? 'rgba(16, 185, 129, 0.05)' : isClaimable ? 'rgba(56, 189, 248, 0.08)' : 'transparent',
                     }}
                   >
                     <td style={{ padding: '12px 14px', fontWeight: 800, color: '#94a3b8' }}>#{m.index + 1}</td>
@@ -296,7 +296,7 @@ export function EarningsPage() {
                       {m.right.toLocaleString()} {rightMet && '✓'}
                     </td>
                     <td style={{ padding: '12px 14px', fontWeight: 900, color: '#38bdf8' }}>
-                      ${m.reward.toLocaleString()} <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>USDT</span>
+                      ${m.reward.toLocaleString()} <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>{m.index === 0 ? 'USDT (or Auto Single Leg)' : 'USDT'}</span>
                     </td>
                     <td style={{ padding: '12px 14px', minWidth: 120 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -309,7 +309,7 @@ export function EarningsPage() {
                     <td style={{ padding: '12px 14px' }}>
                       {isClaimed ? (
                         <span style={{ color: '#4ade80', fontWeight: 800, fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                          <Check size={14} /> CLAIMED
+                          <Check size={14} /> ACHIEVED (INSTANT)
                         </span>
                       ) : isClaimable ? (
                         <button
@@ -319,18 +319,18 @@ export function EarningsPage() {
                             padding: '6px 14px',
                             borderRadius: 8,
                             border: 'none',
-                            background: 'linear-gradient(135deg, #10b981, #059669)',
+                            background: 'linear-gradient(135deg, #38bdf8, #0284c7)',
                             color: '#fff',
                             fontWeight: 800,
                             fontSize: '0.78rem',
                             cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                            boxShadow: '0 4px 12px rgba(56, 189, 248, 0.35)',
                           }}
                         >
-                          {loading ? 'Claiming...' : 'Claim Reward'}
+                          {loading ? 'Processing...' : 'Instant Sync'}
                         </button>
                       ) : (
-                        <span style={{ color: '#64748b', fontSize: '0.76rem', fontWeight: 700 }}>LOCKED</span>
+                        <span style={{ color: '#64748b', fontSize: '0.76rem', fontWeight: 700 }}>IN PROGRESS</span>
                       )}
                     </td>
                   </tr>

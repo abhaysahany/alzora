@@ -135,29 +135,9 @@ export function TreePage() {
       }
     } catch (err) {
       console.warn('Could not read user profile for:', userAddr, err)
-      // Provide fallback self-profile if connected address
-      if (userAddr.toLowerCase() === connectedAddress?.toLowerCase() && liveProfile) {
-        return {
-          address: userAddr,
-          sponsor: liveProfile.sponsor || '0x0000000000000000000000000000000000000000',
-          parent: liveProfile.parent || '0x0000000000000000000000000000000000000000',
-          position: Number(liveProfile.position || 0),
-          isRegistered: Boolean(liveProfile.isRegistered),
-          directCount: Number(liveProfile.directCount || 0),
-          leftDirectCount: Number(liveProfile.leftDirectCount || 0),
-          rightDirectCount: Number(liveProfile.rightDirectCount || 0),
-          leftTeamCount: Number(liveProfile.leftTeamCount || 0),
-          rightTeamCount: Number(liveProfile.rightTeamCount || 0),
-          leftCarryVolume: Number(liveProfile.leftCarryVolume || 0),
-          rightCarryVolume: Number(liveProfile.rightCarryVolume || 0),
-          rank: Number(liveProfile.currentRank || 1),
-          rankName: liveProfile.rankName || 'Starter',
-          totalIncomeEarned: Number(liveProfile.totalIncomeEarned || 0),
-        }
-      }
       return null
     }
-  }, [CONTRACT_ADDRESSES.GATEWAY, connectedAddress, liveProfile])
+  }, [CONTRACT_ADDRESSES.GATEWAY])
 
   // Load Sponsor Tree BFS up to maxDepth levels (1 to 6) starting with self
   const loadSponsorGenealogy = useCallback(async (rootAddr, targetDepth) => {
@@ -185,16 +165,16 @@ export function TreePage() {
           parent: '0x0000000000000000000000000000000000000000',
           position: 0,
           isRegistered: true,
-          directCount: liveProfile?.directCount || 0,
-          leftDirectCount: liveProfile?.leftDirectCount || 0,
-          rightDirectCount: liveProfile?.rightDirectCount || 0,
-          leftTeamCount: liveProfile?.leftTeamCount || 0,
-          rightTeamCount: liveProfile?.rightTeamCount || 0,
-          leftCarryVolume: liveProfile?.leftCarryVolume || 0,
-          rightCarryVolume: liveProfile?.rightCarryVolume || 0,
+          directCount: 0,
+          leftDirectCount: 0,
+          rightDirectCount: 0,
+          leftTeamCount: 0,
+          rightTeamCount: 0,
+          leftCarryVolume: 0,
+          rightCarryVolume: 0,
           rank: 1,
-          rankName: liveProfile?.rankName || 'Starter',
-          totalIncomeEarned: liveProfile?.totalIncomeEarned || 0,
+          rankName: 'Starter',
+          totalIncomeEarned: 0,
         }
       }
 
@@ -270,7 +250,7 @@ export function TreePage() {
     } finally {
       setLoading(false)
     }
-  }, [activeChain, rpcUrl, CONTRACT_ADDRESSES.GATEWAY, fetchMemberDetails, liveProfile])
+  }, [activeChain, rpcUrl, CONTRACT_ADDRESSES.GATEWAY, fetchMemberDetails])
 
   useEffect(() => {
     if (focusAddress) {
@@ -367,7 +347,7 @@ export function TreePage() {
     // Retrieve node from map, or create immediate visual node for self if root
     const node = nodesMap[key] || (currentLvl === 0 ? {
       address: addr,
-      sponsor: '0x0000000000000000000000000000000000000000',
+      sponsor: liveProfile?.sponsor || '0x0000000000000000000000000000000000000000',
       rankName: liveProfile?.rankName || 'Starter',
       directCount: liveProfile?.directCount || 0,
       leftTeamCount: liveProfile?.leftTeamCount || 0,
@@ -917,7 +897,7 @@ export function TreePage() {
               alignItems: 'center',
             }}
           >
-            {loading ? (
+            {loading && !nodesMap[focusAddress?.toLowerCase()] ? (
               <div style={{ padding: 60, textAlign: 'center', color: '#c084fc', fontWeight: 700, fontSize: '0.95rem' }}>
                 <RefreshCw size={28} className="spin" style={{ margin: '0 auto 12px' }} />
                 Loading Level 1 to {maxDepth} Genealogy Tree from Blockchain...

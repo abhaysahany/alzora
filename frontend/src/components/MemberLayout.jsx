@@ -77,8 +77,6 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
     { path: '/team', label: 'Team & Lineage', icon: Users },
     { path: '/referrals', label: 'Referral Link & QR', icon: Share2 },
     { path: '/income-history', label: 'Income Streams Ledger', icon: Receipt },
-    { path: '/business-plan', label: 'Business Plan', icon: FileText },
-    { path: '/faqs', label: "FAQ's", icon: HelpCircle },
   ]
 
   return (
@@ -121,12 +119,13 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
 
       {/* SIDEBAR */}
       <aside className={`dashboard-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
-        <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: '100%', padding: '0 16px' }}>
-          <Link to="/" className="brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', textDecoration: 'none' }}>
+        <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: '100%', height: 96, padding: '0 16px' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', textDecoration: 'none' }}>
             <img
               src="/logo.png"
               alt="ELZORA"
               className="elzora-logo-sidebar"
+              style={{ height: 68, width: 'auto', maxWidth: 220, objectFit: 'contain', display: 'block' }}
             />
           </Link>
           <button

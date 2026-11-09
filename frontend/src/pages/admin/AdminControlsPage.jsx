@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import { useChainId } from 'wagmi'
+import { useChainId, useReadContract } from 'wagmi'
+import { formatUnits } from 'viem'
 import { AdminLayout } from '../../components/AdminLayout'
 import { useAventraContracts } from '../../hooks/useAventraContracts'
-import { getContractAddresses, CONTRACT_ADDRESSES } from '../../web3/contracts'
+import { getContractAddresses, CONTRACT_ADDRESSES, ELZORA_MAIN_ABI } from '../../web3/contracts'
 import { useWalletAuth } from '../../hooks/useWalletAuth'
 import {
   Sliders,
@@ -16,6 +17,8 @@ import {
   Check,
   ExternalLink,
   AlertTriangle,
+  Users,
+  Award,
 } from 'lucide-react'
 
 export function AdminControlsPage() {
@@ -55,19 +58,86 @@ export function AdminControlsPage() {
   const [newCoinPrice, setNewCoinPrice] = useState('')
   const [newSwapFeePct, setNewSwapFeePct] = useState('10')
 
-  // Pool Distribution States
-  const currentMonthEpoch = Math.floor(Date.now() / 1000 / (30 * 86400))
-  const currentWeeklyEpoch = Number(globalStats?.currentWeeklyEpoch || Math.floor(Date.now() / 1000 / (7 * 86400)))
+  // Pool Distribution States (Epoch counting starts from 0)
+  const currentMonthEpoch = Number(globalStats?.currentMonthEpoch ?? 0)
+  const currentWeeklyEpoch = Number(globalStats?.currentWeeklyEpoch ?? 0)
 
-  const [championMonthEpoch, setChampionMonthEpoch] = useState(currentMonthEpoch.toString())
+  const [championMonthEpoch, setChampionMonthEpoch] = useState('0')
   const [championBatchSize, setChampionBatchSize] = useState('50')
   const [isProcessingChampionSnapshot, setIsProcessingChampionSnapshot] = useState(false)
   const [isProcessingChampionBatch, setIsProcessingChampionBatch] = useState(false)
 
-  const [weeklyEpochInput, setWeeklyEpochInput] = useState(Math.max(0, currentWeeklyEpoch - 1).toString())
+  const [weeklyEpochInput, setWeeklyEpochInput] = useState('0')
   const [weeklyBatchSize, setWeeklyBatchSize] = useState('50')
   const [isProcessingWeeklySnapshot, setIsProcessingWeeklySnapshot] = useState(false)
   const [isProcessingWeeklyBatch, setIsProcessingWeeklyBatch] = useState(false)
+
+  // Keep inputs synced with active on-chain epochs
+  React.useEffect(() => {
+    if (globalStats?.currentMonthEpoch !== undefined) {
+      setChampionMonthEpoch(String(globalStats.currentMonthEpoch))
+    }
+    if (globalStats?.currentWeeklyEpoch !== undefined) {
+      setWeeklyEpochInput(String(globalStats.currentWeeklyEpoch))
+    }
+  }, [globalStats?.currentMonthEpoch, globalStats?.currentWeeklyEpoch])
+
+  // Live Champion Qualifiers & Month Snapshot Queries
+  const { data: rawChampCount, refetch: refetchChampCount } = useReadContract({
+    address: contractAddresses.TETHER_STREAM,
+    abi: ELZORA_MAIN_ABI,
+    functionName: 'getChampionMembersCount',
+    query: { refetchInterval: 10_000 },
+  })
+
+  const { data: rawChampRecord, refetch: refetchChampRecord } = useReadContract({
+    address: contractAddresses.TETHER_STREAM,
+    abi: ELZORA_MAIN_ABI,
+    functionName: 'championMonthlyRecords',
+    args: [BigInt(championMonthEpoch || 0)],
+    query: { refetchInterval: 10_000 },
+  })
+
+  // Live Weekly Qualifiers & Week Snapshot Queries
+  const { data: rawWeeklyCount, refetch: refetchWeeklyCount } = useReadContract({
+    address: contractAddresses.TETHER_STREAM,
+    abi: ELZORA_MAIN_ABI,
+    functionName: 'getWeeklyQualifiersCount',
+    args: [BigInt(weeklyEpochInput || 0)],
+    query: { refetchInterval: 10_000 },
+  })
+
+  const { data: rawWeeklyRecord, refetch: refetchWeeklyRecord } = useReadContract({
+    address: contractAddresses.TETHER_STREAM,
+    abi: ELZORA_MAIN_ABI,
+    functionName: 'weeklyEpochRecords',
+    args: [BigInt(weeklyEpochInput || 0)],
+    query: { refetchInterval: 10_000 },
+  })
+
+  const champCount = Number(rawChampCount || 0n)
+  const champRecord = rawChampRecord
+    ? {
+        totalPool: formatUnits(rawChampRecord[0] || 0n, 6),
+        totalMembers: Number(rawChampRecord[1] || 0n),
+        rewardPerMember: formatUnits(rawChampRecord[2] || 0n, 6),
+        distributedMembersCount: Number(rawChampRecord[3] || 0n),
+        isSnapshotCreated: Boolean(rawChampRecord[4]),
+        isFullyDistributed: Boolean(rawChampRecord[5]),
+      }
+    : null
+
+  const weeklyCount = Number(rawWeeklyCount || 0n)
+  const weeklyRecord = rawWeeklyRecord
+    ? {
+        totalPool: formatUnits(rawWeeklyRecord[0] || 0n, 6),
+        totalQualifiers: Number(rawWeeklyRecord[1] || 0n),
+        rewardPerQualifier: formatUnits(rawWeeklyRecord[2] || 0n, 6),
+        distributedMembersCount: Number(rawWeeklyRecord[3] || 0n),
+        isSnapshotCreated: Boolean(rawWeeklyRecord[4]),
+        isFullyDistributed: Boolean(rawWeeklyRecord[5]),
+      }
+    : null
 
   // Emergency withdraw state
   const [emToken, setEmToken] = useState(CONTRACT_ADDRESSES.USDT)
@@ -183,7 +253,7 @@ export function AdminControlsPage() {
               Champion Club 6% turnover pool is accumulated continuously. Admin snapshots the completed month and executes payouts in safe on-chain batches (max 100 per batch).
             </p>
 
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 14, border: '1px solid rgba(251, 191, 36, 0.15)', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 14, border: '1px solid rgba(251, 191, 36, 0.15)', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Unclaimed Pool Balance</div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fbbf24' }}>
@@ -196,6 +266,47 @@ export function AdminControlsPage() {
                   #{currentMonthEpoch}
                 </div>
               </div>
+            </div>
+
+            {/* QUALIFIED CHAMPIONS METRICS BOX */}
+            <div style={{ background: 'rgba(251, 191, 36, 0.08)', padding: 14, borderRadius: 14, border: '1px solid rgba(251, 191, 36, 0.25)', marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: champRecord?.isSnapshotCreated ? 10 : 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Users size={18} color="#fbbf24" />
+                  <span style={{ fontSize: '0.82rem', color: '#fff', fontWeight: 700 }}>Qualified Champions</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#fbbf24' }}>
+                    {champRecord?.isSnapshotCreated ? `${champRecord.totalMembers} Members` : `${champCount} Members`}
+                  </span>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    padding: '2px 8px',
+                    borderRadius: 10,
+                    fontWeight: 800,
+                    background: champRecord?.isSnapshotCreated ? 'rgba(0, 255, 136, 0.15)' : 'rgba(251, 191, 36, 0.15)',
+                    color: champRecord?.isSnapshotCreated ? '#00ff88' : '#fbbf24',
+                    border: `1px solid ${champRecord?.isSnapshotCreated ? 'rgba(0, 255, 136, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
+                  }}>
+                    {champRecord?.isSnapshotCreated ? 'Snapshot Created ✅' : 'Live On-Chain'}
+                  </span>
+                </div>
+              </div>
+
+              {champRecord?.isSnapshotCreated && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: '0.78rem' }}>
+                  <div>
+                    <span style={{ color: 'var(--muted)' }}>Reward Per Member:</span>
+                    <div style={{ color: '#00ff88', fontWeight: 800, fontSize: '0.92rem' }}>${champRecord.rewardPerMember} USDT</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ color: 'var(--muted)' }}>Distribution Progress:</span>
+                    <div style={{ color: champRecord.isFullyDistributed ? '#00ff88' : '#fbbf24', fontWeight: 800, fontSize: '0.92rem' }}>
+                      {champRecord.distributedMembersCount} / {champRecord.totalMembers} Paid {champRecord.isFullyDistributed ? '✅' : '⏳'}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -253,7 +364,8 @@ export function AdminControlsPage() {
                     setIsProcessingChampionSnapshot(true)
                     showToast(`Creating snapshot for Month Epoch ${championMonthEpoch}...`)
                     await createChampionMonthlySnapshot(championMonthEpoch)
-                    showToast('✅ Champion Pool snapshot created successfully!')
+                    await Promise.all([refetchChampCount(), refetchChampRecord()])
+                    showToast(`✅ Champion Pool snapshot created! Qualifiers: ${champCount}`)
                   } catch (err) {
                     showToast(`Snapshot error: ${err.message}`)
                   } finally {
@@ -276,12 +388,13 @@ export function AdminControlsPage() {
 
               <button
                 type="button"
-                disabled={isProcessingChampionBatch || loading}
+                disabled={isProcessingChampionBatch || loading || (champRecord?.isSnapshotCreated && champRecord?.isFullyDistributed)}
                 onClick={async () => {
                   try {
                     setIsProcessingChampionBatch(true)
                     showToast(`Distributing batch of ${championBatchSize} to Champion qualifiers...`)
                     await distributeChampionBatch(championMonthEpoch, championBatchSize)
+                    await Promise.all([refetchChampCount(), refetchChampRecord()])
                     showToast('🎉 Champion batch distributed to qualifiers on-chain!')
                   } catch (err) {
                     showToast(`Distribution error: ${err.message}`)
@@ -294,13 +407,13 @@ export function AdminControlsPage() {
                   borderRadius: 12,
                   fontWeight: 800,
                   fontSize: '0.82rem',
-                  background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
+                  background: champRecord?.isFullyDistributed ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
                   border: 'none',
-                  color: '#000',
-                  cursor: 'pointer',
+                  color: champRecord?.isFullyDistributed ? 'var(--muted)' : '#000',
+                  cursor: champRecord?.isFullyDistributed ? 'not-allowed' : 'pointer',
                 }}
               >
-                {isProcessingChampionBatch ? 'Distributing...' : '2. Distribute Batch'}
+                {champRecord?.isFullyDistributed ? 'Fully Distributed ✅' : isProcessingChampionBatch ? 'Distributing...' : '2. Distribute Batch'}
               </button>
             </div>
           </div>
@@ -325,7 +438,7 @@ export function AdminControlsPage() {
               Distributed every Sunday morning to members who sponsored 3+ directs in that week's epoch. Admin closes the epoch snapshot and dispatches safe on-chain batches.
             </p>
 
-            <div style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 14, border: '1px solid rgba(244, 63, 94, 0.15)', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 14, border: '1px solid rgba(244, 63, 94, 0.15)', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Current Week Pool</div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#f43f5e' }}>
@@ -339,13 +452,54 @@ export function AdminControlsPage() {
                 </div>
               </div>
             </div>
+
+            {/* QUALIFIED WEEKLY MEMBERS METRICS BOX */}
+            <div style={{ background: 'rgba(244, 63, 94, 0.08)', padding: 14, borderRadius: 14, border: '1px solid rgba(244, 63, 94, 0.25)', marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: weeklyRecord?.isSnapshotCreated ? 10 : 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Award size={18} color="#f43f5e" />
+                  <span style={{ fontSize: '0.82rem', color: '#fff', fontWeight: 700 }}>Week #{weeklyEpochInput} Qualifiers</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#f43f5e' }}>
+                    {weeklyRecord?.isSnapshotCreated ? `${weeklyRecord.totalQualifiers} Qualifiers` : `${weeklyCount} Qualifiers`}
+                  </span>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    padding: '2px 8px',
+                    borderRadius: 10,
+                    fontWeight: 800,
+                    background: weeklyRecord?.isSnapshotCreated ? 'rgba(0, 255, 136, 0.15)' : 'rgba(244, 63, 94, 0.15)',
+                    color: weeklyRecord?.isSnapshotCreated ? '#00ff88' : '#f43f5e',
+                    border: `1px solid ${weeklyRecord?.isSnapshotCreated ? 'rgba(0, 255, 136, 0.3)' : 'rgba(244, 63, 94, 0.3)'}`
+                  }}>
+                    {weeklyRecord?.isSnapshotCreated ? 'Snapshot Created ✅' : 'Live On-Chain'}
+                  </span>
+                </div>
+              </div>
+
+              {weeklyRecord?.isSnapshotCreated && (
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, fontSize: '0.78rem' }}>
+                  <div>
+                    <span style={{ color: 'var(--muted)' }}>Reward Per Qualifier:</span>
+                    <div style={{ color: '#00ff88', fontWeight: 800, fontSize: '0.92rem' }}>${weeklyRecord.rewardPerQualifier} USDT</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ color: 'var(--muted)' }}>Distribution Progress:</span>
+                    <div style={{ color: weeklyRecord.isFullyDistributed ? '#00ff88' : '#f43f5e', fontWeight: 800, fontSize: '0.92rem' }}>
+                      {weeklyRecord.distributedMembersCount} / {weeklyRecord.totalQualifiers} Paid {weeklyRecord.isFullyDistributed ? '✅' : '⏳'}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
-                  Closed Week Epoch
+                  Week Epoch
                 </label>
                 <input
                   type="number"
@@ -395,7 +549,8 @@ export function AdminControlsPage() {
                     setIsProcessingWeeklySnapshot(true)
                     showToast(`Creating snapshot for Week Epoch ${weeklyEpochInput}...`)
                     await createWeeklyPoolSnapshot(weeklyEpochInput)
-                    showToast('✅ Weekly Pool snapshot created successfully!')
+                    await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord()])
+                    showToast(`✅ Weekly Pool snapshot created! Qualifiers: ${weeklyCount}`)
                   } catch (err) {
                     showToast(`Snapshot error: ${err.message}`)
                   } finally {
@@ -418,12 +573,13 @@ export function AdminControlsPage() {
 
               <button
                 type="button"
-                disabled={isProcessingWeeklyBatch || loading}
+                disabled={isProcessingWeeklyBatch || loading || (weeklyRecord?.isSnapshotCreated && weeklyRecord?.isFullyDistributed)}
                 onClick={async () => {
                   try {
                     setIsProcessingWeeklyBatch(true)
                     showToast(`Distributing batch of ${weeklyBatchSize} to Week #${weeklyEpochInput} qualifiers...`)
                     await distributeWeeklyBatch(weeklyEpochInput, weeklyBatchSize)
+                    await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord()])
                     showToast('🎉 Weekly batch distributed to qualifiers on-chain!')
                   } catch (err) {
                     showToast(`Distribution error: ${err.message}`)
@@ -436,13 +592,13 @@ export function AdminControlsPage() {
                   borderRadius: 12,
                   fontWeight: 800,
                   fontSize: '0.82rem',
-                  background: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)',
+                  background: weeklyRecord?.isFullyDistributed ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)',
                   border: 'none',
-                  color: '#fff',
-                  cursor: 'pointer',
+                  color: weeklyRecord?.isFullyDistributed ? 'var(--muted)' : '#fff',
+                  cursor: weeklyRecord?.isFullyDistributed ? 'not-allowed' : 'pointer',
                 }}
               >
-                {isProcessingWeeklyBatch ? 'Distributing...' : '2. Distribute Batch'}
+                {weeklyRecord?.isFullyDistributed ? 'Fully Distributed ✅' : isProcessingWeeklyBatch ? 'Distributing...' : '2. Distribute Batch'}
               </button>
             </div>
           </div>

@@ -182,23 +182,68 @@ export function PackagesPage() {
             </div>
 
             <div>
-              {isNeedsApproval ? (
+              {globalClub.entriesCount > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div
+                    style={{
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      border: '1px solid rgba(16, 185, 129, 0.35)',
+                      color: '#34d399',
+                      padding: '12px 16px',
+                      borderRadius: 12,
+                      fontSize: '0.84rem',
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <CheckCircle2 size={18} />
+                    <span>Single Leg Queue Position Active ({globalClub.entriesCount} Entry)</span>
+                  </div>
+
+                  <button
+                    disabled
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: 12,
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.25) 100%)',
+                      color: '#6ee7b7',
+                      fontWeight: 800,
+                      fontSize: '0.92rem',
+                      cursor: 'not-allowed',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <CheckCircle2 size={18} color="#34d399" />
+                    <span>Already Registered to Global Single Leg Queue</span>
+                  </button>
+                  <p style={{ margin: 0, fontSize: '0.74rem', color: '#94a3b8', textAlign: 'center' }}>
+                    Single leg entry is activated once per member. Future positions are generated automatically via cycle re-entries.
+                  </p>
+                </div>
+              ) : isNeedsApproval ? (
                 <button
                   onClick={handleApprove}
                   disabled={loading}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    padding: '14px',
                     borderRadius: 12,
                     border: 'none',
                     background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                     color: '#fff',
                     fontWeight: 800,
-                    fontSize: '0.9rem',
+                    fontSize: '0.92rem',
                     cursor: loading ? 'not-allowed' : 'pointer',
                   }}
                 >
-                  {loading ? 'Approving USDT...' : 'Approve $25 USDT'}
+                  {loading ? 'Approving USDT...' : 'Step 1: Approve $25 USDT'}
                 </button>
               ) : (
                 <button
@@ -206,13 +251,13 @@ export function PackagesPage() {
                   disabled={loading || Number(usdtBalance) < 25}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    padding: '14px',
                     borderRadius: 12,
                     border: 'none',
                     background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
                     color: '#fff',
                     fontWeight: 800,
-                    fontSize: '0.9rem',
+                    fontSize: '0.92rem',
                     cursor: loading || Number(usdtBalance) < 25 ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -220,8 +265,8 @@ export function PackagesPage() {
                     gap: 8,
                   }}
                 >
-                  <RefreshCw size={16} />
-                  <span>{loading ? 'Entering Global Club...' : 'Join Global Club ($25 USDT)'}</span>
+                  <RefreshCw size={16} className={loading ? 'spin' : ''} />
+                  <span>{loading ? 'Entering Global Club...' : 'Step 2: Join Global Club ($25 USDT)'}</span>
                 </button>
               )}
             </div>

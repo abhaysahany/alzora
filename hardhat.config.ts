@@ -15,7 +15,7 @@ const PRIVATE_KEY =
 const BSC_TESTNET_RPC =
   process.env.BNB_TESTNET_RPC_URL ||
   process.env.BSC_TESTNET_RPC_URL ||
-  "https://bsc-testnet-dataseed.bnbchain.org";
+  "https://bsc-testnet.publicnode.com";
 const BSC_MAINNET_RPC =
   process.env.BNB_MAINNET_RPC_URL ||
   process.env.BSC_MAINNET_RPC_URL ||

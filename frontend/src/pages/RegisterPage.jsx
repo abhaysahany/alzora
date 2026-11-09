@@ -8,6 +8,7 @@ import { useTetherStream } from '../hooks/useTetherStream'
 import { ConnectWalletButton } from '../components/ConnectWalletButton'
 import BackgroundCanvas from '../components/BackgroundCanvas'
 import { getRpcUrl, ELZORA_GATEWAY_ABI } from '../web3/contracts'
+import { getStoredReferral } from '../utils/referral'
 import {
   UserCheck,
   ShieldCheck,
@@ -41,7 +42,7 @@ export function RegisterPage() {
     CONTRACT_ADDRESSES,
   } = useTetherStream()
 
-  const refFromUrl = searchParams.get('ref') || searchParams.get('sponsor') || ''
+  const refFromUrl = searchParams.get('ref') || searchParams.get('sponsor') || getStoredReferral() || ''
   const parentFromUrl = searchParams.get('parent') || ''
   const posFromUrl = searchParams.get('pos') || searchParams.get('position') || '1'
 
@@ -53,12 +54,24 @@ export function RegisterPage() {
   const [position, setPosition] = useState(Number(posFromUrl) === 2 ? 2 : 1) // 1 = Left, 2 = Right
   const [successMsg, setSuccessMsg] = useState('')
 
+  // Sync referral parameters if URL or stored referral changes or loads late
+  useEffect(() => {
+    const activeRef = searchParams.get('ref') || searchParams.get('sponsor') || getStoredReferral()
+    if (activeRef && activeRef !== CONTRACT_ADDRESSES.ROOT_ID) {
+      setSponsorInput(activeRef)
+      if (!parentFromUrl) {
+        setParentInput(activeRef)
+        setAutoParent(activeRef)
+      }
+    }
+  }, [searchParams, parentFromUrl, CONTRACT_ADDRESSES.ROOT_ID])
+
   // Redirect if already registered
   useEffect(() => {
-    if (profile && profile.active) {
+    if (profile && (profile.active || profile.isRegistered)) {
       navigate('/dashboard', { replace: true })
     }
-  }, [profile?.active, navigate])
+  }, [profile?.active, profile?.isRegistered, navigate])
 
   // Automatically resolve the vacant parent on the chosen leg
   useEffect(() => {
@@ -128,14 +141,17 @@ export function RegisterPage() {
     return () => { isCancelled = true }
   }, [sponsorInput, position, chainId, parentFromUrl, CONTRACT_ADDRESSES.GATEWAY, CONTRACT_ADDRESSES.ROOT_ID])
 
+  const [localApproved, setLocalApproved] = useState(false)
+
   const REGISTRATION_PRICE = '50'
-  const isNeedsApproval = Number(usdtAllowance || 0) < Number(REGISTRATION_PRICE)
+  const isNeedsApproval = !localApproved && Number(usdtAllowance || 0) < Number(REGISTRATION_PRICE)
 
   const handleApprove = async () => {
     setSuccessMsg('')
     try {
       await approveUSDT(REGISTRATION_PRICE)
-      setSuccessMsg(`USDT spending limit of $${REGISTRATION_PRICE} approved successfully!`)
+      setLocalApproved(true)
+      setSuccessMsg(`USDT spending limit of $${REGISTRATION_PRICE} approved successfully! You can now proceed to Register.`)
     } catch (err) {
       console.error(err)
     }
@@ -486,6 +502,35 @@ export function RegisterPage() {
             {!isConnected ? (
               <div style={{ textAlign: 'center' }}>
                 <ConnectWalletButton size="large" />
+              </div>
+            ) : profile?.isRegistered || profile?.active ? (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ marginBottom: 12, color: '#34d399', fontWeight: 600 }}>
+                  This wallet is already registered in ELZORA!
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate('/dashboard')}
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    borderRadius: 14,
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: '#fff',
+                    fontSize: '1rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '0 10px 25px rgba(16, 185, 129, 0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span>Go to Dashboard</span>
+                  <ArrowRight size={18} />
+                </button>
               </div>
             ) : isNeedsApproval ? (
               <button

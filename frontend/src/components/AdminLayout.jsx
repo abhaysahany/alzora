@@ -20,6 +20,7 @@ import {
   Layers,
   Activity,
   Wallet,
+  GitCommit,
 } from 'lucide-react'
 import { ConnectWalletButton } from './ConnectWalletButton'
 import { useWalletAuth } from '../hooks/useWalletAuth'
@@ -83,7 +84,7 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
         className={`admin-sidebar ${mobileDrawerOpen ? 'open' : ''}`}
       >
         {/* BRAND LOGO */}
-        <div style={{ height: 84, padding: '0 20px', borderBottom: '1px solid rgba(139, 92, 246, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ height: 96, padding: '0 16px', borderBottom: '1px solid rgba(139, 92, 246, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Link to="/admin" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', width: '100%' }}>
             <img
               src="/logo.png"

@@ -47,11 +47,7 @@ export default function App() {
         <Route path="/member/:id" element={<UserDetailsPage />} />
         <Route
           path="/register"
-          element={
-            <ProtectedRoute>
-              <RegisterPage />
-            </ProtectedRoute>
-          }
+          element={<RegisterPage />}
         />
         <Route
           path="/dashboard"
