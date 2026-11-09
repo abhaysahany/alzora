@@ -2145,11 +2145,12 @@
       }
 
       .sidebar-header {
-        height: 78px;
-        padding: 0 24px;
+        height: 84px;
+        padding: 0 20px;
         border-bottom: 1px solid rgba(139, 92, 246, 0.2);
         display: flex;
         align-items: center;
+        justify-content: center;
         background: #090d24;
       }
 
@@ -2313,10 +2314,10 @@
 
       /* CONTENT BODY */
       .dashboard-content {
-        padding: 32px;
+        padding: 20px 24px;
         display: flex;
         flex-direction: column;
-        gap: 28px;
+        gap: 20px;
         max-width: 100%;
         overflow-x: hidden;
       }
@@ -2809,5 +2810,132 @@
         }
         .landing-network-badge {
           display: none !important;
+        }
+      }
+
+      /* ========================================================
+         ELZORA 3D GOLDEN LOGO STYLES & ANIMATIONS
+         ======================================================== */
+      .elzora-logo-nav {
+        height: 48px;
+        width: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 2px 14px rgba(245, 158, 11, 0.45));
+        transition: transform 0.25s ease, filter 0.25s ease;
+      }
+      .elzora-logo-nav:hover {
+        transform: scale(1.05);
+        filter: drop-shadow(0 4px 22px rgba(245, 158, 11, 0.75));
+      }
+
+      .elzora-logo-sidebar {
+        height: 52px;
+        width: auto;
+        max-width: 200px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        filter: drop-shadow(0 2px 14px rgba(245, 158, 11, 0.45));
+        transition: transform 0.25s ease, filter 0.25s ease;
+      }
+      .elzora-logo-sidebar:hover {
+        transform: scale(1.05);
+        filter: drop-shadow(0 4px 22px rgba(245, 158, 11, 0.75));
+      }
+
+      .elzora-logo-card {
+        height: 64px;
+        width: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 6px 24px rgba(245, 158, 11, 0.55));
+        animation: logoCardPulse 4s ease-in-out infinite;
+      }
+
+      @keyframes logoCardPulse {
+        0%, 100% {
+          filter: drop-shadow(0 4px 18px rgba(245, 158, 11, 0.45));
+          transform: translateY(0);
+        }
+        50% {
+          filter: drop-shadow(0 8px 30px rgba(245, 158, 11, 0.75));
+          transform: translateY(-3px);
+        }
+      }
+
+      /* Home Page Hero Floating 3D Logo */
+      .elzora-hero-logo-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        margin: 0 auto 32px;
+        perspective: 1000px;
+        text-align: center;
+      }
+
+      .elzora-hero-logo-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 20px;
+        padding: 10px 24px;
+      }
+
+      .elzora-hero-logo {
+        width: clamp(260px, 45vw, 420px);
+        max-width: 90vw;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        filter: drop-shadow(0 10px 30px rgba(245, 158, 11, 0.6))
+                drop-shadow(0 0 50px rgba(217, 119, 6, 0.4));
+        animation: heroLogoFloat 5s ease-in-out infinite;
+        will-change: transform, filter;
+        transition: transform 0.3s ease;
+      }
+
+      .elzora-hero-logo:hover {
+        transform: scale(1.04);
+        filter: drop-shadow(0 16px 40px rgba(245, 158, 11, 0.85))
+                drop-shadow(0 0 70px rgba(245, 158, 11, 0.55));
+      }
+
+      @keyframes heroLogoFloat {
+        0%, 100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      /* Shimmer beam across logo */
+      .elzora-hero-shimmer {
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 45%;
+        height: 100%;
+        background: linear-gradient(
+          120deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.35) 50%,
+          transparent 100%
+        );
+        transform: skewX(-25deg);
+        pointer-events: none;
+        animation: heroShimmerSweep 4.5s ease-in-out infinite;
+      }
+
+      @keyframes heroShimmerSweep {
+        0%, 30% {
+          left: -100%;
+        }
+        70%, 100% {
+          left: 200%;
         }
       }

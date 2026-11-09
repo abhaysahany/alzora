@@ -139,31 +139,17 @@ export function HistoryPage() {
     })
   }
 
-  // 9. Global Club Cycles
+  // 9. Single Leg / Global Club Cycles
   if (Number(incomeBreakdown?.globalClubIncome || 0) > 0 || (globalClub?.cyclesCompleted || 0) > 0) {
     historyData.push({
       id: 'global-club-event',
       type: 'GLOBAL_CLUB',
-      title: 'Global Club 1-to-2 Queue Cycles',
+      title: 'Single Leg / Global 1-to-2 Queue Cycles',
       amount: `+$${Number(incomeBreakdown?.globalClubIncome || 0).toFixed(2)} USDT`,
-      status: 'On-Chain Allocated',
+      status: 'Instant Wallet Transferred',
       date: `${globalClub?.cyclesCompleted || 0} cycles completed ($25/cycle)`,
       color: '#818cf8',
       icon: RefreshCw,
-    })
-  }
-
-  // 10. Withdrawals
-  if (Number(profile?.totalWithdrawn || 0) > 0) {
-    historyData.push({
-      id: 'withdrawal-event',
-      type: 'WITHDRAWAL',
-      title: 'Withdrawn Directly to Web3 Wallet',
-      amount: `-$${Number(profile.totalWithdrawn).toFixed(2)} USDT`,
-      status: 'Transferred On-Chain',
-      date: 'Instant Non-Custodial Execution',
-      color: '#38bdf8',
-      icon: Wallet,
     })
   }
 
@@ -178,56 +164,56 @@ export function HistoryPage() {
 
   return (
     <MemberLayout pageTitle="Transaction History">
-      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 20 }}>
         
         {/* BANNER */}
         <div
           style={{
-            padding: '28px 32px',
-            borderRadius: 24,
+            padding: '20px 24px',
+            borderRadius: 20,
             border: '1px solid rgba(139, 92, 246, 0.4)',
             background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.95) 0%, rgba(10, 14, 38, 0.98) 100%)',
-            boxShadow: '0 20px 45px rgba(0,0,0,0.5)',
+            boxShadow: '0 16px 36px rgba(0,0,0,0.45)',
             position: 'relative',
             overflow: 'hidden',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
             <div>
               <div
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 6,
-                  padding: '5px 14px',
+                  padding: '4px 12px',
                   borderRadius: 20,
                   background: 'rgba(99, 102, 241, 0.25)',
                   border: '1px solid rgba(139, 92, 246, 0.4)',
                   color: '#c084fc',
-                  fontSize: '0.78rem',
+                  fontSize: '0.74rem',
                   fontWeight: 800,
                   letterSpacing: '0.05em',
-                  marginBottom: 10,
+                  marginBottom: 6,
                 }}
               >
-                <Sparkles size={14} /> ON-CHAIN ACTIVITY AUDIT LOG
+                <Sparkles size={13} /> ON-CHAIN ACTIVITY AUDIT LOG
               </div>
-              <h1 style={{ margin: 0, fontSize: '2.1rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+              <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em' }}>
                 Transaction & Ledger History
               </h1>
-              <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>
-                Complete immutable record of membership activation, earnings credits, and withdrawals.
+              <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '0.84rem' }}>
+                Complete immutable record of membership activation, earnings credits, and instant wallet transfers.
               </p>
             </div>
 
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: '12px 20px', borderRadius: 16, border: '1px solid rgba(139, 92, 246, 0.3)' }}>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>TOTAL EARNED</span>
-                <span style={{ fontSize: '1.3rem', fontWeight: 900, color: '#38bdf8' }}>${Number(profile?.totalIncomeEarned || 0).toFixed(2)}</span>
+              <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: '10px 16px', borderRadius: 14, border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block' }}>TOTAL EARNED</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#4ade80' }}>${Number(profile?.totalIncomeEarned || 0).toFixed(2)} USDT</span>
               </div>
-              <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: '12px 20px', borderRadius: 16, border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block' }}>TOTAL WITHDRAWN</span>
-                <span style={{ fontSize: '1.3rem', fontWeight: 900, color: '#cbd5e1' }}>${Number(profile?.totalWithdrawn || 0).toFixed(2)}</span>
+              <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: '10px 16px', borderRadius: 14, border: '1px solid rgba(56, 189, 248, 0.3)' }}>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block' }}>PAYOUT MODE</span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#38bdf8' }}>100% Instant</span>
               </div>
             </div>
           </div>
@@ -299,23 +285,23 @@ export function HistoryPage() {
         {/* TRANSACTIONS TIMELINE LIST */}
         <div
           style={{
-            padding: 24,
-            borderRadius: 22,
+            padding: 20,
+            borderRadius: 20,
             background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
             border: '1px solid rgba(139, 92, 246, 0.35)',
             boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
           }}
         >
           {filteredData.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '56px 20px', color: '#94a3b8' }}>
-              <History size={44} style={{ color: 'rgba(139, 92, 246, 0.4)', marginBottom: 12 }} />
-              <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '1.2rem' }}>No Transaction Records Found</div>
-              <p style={{ fontSize: '0.88rem', marginTop: 4 }}>
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+              <History size={40} style={{ color: 'rgba(139, 92, 246, 0.4)', marginBottom: 10 }} />
+              <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '1.1rem' }}>No Transaction Records Found</div>
+              <p style={{ fontSize: '0.82rem', marginTop: 4 }}>
                 Your package registration, referral bonuses, and payout logs will automatically appear here.
               </p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {filteredData.map((item) => {
                 const Icon = item.icon
                 const isDebit = item.amount.startsWith('-')
@@ -326,20 +312,20 @@ export function HistoryPage() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '18px 22px',
+                      padding: '14px 18px',
                       background: 'rgba(15, 23, 42, 0.6)',
-                      borderRadius: 16,
+                      borderRadius: 14,
                       border: '1px solid rgba(255,255,255,0.06)',
                       flexWrap: 'wrap',
-                      gap: 14,
+                      gap: 12,
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                       <div
                         style={{
-                          width: 46,
-                          height: 46,
-                          borderRadius: 14,
+                          width: 40,
+                          height: 40,
+                          borderRadius: 12,
                           background: `${item.color}15`,
                           border: `1px solid ${item.color}40`,
                           display: 'flex',
@@ -349,13 +335,13 @@ export function HistoryPage() {
                           flexShrink: 0,
                         }}
                       >
-                        <Icon size={22} />
+                        <Icon size={18} />
                       </div>
                       <div>
-                        <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.98rem' }}>
+                        <div style={{ fontWeight: 800, color: '#f8fafc', fontSize: '0.92rem' }}>
                           {item.title}
                         </div>
-                        <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: 3 }}>
+                        <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginTop: 2 }}>
                           {item.date}
                         </div>
                       </div>
@@ -364,14 +350,14 @@ export function HistoryPage() {
                     <div style={{ textAlign: 'right' }}>
                       <div
                         style={{
-                          fontSize: '1.2rem',
+                          fontSize: '1.05rem',
                           fontWeight: 900,
                           color: isDebit ? '#f87171' : '#4ade80',
                         }}
                       >
                         {item.amount}
                       </div>
-                      <div style={{ fontSize: '0.76rem', color: '#94a3b8', marginTop: 3 }}>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 2 }}>
                         {item.status}
                       </div>
                     </div>

@@ -179,18 +179,16 @@ export function RegisterPage() {
       <header style={{ padding: '20px 0', borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span
+            <img
+              src="/logo.png"
+              alt="ELZORA"
               style={{
-                fontSize: '1.8rem',
-                fontWeight: 900,
-                letterSpacing: '0.08em',
-                background: 'linear-gradient(135deg, #f8fafc, #c084fc 40%, #6366f1 80%, #38bdf8)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                height: 34,
+                width: 'auto',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 2px 10px rgba(245, 158, 11, 0.35))',
               }}
-            >
-              ELZORA
-            </span>
+            />
           </Link>
           <ConnectWalletButton />
         </div>

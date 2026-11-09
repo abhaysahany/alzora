@@ -22,14 +22,28 @@ export default function BackgroundCanvas() {
       h = canvas.height = window.innerHeight * DPR
       canvas.style.width = window.innerWidth + 'px'
       canvas.style.height = window.innerHeight + 'px'
-      const count = Math.min(70, Math.floor(window.innerWidth / 22))
-      nodes = Array.from({ length: count }, () => ({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.28 * DPR,
-        vy: (Math.random() - 0.5) * 0.28 * DPR,
-        r: (Math.random() * 1.6 + 1) * DPR,
-      }))
+      const count = Math.min(80, Math.floor(window.innerWidth / 18))
+      nodes = Array.from({ length: count }, () => {
+        // Multi-color celestial palette: Gold, Purple, Cyan, Emerald
+        const colors = [
+          { r: 245, g: 158, b: 11 },   // Gold (#f59e0b)
+          { r: 251, g: 191, b: 36 },   // Warm Gold (#fbbf24)
+          { r: 168, g: 85, b: 247 },   // Violet/Purple (#a855f7)
+          { r: 129, g: 140, b: 248 },  // Electric Indigo (#818cf8)
+          { r: 56, g: 189, b: 248 },   // Cyber Cyan (#38bdf8)
+        ]
+        const col = colors[Math.floor(Math.random() * colors.length)]
+        return {
+          x: Math.random() * w,
+          y: Math.random() * h,
+          vx: (Math.random() - 0.5) * 0.35 * DPR,
+          vy: (Math.random() - 0.5) * 0.35 * DPR,
+          r: (Math.random() * 2 + 1) * DPR,
+          pulse: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.02 + Math.random() * 0.025,
+          color: col,
+        }
+      })
     }
 
     resize()
@@ -41,6 +55,7 @@ export default function BackgroundCanvas() {
         const n = nodes[i]
         n.x += n.vx
         n.y += n.vy
+        n.pulse += n.pulseSpeed
         if (n.x < 0 || n.x > w) n.vx *= -1
         if (n.y < 0 || n.y > h) n.vy *= -1
 
@@ -49,11 +64,15 @@ export default function BackgroundCanvas() {
           const dx = n.x - m.x
           const dy = n.y - m.y
           const d = Math.hypot(dx, dy)
-          const max = 140 * DPR
+          const max = 150 * DPR
           if (d < max) {
-            const a = (1 - d / max) * 0.5
-            ctx.strokeStyle = 'rgba(34,229,154,' + a * 0.6 + ')'
-            ctx.lineWidth = DPR * 0.6
+            const a = (1 - d / max) * 0.45
+            // Subtle gradient line between connected nodes
+            const grad = ctx.createLinearGradient(n.x, n.y, m.x, m.y)
+            grad.addColorStop(0, `rgba(${n.color.r}, ${n.color.g}, ${n.color.b}, ${a * 0.7})`)
+            grad.addColorStop(1, `rgba(${m.color.r}, ${m.color.g}, ${m.color.b}, ${a * 0.7})`)
+            ctx.strokeStyle = grad
+            ctx.lineWidth = DPR * 0.75
             ctx.beginPath()
             ctx.moveTo(n.x, n.y)
             ctx.lineTo(m.x, m.y)
@@ -63,11 +82,13 @@ export default function BackgroundCanvas() {
       }
 
       for (const n of nodes) {
+        const currentR = n.r * (1 + 0.25 * Math.sin(n.pulse))
         ctx.beginPath()
-        ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2)
-        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 4)
-        g.addColorStop(0, 'rgba(34,229,154,.9)')
-        g.addColorStop(1, 'rgba(34,229,154,0)')
+        ctx.arc(n.x, n.y, currentR, 0, Math.PI * 2)
+        const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, currentR * 3.5)
+        g.addColorStop(0, `rgba(${n.color.r}, ${n.color.g}, ${n.color.b}, 0.95)`)
+        g.addColorStop(0.5, `rgba(${n.color.r}, ${n.color.g}, ${n.color.b}, 0.35)`)
+        g.addColorStop(1, `rgba(${n.color.r}, ${n.color.g}, ${n.color.b}, 0)`)
         ctx.fillStyle = g
         ctx.fill()
       }

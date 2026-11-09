@@ -86,16 +86,16 @@ export function DashboardPage() {
 
   return (
     <MemberLayout pageTitle="ELZORA Dashboard">
-      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 20 }}>
         
         {/* TOP HERO BANNER */}
         <div
           style={{
-            padding: '28px 32px',
-            borderRadius: 24,
+            padding: '20px 24px',
+            borderRadius: 20,
             border: '1px solid rgba(139, 92, 246, 0.4)',
             background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.95) 0%, rgba(10, 14, 38, 0.98) 100%)',
-            boxShadow: '0 20px 45px rgba(0, 0, 0, 0.5), 0 0 30px rgba(139, 92, 246, 0.15)',
+            boxShadow: '0 16px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(139, 92, 246, 0.12)',
             position: 'relative',
             overflow: 'hidden',
           }}
@@ -248,15 +248,15 @@ export function DashboardPage() {
         )}
 
         {/* 3 TOP CARDS: TOTAL EARNED, WITHDRAWABLE BALANCE, BINARY SUMMARY */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
           
           {/* Card 1: Instant Direct Earnings */}
           <div
             style={{
               background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
               border: '1px solid rgba(139, 92, 246, 0.35)',
-              borderRadius: 22,
-              padding: 26,
+              borderRadius: 20,
+              padding: 20,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -264,25 +264,25 @@ export function DashboardPage() {
             }}
           >
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#c084fc', letterSpacing: '0.06em' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#c084fc', letterSpacing: '0.06em' }}>
                   INSTANT TOTAL EARNINGS
                 </span>
-                <div style={{ padding: 8, borderRadius: 10, background: 'rgba(192, 132, 252, 0.15)' }}>
-                  <Wallet size={20} color="#c084fc" />
+                <div style={{ padding: 6, borderRadius: 8, background: 'rgba(192, 132, 252, 0.15)' }}>
+                  <Wallet size={18} color="#c084fc" />
                 </div>
               </div>
 
-              <div style={{ fontSize: '2.4rem', fontWeight: 900, color: '#4ade80', marginBottom: 6, display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#4ade80', marginBottom: 4, display: 'flex', alignItems: 'baseline', gap: 8 }}>
                 ${totalEarnedVal.toFixed(2)}
-                <span style={{ fontSize: '1rem', color: '#c084fc', fontWeight: 700 }}>USDT</span>
+                <span style={{ fontSize: '0.9rem', color: '#c084fc', fontWeight: 700 }}>USDT</span>
               </div>
 
-              <div style={{ background: 'rgba(74, 222, 128, 0.1)', padding: '12px 14px', borderRadius: 14, border: '1px solid rgba(74, 222, 128, 0.25)', marginTop: 14 }}>
-                <span style={{ fontSize: '0.76rem', color: '#4ade80', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
-                  <CheckCircle2 size={16} /> 100% INSTANT WALLET TRANSFERS ACTIVE
+              <div style={{ background: 'rgba(74, 222, 128, 0.1)', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(74, 222, 128, 0.25)', marginTop: 10 }}>
+                <span style={{ fontSize: '0.74rem', color: '#4ade80', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700 }}>
+                  <CheckCircle2 size={15} /> 100% INSTANT WALLET TRANSFERS ACTIVE
                 </span>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', marginTop: 4 }}>
+                <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', marginTop: 2 }}>
                   All commissions are transferred directly to your connected BSC wallet without manual withdrawal.
                 </span>
               </div>
@@ -290,22 +290,22 @@ export function DashboardPage() {
 
             <div
               style={{
-                marginTop: 22,
+                marginTop: 16,
                 width: '100%',
-                padding: '14px 20px',
-                borderRadius: 14,
+                padding: '10px 16px',
+                borderRadius: 12,
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.08)',
                 color: '#cbd5e1',
                 fontWeight: 700,
-                fontSize: '0.88rem',
+                fontSize: '0.84rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
               }}
             >
               <span>Single Leg Active Entries:</span>
-              <b style={{ color: '#38bdf8', fontSize: '1.05rem' }}>{globalClub.entriesCount}</b>
+              <b style={{ color: '#38bdf8', fontSize: '1rem' }}>{globalClub.entriesCount}</b>
             </div>
           </div>
 
@@ -314,8 +314,8 @@ export function DashboardPage() {
             style={{
               background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
               border: '1px solid rgba(99, 102, 241, 0.35)',
-              borderRadius: 22,
-              padding: 26,
+              borderRadius: 20,
+              padding: 20,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -323,39 +323,39 @@ export function DashboardPage() {
             }}
           >
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#818cf8', letterSpacing: '0.06em' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#818cf8', letterSpacing: '0.06em' }}>
                   BINARY TEAM BALANCE
                 </span>
-                <div style={{ padding: 8, borderRadius: 10, background: 'rgba(99, 102, 241, 0.15)' }}>
-                  <GitCommit size={20} color="#818cf8" />
+                <div style={{ padding: 6, borderRadius: 8, background: 'rgba(99, 102, 241, 0.15)' }}>
+                  <GitCommit size={18} color="#818cf8" />
                 </div>
               </div>
 
               {/* Left vs Right Comparison Cards */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                 {/* Left Side */}
-                <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: 14, borderRadius: 14, border: '1px solid rgba(99, 102, 241, 0.25)' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#818cf8', letterSpacing: '0.05em' }}>LEFT LEG</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#f8fafc', margin: '2px 0' }}>{leftTeamCount}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: 10, borderRadius: 12, border: '1px solid rgba(99, 102, 241, 0.25)' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#818cf8', letterSpacing: '0.05em' }}>LEFT LEG</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f8fafc', margin: '2px 0' }}>{leftTeamCount}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
                     Directs: <strong style={{ color: '#cbd5e1' }}>{profile?.leftDirectCount || 0}</strong> • Carry: <strong style={{ color: '#38bdf8' }}>{profile?.leftCarryVolume || 0}</strong>
                   </div>
                 </div>
 
                 {/* Right Side */}
-                <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: 14, borderRadius: 14, border: '1px solid rgba(168, 85, 247, 0.25)' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#c084fc', letterSpacing: '0.05em' }}>RIGHT LEG</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#f8fafc', margin: '2px 0' }}>{rightTeamCount}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: 10, borderRadius: 12, border: '1px solid rgba(168, 85, 247, 0.25)' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#c084fc', letterSpacing: '0.05em' }}>RIGHT LEG</div>
+                  <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f8fafc', margin: '2px 0' }}>{rightTeamCount}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
                     Directs: <strong style={{ color: '#cbd5e1' }}>{profile?.rightDirectCount || 0}</strong> • Carry: <strong style={{ color: '#38bdf8' }}>{profile?.rightCarryVolume || 0}</strong>
                   </div>
                 </div>
               </div>
 
               {/* Visual Balance Ratio Bar */}
-              <div style={{ marginBottom: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#94a3b8', marginBottom: 4 }}>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: '#94a3b8', marginBottom: 3 }}>
                   <span>Left: {leftRatio}%</span>
                   <span>Right: {rightRatio}%</span>
                 </div>
@@ -366,10 +366,10 @@ export function DashboardPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem', padding: '10px 14px', borderRadius: 12, background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
-              <span style={{ color: '#cbd5e1', fontWeight: 600 }}>First Pair (2:1 / 1:2):</span>
-              <span style={{ fontWeight: 800, color: profile?.hasMatchedFirstPair ? '#10b981' : '#f59e0b', display: 'flex', alignItems: 'center', gap: 6 }}>
-                {profile?.hasMatchedFirstPair ? 'QUALIFIED ✅' : 'PENDING ⏳'}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.76rem', padding: '8px 12px', borderRadius: 10, background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
+              <span style={{ color: '#cbd5e1', fontWeight: 600 }}>1:1 Pair Matching:</span>
+              <span style={{ fontWeight: 800, color: (profile?.leftDirectCount >= 1 && profile?.rightDirectCount >= 1) ? '#10b981' : '#f59e0b', display: 'flex', alignItems: 'center', gap: 4 }}>
+                {(profile?.leftDirectCount >= 1 && profile?.rightDirectCount >= 1) ? 'QUALIFIED (1L & 1R Active) ✅' : 'PENDING (Need 1L & 1R) ⏳'}
               </span>
             </div>
           </div>
@@ -379,8 +379,8 @@ export function DashboardPage() {
             style={{
               background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
               border: '1px solid rgba(217, 70, 239, 0.35)',
-              borderRadius: 22,
-              padding: 26,
+              borderRadius: 20,
+              padding: 20,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -388,69 +388,248 @@ export function DashboardPage() {
             }}
           >
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#ec4899', letterSpacing: '0.06em' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ec4899', letterSpacing: '0.06em' }}>
                   GLOBAL CLUB ($25 RE-ENTRY)
                 </span>
-                <div style={{ padding: 8, borderRadius: 10, background: 'rgba(236, 72, 153, 0.15)' }}>
-                  <RefreshCw size={20} color="#ec4899" />
+                <div style={{ padding: 6, borderRadius: 8, background: 'rgba(236, 72, 153, 0.15)' }}>
+                  <RefreshCw size={18} color="#ec4899" />
                 </div>
               </div>
 
-              <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#f8fafc', marginBottom: 6, display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                {globalClub.cyclesCompleted} <span style={{ fontSize: '1rem', color: '#f472b6', fontWeight: 700 }}>Cycles Completed</span>
+              <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#f8fafc', marginBottom: 4, display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                {globalClub.cyclesCompleted} <span style={{ fontSize: '0.9rem', color: '#f472b6', fontWeight: 700 }}>Cycles Completed</span>
               </div>
-              <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.6, margin: '8px 0 14px' }}>
+              <p style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.5, margin: '6px 0 10px' }}>
                 1-to-2 automated queue: 2 users enter below you → earn $25 cycle reward + 1 automatic re-entry position!
               </p>
 
-              <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: '10px 14px', borderRadius: 12, border: '1px solid rgba(236, 72, 153, 0.25)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Your Active Queue Positions:</span>
-                <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#f472b6' }}>{globalClub.entriesCount}</span>
+              <div style={{ background: 'rgba(6, 8, 20, 0.8)', padding: '8px 12px', borderRadius: 10, border: '1px solid rgba(236, 72, 153, 0.25)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Your Active Queue Positions:</span>
+                <span style={{ fontSize: '1rem', fontWeight: 900, color: '#f472b6' }}>{globalClub.entriesCount}</span>
               </div>
             </div>
 
             <Link
               to="/packages"
               style={{
-                marginTop: 22,
-                padding: '14px 20px',
-                borderRadius: 14,
+                marginTop: 16,
+                padding: '11px 16px',
+                borderRadius: 12,
                 background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(168, 85, 247, 0.25))',
                 border: '1px solid rgba(236, 72, 153, 0.45)',
                 color: '#f8fafc',
                 textDecoration: 'none',
                 fontWeight: 800,
-                fontSize: '0.94rem',
+                fontSize: '0.88rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 8,
-                boxShadow: '0 8px 20px rgba(236, 72, 153, 0.2)',
+                boxShadow: '0 6px 16px rgba(236, 72, 153, 0.2)',
                 transition: 'all 0.2s',
               }}
             >
               <span>Manage Global Club Entries</span>
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </Link>
           </div>
         </div>
 
+        {/* CHAMPION CLUB & WEEKLY REWARD PERFORMANCE STRATEGY CARDS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16 }}>
+          
+          {/* Champion Club Strategy Card */}
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(20, 24, 62, 0.9) 0%, rgba(12, 16, 42, 0.98) 100%)',
+              border: champion.isEligible ? '1px solid rgba(251, 191, 36, 0.6)' : '1px solid rgba(251, 191, 36, 0.3)',
+              borderRadius: 20,
+              padding: 20,
+              boxShadow: champion.isEligible ? '0 10px 30px rgba(251, 191, 36, 0.15)' : '0 10px 30px rgba(0,0,0,0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ padding: 8, borderRadius: 10, background: 'rgba(251, 191, 36, 0.18)' }}>
+                    <Sparkles size={18} color="#fbbf24" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#f8fafc' }}>
+                      Champion Club (Monthly Pool)
+                    </h3>
+                    <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>$3 per registration across whole company</span>
+                  </div>
+                </div>
+                <span
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 16,
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    background: champion.isEligible ? 'rgba(74, 222, 128, 0.15)' : 'rgba(251, 191, 36, 0.15)',
+                    color: champion.isEligible ? '#4ade80' : '#fbbf24',
+                    border: champion.isEligible ? '1px solid #4ade80' : '1px solid rgba(251, 191, 36, 0.4)',
+                  }}
+                >
+                  {champion.isEligible ? 'QUALIFIED ✅' : 'IN PROGRESS ⏳'}
+                </span>
+              </div>
+
+              {/* Progress Bar & Status */}
+              <div style={{ background: 'rgba(6, 8, 20, 0.6)', padding: '12px 14px', borderRadius: 14, border: '1px solid rgba(255, 255, 255, 0.05)', marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: 5 }}>
+                  <span style={{ color: '#cbd5e1' }}>Direct Referrals Requirement:</span>
+                  <strong style={{ color: '#fbbf24' }}>{profile?.directCount || 0} / 3 Directs</strong>
+                </div>
+                <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.08)', overflow: 'hidden', marginBottom: 6 }}>
+                  <div
+                    style={{
+                      width: `${Math.min(100, Math.round(((profile?.directCount || 0) / 3) * 100))}%`,
+                      background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
+                      height: '100%',
+                      transition: 'width 0.3s',
+                    }}
+                  />
+                </div>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                  {champion.isEligible
+                    ? '🎉 You have achieved Champion Club qualification! You receive an equal share of the monthly pool in batches directly to your wallet.'
+                    : `Achieve 3 directs to lock your lifetime qualification in the monthly turnover royalty pool.`}
+                </span>
+              </div>
+
+              {/* Earnings & Pool Metrics */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block' }}>Your Received Champion Income</span>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#fbbf24' }}>
+                    ${Number(incomeBreakdown?.championIncome || 0).toFixed(2)} <span style={{ fontSize: '0.72rem' }}>USDT</span>
+                  </span>
+                </div>
+                <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block' }}>Current Monthly Pool</span>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#4ade80' }}>
+                    ${Number(overview?.championPoolBalance || 0).toFixed(2)} <span style={{ fontSize: '0.72rem' }}>USDT</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 12, fontSize: '0.72rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Clock size={13} color="#fbbf24" />
+              <span>Monthly closing handled by Admin. Distributed directly to member wallets in batches of 50-100.</span>
+            </div>
+          </div>
+
+          {/* Weekly Reward Strategy Card */}
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(20, 24, 62, 0.9) 0%, rgba(12, 16, 42, 0.98) 100%)',
+              border: weekly.isEligible ? '1px solid rgba(236, 72, 153, 0.6)' : '1px solid rgba(236, 72, 153, 0.3)',
+              borderRadius: 20,
+              padding: 20,
+              boxShadow: weekly.isEligible ? '0 10px 30px rgba(236, 72, 153, 0.15)' : '0 10px 30px rgba(0,0,0,0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ padding: 8, borderRadius: 10, background: 'rgba(236, 72, 153, 0.18)' }}>
+                    <Award size={18} color="#ec4899" />
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 900, color: '#f8fafc' }}>
+                      Weekly Performance Reward (Sun–Sat)
+                    </h3>
+                    <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>$3 per registration during the 7-day cycle</span>
+                  </div>
+                </div>
+                <span
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 16,
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    background: weekly.isEligible ? 'rgba(74, 222, 128, 0.15)' : 'rgba(236, 72, 153, 0.15)',
+                    color: weekly.isEligible ? '#4ade80' : '#ec4899',
+                    border: weekly.isEligible ? '1px solid #4ade80' : '1px solid rgba(236, 72, 153, 0.4)',
+                  }}
+                >
+                  {weekly.isEligible ? 'QUALIFIED THIS WEEK ✅' : 'IN PROGRESS ⏳'}
+                </span>
+              </div>
+
+              {/* Progress Bar & Status */}
+              <div style={{ background: 'rgba(6, 8, 20, 0.6)', padding: '12px 14px', borderRadius: 14, border: '1px solid rgba(255, 255, 255, 0.05)', marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: 5 }}>
+                  <span style={{ color: '#cbd5e1' }}>Directs This Week (Sunday–Saturday):</span>
+                  <strong style={{ color: '#ec4899' }}>{weekly.currentDirects} / 3 Directs</strong>
+                </div>
+                <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.08)', overflow: 'hidden', marginBottom: 6 }}>
+                  <div
+                    style={{
+                      width: `${Math.min(100, Math.round((weekly.currentDirects / 3) * 100))}%`,
+                      background: 'linear-gradient(90deg, #db2777, #ec4899)',
+                      height: '100%',
+                      transition: 'width 0.3s',
+                    }}
+                  />
+                </div>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                  {weekly.isEligible
+                    ? '🎉 You have qualified for this week’s pool! On Sunday morning, admin will close and distribute your equal share directly to your wallet.'
+                    : `Sponsor ${3 - Math.min(3, weekly.currentDirects)} more direct${3 - Math.min(3, weekly.currentDirects) === 1 ? '' : 's'} before Saturday 23:59 UTC to qualify for the weekly pool dividend.`}
+                </span>
+              </div>
+
+              {/* Earnings & Pool Metrics */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(236, 72, 153, 0.2)' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block' }}>Your Received Weekly Income</span>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#ec4899' }}>
+                    ${Number(incomeBreakdown?.weeklyIncome || 0).toFixed(2)} <span style={{ fontSize: '0.72rem' }}>USDT</span>
+                  </span>
+                </div>
+                <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: '10px 12px', borderRadius: 12, border: '1px solid rgba(236, 72, 153, 0.2)' }}>
+                  <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block' }}>Active Weekly Pool</span>
+                  <span style={{ fontSize: '1.15rem', fontWeight: 900, color: '#4ade80' }}>
+                    ${Number(overview?.weeklyPoolBalance || 0).toFixed(2)} <span style={{ fontSize: '0.72rem' }}>USDT</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 12, fontSize: '0.72rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Clock size={13} color="#ec4899" />
+              <span>Closing: Every Sunday morning. Distributed by Admin in batches of 50-100 directly to member wallets.</span>
+            </div>
+          </div>
+
+        </div>
+
         {/* 7 INCOME STREAMS BREAKDOWN GRID */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <div>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#f8fafc', margin: 0 }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#f8fafc', margin: 0 }}>
                 7 Comprehensive Income Streams
               </h2>
-              <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '4px 0 0' }}>
+              <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: '3px 0 0' }}>
                 Automated smart contract distribution from every $50 registration and team expansion
               </p>
             </div>
             <Link
               to="/earnings"
               style={{
-                fontSize: '0.85rem',
+                fontSize: '0.82rem',
                 color: '#c084fc',
                 textDecoration: 'none',
                 fontWeight: 700,
@@ -468,7 +647,7 @@ export function DashboardPage() {
             </Link>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 14 }}>
             
             {/* Stream 1: Direct Income */}
             <div style={{ background: 'rgba(13, 18, 45, 0.75)', border: '1px solid rgba(139, 92, 246, 0.25)', borderRadius: 18, padding: 20 }}>
@@ -582,26 +761,26 @@ export function DashboardPage() {
           style={{
             background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
             border: '1px solid rgba(139, 92, 246, 0.35)',
-            borderRadius: 22,
-            padding: 26,
+            borderRadius: 20,
+            padding: 20,
             boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <div style={{ padding: 8, borderRadius: 10, background: 'rgba(168, 85, 247, 0.2)' }}>
-              <Share2 size={20} color="#c084fc" />
+              <Share2 size={18} color="#c084fc" />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>
                 Binary Placement Referral Links
               </h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.82rem', margin: '2px 0 0' }}>
+              <p style={{ color: '#94a3b8', fontSize: '0.78rem', margin: '2px 0 0' }}>
                 Direct new members to join specifically on your Left or Right leg to balance your binary matrix:
               </p>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 16, marginTop: 18 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 12, marginTop: 14 }}>
             {/* Left Referral Link */}
             <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 16, borderRadius: 16, border: '1px solid rgba(99, 102, 241, 0.3)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>

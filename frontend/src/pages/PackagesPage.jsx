@@ -54,17 +54,17 @@ export function PackagesPage() {
   }
 
   return (
-    <MemberLayout pageTitle="Global Club ($25 Re-entry)">
-      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <MemberLayout pageTitle="Single Leg / Global Club ($25)">
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 20 }}>
         
         {/* TOP BANNER */}
         <div
           style={{
-            padding: '28px 32px',
-            borderRadius: 24,
+            padding: '20px 24px',
+            borderRadius: 20,
             border: '1px solid rgba(217, 70, 239, 0.35)',
             background: 'linear-gradient(135deg, rgba(25, 15, 60, 0.9) 0%, rgba(9, 13, 35, 0.95) 100%)',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 30px rgba(217, 70, 239, 0.15)',
+            boxShadow: '0 16px 36px rgba(0,0,0,0.45), 0 0 24px rgba(217, 70, 239, 0.12)',
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
@@ -86,10 +86,10 @@ export function PackagesPage() {
               >
                 <Sparkles size={14} /> AUTONOMOUS $25 CYCLING QUEUE
               </div>
-              <h1 style={{ margin: 0, fontSize: '1.9rem', fontWeight: 900, color: '#f8fafc' }}>
-                Global Club & Perpetual $25 Re-entry System
+              <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+                Single Leg / Global Club ($25 Queue)
               </h1>
-              <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '0.92rem' }}>
+              <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '0.84rem' }}>
                 Enter the decentralized 1-to-2 automated queue: Earn $25 per cycle and generate a new re-entry spot automatically!
               </p>
             </div>
@@ -97,14 +97,14 @@ export function PackagesPage() {
             <div
               style={{
                 background: 'rgba(6, 8, 20, 0.7)',
-                padding: '14px 22px',
-                borderRadius: 16,
+                padding: '10px 18px',
+                borderRadius: 14,
                 border: '1px solid rgba(217, 70, 239, 0.3)',
                 textAlign: 'right',
               }}
             >
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block' }}>Total Protocol Entries</span>
-              <span style={{ fontSize: '1.5rem', fontWeight: 900, color: '#ec4899' }}>
+              <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', fontWeight: 700, letterSpacing: '0.04em' }}>TOTAL PROTOCOL ENTRIES</span>
+              <span style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ec4899' }}>
                 {overview?.globalClubTotalEntries || 0} Entries
               </span>
             </div>
@@ -126,7 +126,7 @@ export function PackagesPage() {
         )}
 
         {/* 2 MAIN CARDS: JOIN CARD & USER STATUS */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
           
           {/* Join Global Club Card */}
           <div
@@ -134,49 +134,49 @@ export function PackagesPage() {
               background: 'rgba(13, 18, 45, 0.85)',
               border: '1px solid rgba(217, 70, 239, 0.35)',
               borderRadius: 20,
-              padding: 28,
+              padding: 20,
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
             }}
           >
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-                <div style={{ padding: 10, borderRadius: 12, background: 'rgba(217, 70, 239, 0.2)', color: '#ec4899' }}>
-                  <RefreshCw size={22} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                <div style={{ padding: 8, borderRadius: 10, background: 'rgba(217, 70, 239, 0.2)', color: '#ec4899' }}>
+                  <RefreshCw size={20} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
+                  <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc' }}>
                     Join Global Club Entry
                   </h3>
-                  <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Fixed Participation: $25 USDT</span>
+                  <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Fixed Participation: $25 USDT</span>
                 </div>
               </div>
 
               <div
                 style={{
-                  padding: '16px',
+                  padding: '14px',
                   borderRadius: 14,
                   background: 'rgba(6, 8, 20, 0.6)',
                   border: '1px solid rgba(217, 70, 239, 0.2)',
-                  marginBottom: 20,
+                  marginBottom: 16,
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: '0.82rem' }}>
                   <span style={{ color: '#cbd5e1' }}>Entry Price:</span>
                   <strong style={{ color: '#f8fafc' }}>$25.00 USDT</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: '0.82rem' }}>
                   <span style={{ color: '#cbd5e1' }}>Cycle Reward:</span>
-                  <strong style={{ color: '#10b981' }}>$25.00 USDT (100% ROI)</strong>
+                  <strong style={{ color: '#10b981' }}>$25.00 USDT (Instant To Wallet)</strong>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
                   <span style={{ color: '#cbd5e1' }}>Automated Re-entry:</span>
                   <strong style={{ color: '#c084fc' }}>1 Re-entry Spot (Auto Funded)</strong>
                 </div>
               </div>
 
-              <div style={{ fontSize: '0.82rem', color: '#94a3b8', marginBottom: 20 }}>
+              <div style={{ fontSize: '0.78rem', color: '#94a3b8', marginBottom: 16 }}>
                 Wallet Balance: <strong style={{ color: '#38bdf8' }}>${Number(usdtBalance).toFixed(2)} USDT</strong>
               </div>
             </div>
@@ -188,13 +188,13 @@ export function PackagesPage() {
                   disabled={loading}
                   style={{
                     width: '100%',
-                    padding: '14px',
+                    padding: '12px',
                     borderRadius: 12,
                     border: 'none',
                     background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
                     color: '#fff',
                     fontWeight: 800,
-                    fontSize: '0.95rem',
+                    fontSize: '0.9rem',
                     cursor: loading ? 'not-allowed' : 'pointer',
                   }}
                 >
@@ -206,13 +206,13 @@ export function PackagesPage() {
                   disabled={loading || Number(usdtBalance) < 25}
                   style={{
                     width: '100%',
-                    padding: '14px',
+                    padding: '12px',
                     borderRadius: 12,
                     border: 'none',
                     background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
                     color: '#fff',
                     fontWeight: 800,
-                    fontSize: '0.95rem',
+                    fontSize: '0.9rem',
                     cursor: loading || Number(usdtBalance) < 25 ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -220,7 +220,7 @@ export function PackagesPage() {
                     gap: 8,
                   }}
                 >
-                  <RefreshCw size={18} />
+                  <RefreshCw size={16} />
                   <span>{loading ? 'Entering Global Club...' : 'Join Global Club ($25 USDT)'}</span>
                 </button>
               )}
@@ -233,49 +233,49 @@ export function PackagesPage() {
               background: 'rgba(13, 18, 45, 0.85)',
               border: '1px solid rgba(139, 92, 246, 0.3)',
               borderRadius: 20,
-              padding: 28,
+              padding: 20,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-              <div style={{ padding: 10, borderRadius: 12, background: 'rgba(139, 92, 246, 0.2)', color: '#c084fc' }}>
-                <Award size={22} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ padding: 8, borderRadius: 10, background: 'rgba(139, 92, 246, 0.2)', color: '#c084fc' }}>
+                <Award size={20} />
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc' }}>
                   Your Global Club Statistics
                 </h3>
-                <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Live on-chain cycle accounting</span>
+                <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Live on-chain cycle accounting</span>
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
-              <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: 16, borderRadius: 14, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>TOTAL ENTRIES</div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#f8fafc' }}>{globalClub.entriesCount}</div>
-                <div style={{ fontSize: '0.72rem', color: '#c084fc', marginTop: 4 }}>Initial + Re-entries</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+              <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: 12, borderRadius: 12, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>TOTAL ENTRIES</div>
+                <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#f8fafc' }}>{globalClub.entriesCount}</div>
+                <div style={{ fontSize: '0.68rem', color: '#c084fc', marginTop: 3 }}>Initial + Re-entries</div>
               </div>
 
-              <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: 16, borderRadius: 14, border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                <div style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>COMPLETED CYCLES</div>
-                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#10b981' }}>{globalClub.cyclesCompleted}</div>
-                <div style={{ fontSize: '0.72rem', color: '#cbd5e1', marginTop: 4 }}>$25 per cycle payout</div>
+              <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: 12, borderRadius: 12, border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600 }}>COMPLETED CYCLES</div>
+                <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#10b981' }}>{globalClub.cyclesCompleted}</div>
+                <div style={{ fontSize: '0.68rem', color: '#cbd5e1', marginTop: 3 }}>$25 per cycle payout</div>
               </div>
             </div>
 
             <div
               style={{
                 background: 'rgba(6, 8, 20, 0.7)',
-                padding: '16px',
-                borderRadius: 14,
+                padding: '14px',
+                borderRadius: 12,
                 border: '1px solid rgba(139, 92, 246, 0.2)',
               }}
             >
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Total Global Club Income Earned:</div>
-              <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#f8fafc', margin: '4px 0' }}>
-                ${Number(incomeBreakdown?.globalClubIncome || 0).toFixed(2)} <span style={{ fontSize: '0.9rem', color: '#94a3b8' }}>USDT</span>
+              <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Total Global Club Income Earned:</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#f8fafc', margin: '3px 0' }}>
+                ${Number(incomeBreakdown?.globalClubIncome || 0).toFixed(2)} <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>USDT</span>
               </div>
-              <span style={{ fontSize: '0.75rem', color: '#818cf8' }}>
-                Available to withdraw anytime from your main dashboard
+              <span style={{ fontSize: '0.72rem', color: '#4ade80' }}>
+                Transferred 100% instantly to your connected BSC wallet
               </span>
             </div>
           </div>
@@ -287,32 +287,32 @@ export function PackagesPage() {
             background: 'rgba(13, 18, 45, 0.85)',
             border: '1px solid rgba(139, 92, 246, 0.3)',
             borderRadius: 20,
-            padding: 24,
+            padding: 20,
           }}
         >
-          <h3 style={{ margin: '0 0 12px', fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc' }}>
+          <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', fontWeight: 800, color: '#f8fafc' }}>
             Mathematical Re-entry Queue Sequence
           </h3>
-          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: 16 }}>
+          <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: 14 }}>
             Every position requires exactly 2 subsequent entries under it to trigger cycle completion.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10 }}>
             <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: 12, borderRadius: 10, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-              <div style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: 700 }}>ENTRIES #2 & #3</div>
-              <div style={{ fontSize: '0.85rem', color: '#f8fafc', marginTop: 4 }}>Completes Entry #1 → <strong>Re-entry #4</strong></div>
+              <div style={{ fontSize: '0.72rem', color: '#c084fc', fontWeight: 700 }}>ENTRIES #2 & #3</div>
+              <div style={{ fontSize: '0.82rem', color: '#f8fafc', marginTop: 3 }}>Completes Entry #1 → <strong>Re-entry #4</strong></div>
             </div>
             <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: 12, borderRadius: 10, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-              <div style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: 700 }}>ENTRIES #4 & #5</div>
-              <div style={{ fontSize: '0.85rem', color: '#f8fafc', marginTop: 4 }}>Completes Entry #2 → <strong>Re-entry #6</strong></div>
+              <div style={{ fontSize: '0.72rem', color: '#c084fc', fontWeight: 700 }}>ENTRIES #4 & #5</div>
+              <div style={{ fontSize: '0.82rem', color: '#f8fafc', marginTop: 3 }}>Completes Entry #2 → <strong>Re-entry #6</strong></div>
             </div>
             <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: 12, borderRadius: 10, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-              <div style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: 700 }}>ENTRIES #6 & #7</div>
-              <div style={{ fontSize: '0.85rem', color: '#f8fafc', marginTop: 4 }}>Completes Entry #3 → <strong>Re-entry #8</strong></div>
+              <div style={{ fontSize: '0.72rem', color: '#c084fc', fontWeight: 700 }}>ENTRIES #6 & #7</div>
+              <div style={{ fontSize: '0.82rem', color: '#f8fafc', marginTop: 3 }}>Completes Entry #3 → <strong>Re-entry #8</strong></div>
             </div>
             <div style={{ background: 'rgba(6, 8, 20, 0.7)', padding: 12, borderRadius: 10, border: '1px solid rgba(139, 92, 246, 0.2)' }}>
-              <div style={{ fontSize: '0.75rem', color: '#c084fc', fontWeight: 700 }}>ENTRIES #8 & #9</div>
-              <div style={{ fontSize: '0.85rem', color: '#f8fafc', marginTop: 4 }}>Completes Entry #4 → <strong>Re-entry #10</strong></div>
+              <div style={{ fontSize: '0.72rem', color: '#c084fc', fontWeight: 700 }}>ENTRIES #8 & #9</div>
+              <div style={{ fontSize: '0.82rem', color: '#f8fafc', marginTop: 3 }}>Completes Entry #4 → <strong>Re-entry #10</strong></div>
             </div>
           </div>
         </div>

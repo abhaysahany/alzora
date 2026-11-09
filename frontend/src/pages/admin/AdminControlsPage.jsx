@@ -36,6 +36,13 @@ export function AdminControlsPage() {
   const acceptOwnership = aventra?.acceptOwnership || (async () => showToast('Ownership accepted'))
   const changeTreasuryWallet = aventra?.setTreasuryWallet || aventra?.changeTreasuryWallet || (async () => showToast('Treasury wallet updated'))
   const emergencyWithdrawToken = aventra?.emergencyTokenRescue || aventra?.emergencyWithdrawToken || (async () => showToast('Emergency rescue processed'))
+  
+  // Pool distribution methods
+  const createChampionMonthlySnapshot = aventra?.createChampionMonthlySnapshot
+  const distributeChampionBatch = aventra?.distributeChampionBatch
+  const createWeeklyPoolSnapshot = aventra?.createWeeklyPoolSnapshot
+  const distributeWeeklyBatch = aventra?.distributeWeeklyBatch
+
   const globalStats = aventra?.overview || {}
   const loading = aventra?.loading || false
 
@@ -47,6 +54,20 @@ export function AdminControlsPage() {
   const [newTreasury, setNewTreasury] = useState('')
   const [newCoinPrice, setNewCoinPrice] = useState('')
   const [newSwapFeePct, setNewSwapFeePct] = useState('10')
+
+  // Pool Distribution States
+  const currentMonthEpoch = Math.floor(Date.now() / 1000 / (30 * 86400))
+  const currentWeeklyEpoch = Number(globalStats?.currentWeeklyEpoch || Math.floor(Date.now() / 1000 / (7 * 86400)))
+
+  const [championMonthEpoch, setChampionMonthEpoch] = useState(currentMonthEpoch.toString())
+  const [championBatchSize, setChampionBatchSize] = useState('50')
+  const [isProcessingChampionSnapshot, setIsProcessingChampionSnapshot] = useState(false)
+  const [isProcessingChampionBatch, setIsProcessingChampionBatch] = useState(false)
+
+  const [weeklyEpochInput, setWeeklyEpochInput] = useState(Math.max(0, currentWeeklyEpoch - 1).toString())
+  const [weeklyBatchSize, setWeeklyBatchSize] = useState('50')
+  const [isProcessingWeeklySnapshot, setIsProcessingWeeklySnapshot] = useState(false)
+  const [isProcessingWeeklyBatch, setIsProcessingWeeklyBatch] = useState(false)
 
   // Emergency withdraw state
   const [emToken, setEmToken] = useState(CONTRACT_ADDRESSES.USDT)
@@ -140,8 +161,298 @@ export function AdminControlsPage() {
         </div>
       )}
 
-      {/* GRID CARDS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 24 }}>
+      {/* TOP ROW: 2 POOL BATCH DISTRIBUTION CARDS */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 480px), 1fr))', gap: 24, marginBottom: 24 }}>
+
+        {/* CARD A: CHAMPION CLUB MONTHLY BATCH DISTRIBUTION */}
+        <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(251, 191, 36, 0.35)', background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(11, 15, 36, 0.95) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Coins size={24} color="#fbbf24" />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: 800 }}>
+                  Champion Pool Monthly Distribution
+                </h3>
+              </div>
+              <span style={{ fontSize: '0.72rem', background: 'rgba(251, 191, 36, 0.2)', color: '#fbbf24', padding: '4px 10px', borderRadius: 20, fontWeight: 800 }}>
+                6% POOL ($3/REG)
+              </span>
+            </div>
+
+            <p style={{ color: 'var(--muted)', fontSize: '0.86rem', marginBottom: 16, lineHeight: 1.5 }}>
+              Champion Club 6% turnover pool is accumulated continuously. Admin snapshots the completed month and executes payouts in safe on-chain batches (max 100 per batch).
+            </p>
+
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 14, border: '1px solid rgba(251, 191, 36, 0.15)', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Unclaimed Pool Balance</div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fbbf24' }}>
+                  ${globalStats?.championPoolBalance || '0.00'} USDT
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Current Month Epoch</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff' }}>
+                  #{currentMonthEpoch}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                  Month Epoch
+                </label>
+                <input
+                  type="number"
+                  value={championMonthEpoch}
+                  onChange={(e) => setChampionMonthEpoch(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#fff',
+                    fontSize: '0.85rem',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                  Batch Size (1 - 100)
+                </label>
+                <input
+                  type="number"
+                  value={championBatchSize}
+                  onChange={(e) => setChampionBatchSize(e.target.value)}
+                  max="100"
+                  min="1"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#fff',
+                    fontSize: '0.85rem',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <button
+                type="button"
+                disabled={isProcessingChampionSnapshot || loading}
+                onClick={async () => {
+                  try {
+                    setIsProcessingChampionSnapshot(true)
+                    showToast(`Creating snapshot for Month Epoch ${championMonthEpoch}...`)
+                    await createChampionMonthlySnapshot(championMonthEpoch)
+                    showToast('✅ Champion Pool snapshot created successfully!')
+                  } catch (err) {
+                    showToast(`Snapshot error: ${err.message}`)
+                  } finally {
+                    setIsProcessingChampionSnapshot(false)
+                  }
+                }}
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  background: 'rgba(251, 191, 36, 0.15)',
+                  border: '1px solid #fbbf24',
+                  color: '#fbbf24',
+                  cursor: 'pointer',
+                }}
+              >
+                {isProcessingChampionSnapshot ? 'Processing...' : '1. Create Snapshot'}
+              </button>
+
+              <button
+                type="button"
+                disabled={isProcessingChampionBatch || loading}
+                onClick={async () => {
+                  try {
+                    setIsProcessingChampionBatch(true)
+                    showToast(`Distributing batch of ${championBatchSize} to Champion qualifiers...`)
+                    await distributeChampionBatch(championMonthEpoch, championBatchSize)
+                    showToast('🎉 Champion batch distributed to qualifiers on-chain!')
+                  } catch (err) {
+                    showToast(`Distribution error: ${err.message}`)
+                  } finally {
+                    setIsProcessingChampionBatch(false)
+                  }
+                }}
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #d97706 100%)',
+                  border: 'none',
+                  color: '#000',
+                  cursor: 'pointer',
+                }}
+              >
+                {isProcessingChampionBatch ? 'Distributing...' : '2. Distribute Batch'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* CARD B: WEEKLY PERFORMANCE POOL BATCH DISTRIBUTION */}
+        <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(244, 63, 94, 0.35)', background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.08) 0%, rgba(11, 15, 36, 0.95) 100%)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <Coins size={24} color="#f43f5e" />
+                <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: 800 }}>
+                  Weekly Pool Performance Distribution
+                </h3>
+              </div>
+              <span style={{ fontSize: '0.72rem', background: 'rgba(244, 63, 94, 0.2)', color: '#f43f5e', padding: '4px 10px', borderRadius: 20, fontWeight: 800 }}>
+                6% POOL ($3/REG)
+              </span>
+            </div>
+
+            <p style={{ color: 'var(--muted)', fontSize: '0.86rem', marginBottom: 16, lineHeight: 1.5 }}>
+              Distributed every Sunday morning to members who sponsored 3+ directs in that week's epoch. Admin closes the epoch snapshot and dispatches safe on-chain batches.
+            </p>
+
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 14, border: '1px solid rgba(244, 63, 94, 0.15)', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Current Week Pool</div>
+                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: '#f43f5e' }}>
+                  ${globalStats?.weeklyPoolBalance || '0.00'} USDT
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>Current Weekly Epoch</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff' }}>
+                  Week #{currentWeeklyEpoch}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                  Closed Week Epoch
+                </label>
+                <input
+                  type="number"
+                  value={weeklyEpochInput}
+                  onChange={(e) => setWeeklyEpochInput(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#fff',
+                    fontSize: '0.85rem',
+                  }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                  Batch Size (1 - 100)
+                </label>
+                <input
+                  type="number"
+                  value={weeklyBatchSize}
+                  onChange={(e) => setWeeklyBatchSize(e.target.value)}
+                  max="100"
+                  min="1"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: 10,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#fff',
+                    fontSize: '0.85rem',
+                  }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <button
+                type="button"
+                disabled={isProcessingWeeklySnapshot || loading}
+                onClick={async () => {
+                  try {
+                    setIsProcessingWeeklySnapshot(true)
+                    showToast(`Creating snapshot for Week Epoch ${weeklyEpochInput}...`)
+                    await createWeeklyPoolSnapshot(weeklyEpochInput)
+                    showToast('✅ Weekly Pool snapshot created successfully!')
+                  } catch (err) {
+                    showToast(`Snapshot error: ${err.message}`)
+                  } finally {
+                    setIsProcessingWeeklySnapshot(false)
+                  }
+                }}
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  background: 'rgba(244, 63, 94, 0.15)',
+                  border: '1px solid #f43f5e',
+                  color: '#f43f5e',
+                  cursor: 'pointer',
+                }}
+              >
+                {isProcessingWeeklySnapshot ? 'Processing...' : '1. Create Snapshot'}
+              </button>
+
+              <button
+                type="button"
+                disabled={isProcessingWeeklyBatch || loading}
+                onClick={async () => {
+                  try {
+                    setIsProcessingWeeklyBatch(true)
+                    showToast(`Distributing batch of ${weeklyBatchSize} to Week #${weeklyEpochInput} qualifiers...`)
+                    await distributeWeeklyBatch(weeklyEpochInput, weeklyBatchSize)
+                    showToast('🎉 Weekly batch distributed to qualifiers on-chain!')
+                  } catch (err) {
+                    showToast(`Distribution error: ${err.message}`)
+                  } finally {
+                    setIsProcessingWeeklyBatch(false)
+                  }
+                }}
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  background: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)',
+                  border: 'none',
+                  color: '#fff',
+                  cursor: 'pointer',
+                }}
+              >
+                {isProcessingWeeklyBatch ? 'Distributing...' : '2. Distribute Batch'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* SECOND ROW & REST: PROTOCOL CONTROLS & MANAGEMENT */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))', gap: 24 }}>
+
         {/* CARD 1: PROTOCOL PAUSE & UNPAUSE */}
         <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(255,215,0,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>

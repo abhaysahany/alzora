@@ -42,9 +42,9 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
   const navItems = [
     { label: 'Overview', path: '/admin', icon: LayoutDashboard },
     { label: 'Members Audit', path: '/admin/members', icon: Users },
+    { label: 'Genealogy & Trees', path: '/admin/tree', icon: GitCommit },
     { label: 'Packages & Tiers', path: '/admin/packages', icon: Package },
-    { label: '7-Stream Income', path: '/admin/income', icon: BadgeDollarSign },
-    { label: 'Withdrawals & Vault', path: '/admin/withdrawals', icon: ArrowUpRight },
+    { label: '8-Stream Income', path: '/admin/income', icon: BadgeDollarSign },
     { label: 'Live Transactions', path: '/admin/transactions', icon: Receipt },
     { label: 'Protocol Controls', path: '/admin/controls', icon: Sliders },
   ]
@@ -83,39 +83,15 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
         className={`admin-sidebar ${mobileDrawerOpen ? 'open' : ''}`}
       >
         {/* BRAND LOGO */}
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(139, 92, 246, 0.15)' }}>
-          <Link to="/admin" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-            <div
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                background: 'linear-gradient(135deg, #8b5cf6, #6366f1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 20px rgba(139, 92, 246, 0.4)',
-              }}
-            >
-              <Sparkles size={20} color="#fff" />
-            </div>
-            <div>
-              <div
-                style={{
-                  fontWeight: 900,
-                  fontSize: '1.35rem',
-                  letterSpacing: '0.08em',
-                  background: 'linear-gradient(135deg, #f8fafc, #c084fc 40%, #6366f1 80%, #38bdf8)',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  color: 'transparent',
-                }}
-              >
-                ELZORA
-              </div>
-              <div style={{ fontSize: '0.68rem', color: '#c084fc', fontWeight: 800, letterSpacing: '1.2px' }}>
-                ADMIN CONTROL CENTER
-              </div>
+        <div style={{ height: 84, padding: '0 20px', borderBottom: '1px solid rgba(139, 92, 246, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Link to="/admin" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textDecoration: 'none', width: '100%' }}>
+            <img
+              src="/logo.png"
+              alt="ELZORA"
+              className="elzora-logo-sidebar"
+            />
+            <div style={{ fontSize: '0.65rem', color: '#c084fc', fontWeight: 800, letterSpacing: '1.2px', marginTop: 4, textAlign: 'center' }}>
+              ADMIN CONTROL CENTER
             </div>
           </Link>
         </div>

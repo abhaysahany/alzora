@@ -48,16 +48,16 @@ export function RanksPage() {
 
   return (
     <MemberLayout pageTitle="8 Club Ranks & Champion Club">
-      <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: 20 }}>
         
         {/* Banner */}
         <div
           style={{
-            padding: '28px 32px',
-            borderRadius: 24,
+            padding: '20px 24px',
+            borderRadius: 20,
             border: '1px solid rgba(217, 70, 239, 0.4)',
             background: 'linear-gradient(135deg, rgba(20, 15, 60, 0.95) 0%, rgba(9, 13, 35, 0.98) 100%)',
-            boxShadow: '0 20px 45px rgba(0,0,0,0.5)',
+            boxShadow: '0 16px 36px rgba(0,0,0,0.45)',
             position: 'relative',
             overflow: 'hidden',
           }}
@@ -82,10 +82,10 @@ export function RanksPage() {
               >
                 <Sparkles size={14} /> 24% CLUB MATRIX ALLOCATION
               </div>
-              <h1 style={{ margin: 0, fontSize: '2.1rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em' }}>
+              <h1 style={{ margin: 0, fontSize: '1.75rem', fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em' }}>
                 8 Club Ranks & Automated Upgrades
               </h1>
-              <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: '0.9rem' }}>
+              <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '0.84rem' }}>
                 Cascading 2-matrix queue where qualifying members advance through automated contract upgrades.
               </p>
             </div>
@@ -93,16 +93,16 @@ export function RanksPage() {
             <div
               style={{
                 background: 'rgba(6, 8, 20, 0.8)',
-                padding: '16px 24px',
-                borderRadius: 18,
+                padding: '12px 18px',
+                borderRadius: 14,
                 border: '1px solid rgba(168, 85, 247, 0.35)',
                 boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
                 textAlign: 'right',
               }}
             >
-              <span style={{ fontSize: '0.72rem', color: '#94a3b8', display: 'block', fontWeight: 700, letterSpacing: '0.06em' }}>YOUR CURRENT RANK</span>
-              <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#c084fc' }}>
-                {profile?.rankName || 'Starter'} <span style={{ fontSize: '1rem', color: '#94a3b8' }}>(Rank {currentRankNum})</span>
+              <span style={{ fontSize: '0.7rem', color: '#94a3b8', display: 'block', fontWeight: 700, letterSpacing: '0.06em' }}>YOUR CURRENT RANK</span>
+              <span style={{ fontSize: '1.4rem', fontWeight: 900, color: '#c084fc' }}>
+                {profile?.rankName || 'Starter'} <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>(Rank {currentRankNum})</span>
               </span>
             </div>
           </div>
@@ -200,32 +200,32 @@ export function RanksPage() {
           style={{
             background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
             border: '1px solid rgba(139, 92, 246, 0.35)',
-            borderRadius: 22,
-            padding: 26,
+            borderRadius: 20,
+            padding: 20,
             boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
             overflowX: 'auto',
           }}
         >
-          <div style={{ marginBottom: 20 }}>
-            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
+          <div style={{ marginBottom: 14 }}>
+            <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#f8fafc' }}>
               Club Rank Progression Schedule (Official 8-Stage Matrix)
             </h3>
-            <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: '0.85rem' }}>
+            <p style={{ margin: '3px 0 0', color: '#94a3b8', fontSize: '0.8rem' }}>
               Starter to Legend rank progression conditions, automated package upgrade deductions, sponsor commissions, and net profit.
             </p>
           </div>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 720 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 720, fontSize: '0.84rem' }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(139, 92, 246, 0.35)', color: '#c084fc', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                <th style={{ padding: '14px 16px' }}>Rank</th>
-                <th style={{ padding: '14px 16px' }}>Rank Name</th>
-                <th style={{ padding: '14px 16px' }}>Team Members</th>
-                <th style={{ padding: '14px 16px' }}>Gross Income</th>
-                <th style={{ padding: '14px 16px' }}>Package Upgrade</th>
-                <th style={{ padding: '14px 16px' }}>Sponsor Income</th>
-                <th style={{ padding: '14px 16px' }}>Net Profit</th>
-                <th style={{ padding: '14px 16px' }}>Status</th>
+              <tr style={{ borderBottom: '1px solid rgba(139, 92, 246, 0.35)', color: '#c084fc', fontSize: '0.74rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <th style={{ padding: '10px 14px' }}>Rank</th>
+                <th style={{ padding: '10px 14px' }}>Rank Name</th>
+                <th style={{ padding: '10px 14px' }}>Team Members</th>
+                <th style={{ padding: '10px 14px' }}>Gross Income</th>
+                <th style={{ padding: '10px 14px' }}>Package Upgrade</th>
+                <th style={{ padding: '10px 14px' }}>Sponsor Income</th>
+                <th style={{ padding: '10px 14px' }}>Net Profit</th>
+                <th style={{ padding: '10px 14px' }}>Status</th>
               </tr>
             </thead>
             <tbody>
@@ -242,28 +242,28 @@ export function RanksPage() {
                       transition: 'background 0.2s',
                     }}
                   >
-                    <td style={{ padding: '16px', fontWeight: 800, color: isCurrent ? '#c084fc' : '#94a3b8' }}>
+                    <td style={{ padding: '12px 14px', fontWeight: 800, color: isCurrent ? '#c084fc' : '#94a3b8' }}>
                       #{r.rank}
                     </td>
-                    <td style={{ padding: '16px', fontWeight: 900, color: isCurrent ? '#f8fafc' : '#cbd5e1' }}>
+                    <td style={{ padding: '12px 14px', fontWeight: 900, color: isCurrent ? '#f8fafc' : '#cbd5e1' }}>
                       {r.name}
                     </td>
-                    <td style={{ padding: '16px', color: '#cbd5e1', fontWeight: 600 }}>{r.members}</td>
-                    <td style={{ padding: '16px', color: '#38bdf8', fontWeight: 800 }}>{r.gross}</td>
-                    <td style={{ padding: '16px', color: '#f472b6', fontWeight: 600 }}>{r.upgrade}</td>
-                    <td style={{ padding: '16px', color: '#fbbf24', fontWeight: 600 }}>{r.sponsor}</td>
-                    <td style={{ padding: '16px', color: '#4ade80', fontWeight: 900 }}>{r.net}</td>
-                    <td style={{ padding: '16px' }}>
+                    <td style={{ padding: '12px 14px', color: '#cbd5e1', fontWeight: 600 }}>{r.members}</td>
+                    <td style={{ padding: '12px 14px', color: '#38bdf8', fontWeight: 800 }}>{r.gross}</td>
+                    <td style={{ padding: '12px 14px', color: '#f472b6', fontWeight: 600 }}>{r.upgrade}</td>
+                    <td style={{ padding: '12px 14px', color: '#fbbf24', fontWeight: 600 }}>{r.sponsor}</td>
+                    <td style={{ padding: '12px 14px', color: '#4ade80', fontWeight: 900 }}>{r.net}</td>
+                    <td style={{ padding: '12px 14px' }}>
                       {isCompleted ? (
-                        <span style={{ color: '#4ade80', fontWeight: 800, fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{ color: '#4ade80', fontWeight: 800, fontSize: '0.78rem', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                           <Check size={14} /> COMPLETED
                         </span>
                       ) : isCurrent ? (
-                        <span style={{ padding: '5px 12px', borderRadius: 8, background: 'linear-gradient(135deg, #7c3aed, #6366f1)', color: '#fff', fontWeight: 800, fontSize: '0.75rem', boxShadow: '0 2px 10px rgba(124, 58, 237, 0.4)' }}>
+                        <span style={{ padding: '4px 10px', borderRadius: 8, background: 'linear-gradient(135deg, #7c3aed, #6366f1)', color: '#fff', fontWeight: 800, fontSize: '0.72rem', boxShadow: '0 2px 10px rgba(124, 58, 237, 0.4)' }}>
                           ACTIVE NOW
                         </span>
                       ) : (
-                        <span style={{ color: '#64748b', fontSize: '0.78rem', fontWeight: 700 }}>LOCKED</span>
+                        <span style={{ color: '#64748b', fontSize: '0.76rem', fontWeight: 700 }}>LOCKED</span>
                       )}
                     </td>
                   </tr>

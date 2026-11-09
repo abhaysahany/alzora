@@ -516,6 +516,95 @@ export function useElzora() {
     }
   }
 
+  // --- Champion & Weekly Pool Admin Distribution Functions ---
+  const createChampionMonthlySnapshot = async (monthEpoch) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'createChampionMonthlySnapshot',
+        args: [BigInt(monthEpoch)],
+        chain: activeChain,
+      })
+      await refreshAll()
+      setLoading(false)
+      return tx
+    } catch (err) {
+      console.error('Create Champion snapshot failed:', err)
+      setError(err.message || 'Create Champion snapshot failed')
+      setLoading(false)
+      throw err
+    }
+  }
+
+  const distributeChampionBatch = async (monthEpoch, batchSize = 50) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'distributeChampionBatch',
+        args: [BigInt(monthEpoch), BigInt(batchSize)],
+        chain: activeChain,
+      })
+      await refreshAll()
+      setLoading(false)
+      return tx
+    } catch (err) {
+      console.error('Distribute Champion batch failed:', err)
+      setError(err.message || 'Distribute Champion batch failed')
+      setLoading(false)
+      throw err
+    }
+  }
+
+  const createWeeklyPoolSnapshot = async (epoch) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'createWeeklyPoolSnapshot',
+        args: [BigInt(epoch)],
+        chain: activeChain,
+      })
+      await refreshAll()
+      setLoading(false)
+      return tx
+    } catch (err) {
+      console.error('Create Weekly snapshot failed:', err)
+      setError(err.message || 'Create Weekly snapshot failed')
+      setLoading(false)
+      throw err
+    }
+  }
+
+  const distributeWeeklyBatch = async (epoch, batchSize = 50) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'distributeWeeklyBatch',
+        args: [BigInt(epoch), BigInt(batchSize)],
+        chain: activeChain,
+      })
+      await refreshAll()
+      setLoading(false)
+      return tx
+    } catch (err) {
+      console.error('Distribute Weekly batch failed:', err)
+      setError(err.message || 'Distribute Weekly batch failed')
+      setLoading(false)
+      throw err
+    }
+  }
+
   return {
     address,
     isConnected,
@@ -552,6 +641,10 @@ export function useElzora() {
     emergencyTokenRescue,
     transferOwnership,
     acceptOwnership,
+    createChampionMonthlySnapshot,
+    distributeChampionBatch,
+    createWeeklyPoolSnapshot,
+    distributeWeeklyBatch,
     // Shorthands & Registration Flags
     isRegistered: isUserRegistered,
     active: isUserRegistered,

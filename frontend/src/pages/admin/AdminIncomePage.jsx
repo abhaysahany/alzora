@@ -39,15 +39,16 @@ export function AdminIncomePage() {
     setTimeout(() => setCopiedKey(null), 2000)
   }
 
-  // 7 Financial Streams Architecture Spec
+  // 8 Financial Streams Architecture Spec
   const STREAMS_CONFIG = [
-    { id: 1, name: 'Direct Sponsor Commission', pct: '20.0%', amount: '$10.00', poolTotal: '20%', desc: 'Instant $10 payment to direct sponsor per $50 package', color: '#c084fc' },
-    { id: 2, name: '20-Level Affiliate Network', pct: '14.0%', amount: '$7.00', poolTotal: '14%', desc: '$0.40 L1-10 & $0.30 L11-20 across 20 upline levels', color: '#38bdf8' },
-    { id: 3, name: '8 Cascading Club Matrices', pct: '24.0%', amount: '$12.00', poolTotal: '24%', desc: 'Starter up to Legend automated queue rank upgrades', color: '#a855f7' },
-    { id: 4, name: 'Binary Matching Pool', pct: '20.0%', amount: '$10.00', poolTotal: '20%', desc: '$2.00 per 1:1 pair match (2:1 or 1:2 first pair)', color: '#4ade80' },
-    { id: 5, name: 'Champion Club Royalty Pool', pct: '6.0%', amount: '$3.00', poolTotal: '6%', desc: '6% company turnover shared among 30+ direct qualifiers', color: '#fbbf24' },
-    { id: 6, name: 'Weekly Performance Pool', pct: '6.0%', amount: '$3.00', poolTotal: '6%', desc: '6% pool shared equally among top weekly sponsors', color: '#f43f5e' },
-    { id: 7, name: '27 Lifetime Milestones', pct: '10.0%', amount: '$5.00', poolTotal: '10%', desc: 'Cumulative binary volume rewards from $15 to $500,000', color: '#818cf8' },
+    { id: 1, name: 'Direct Sponsor Commission', pct: '20.0%', amount: '$10.00', poolTotal: '20%', desc: 'Instant $10 payment to direct sponsor per $50 package', color: '#c084fc', field: 'directIncome' },
+    { id: 2, name: '20-Level Affiliate Network', pct: '14.0%', amount: '$7.00', poolTotal: '14%', desc: '$0.40 L1-10 & $0.30 L11-20 across 20 upline levels', color: '#38bdf8', field: 'affiliateIncome' },
+    { id: 3, name: '8 Cascading Club Matrices', pct: '24.0%', amount: '$12.00', poolTotal: '24%', desc: 'Starter up to Legend automated queue rank upgrades', color: '#a855f7', field: 'clubIncome' },
+    { id: 4, name: 'Binary Matching Pool', pct: '20.0%', amount: '$10.00', poolTotal: '20%', desc: '$2.00 per 1:1 pair match (2:1 or 1:2 first pair)', color: '#4ade80', field: 'matchingIncome' },
+    { id: 5, name: 'Champion Club Royalty Pool', pct: '6.0%', amount: '$3.00', poolTotal: '6%', desc: '6% company turnover shared monthly among 30+ direct qualifiers', color: '#fbbf24', field: 'championIncome' },
+    { id: 6, name: 'Weekly Performance Pool', pct: '6.0%', amount: '$3.00', poolTotal: '6%', desc: '6% pool shared weekly among top sponsors (3+ weekly directs)', color: '#f43f5e', field: 'weeklyIncome' },
+    { id: 7, name: '27 Lifetime Milestones', pct: '10.0%', amount: '$5.00', poolTotal: '10%', desc: 'Cumulative binary volume rewards from $25 up to $21,000,000', color: '#818cf8', field: 'lifetimeIncome' },
+    { id: 8, name: 'Single Leg / Global Club ($25)', pct: 'Autonomous Queue', amount: '$25.00', poolTotal: 'Queue', desc: '1-to-2 decentralized queue: cycles generate $25 USDT + 1 automatic re-entry spot', color: '#06b6d4', field: 'globalClubIncome' },
   ]
 
   // Filtered income logs
@@ -63,8 +64,11 @@ export function AdminIncomePage() {
       if (activeTab === 'DIRECT') return item.category === 'DIRECT_BONUS'
       if (activeTab === 'AFFILIATE') return item.category === 'AFFILIATE_LEVEL'
       if (activeTab === 'MATCHING') return item.category === 'BINARY_MATCHING'
-      if (activeTab === 'CLUB') return item.category === 'CLUB_MATRIX' || item.category === 'GLOBAL_CLUB'
+      if (activeTab === 'CLUB') return item.category === 'CLUB_MATRIX'
       if (activeTab === 'CHAMPION') return item.category === 'CHAMPION_ROYALTY'
+      if (activeTab === 'WEEKLY') return item.category === 'WEEKLY_REWARD'
+      if (activeTab === 'MILESTONE') return item.category === 'LIFETIME_MILESTONE'
+      if (activeTab === 'GLOBAL_CLUB') return item.category === 'GLOBAL_CLUB'
 
       return true
     })
@@ -72,8 +76,22 @@ export function AdminIncomePage() {
 
   const totalDisbursed = members.reduce((sum, m) => sum + (m.totalIncome || 0), 0)
 
+  // Stream Totals
+  const streamTotals = useMemo(() => {
+    return {
+      direct: members.reduce((acc, m) => acc + (m.directIncome || 0), 0),
+      affiliate: members.reduce((acc, m) => acc + (m.affiliateIncome || 0), 0),
+      matching: members.reduce((acc, m) => acc + (m.matchingIncome || 0), 0),
+      club: members.reduce((acc, m) => acc + (m.clubIncome || 0), 0),
+      champion: members.reduce((acc, m) => acc + (m.championIncome || 0), 0),
+      weekly: members.reduce((acc, m) => acc + (m.weeklyIncome || 0), 0),
+      lifetime: members.reduce((acc, m) => acc + (m.lifetimeIncome || 0), 0),
+      globalClub: members.reduce((acc, m) => acc + (m.globalClubIncome || 0), 0),
+    }
+  }, [members])
+
   return (
-    <AdminLayout pageTitle="ELZORA 7 Streams Distribution Ledger">
+    <AdminLayout pageTitle="ELZORA 8 Streams Distribution Ledger">
       <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }}>
         
         {/* BANNER */}
@@ -105,10 +123,10 @@ export function AdminIncomePage() {
                 <Sparkles size={14} /> 100% SMART CONTRACT FINANCIAL DISTRIBUTION
               </div>
               <h2 style={{ margin: 0, fontSize: '1.9rem', fontWeight: 900, color: '#fff' }}>
-                7-Stream Income & Commission Ledger
+                8-Stream Income & Commission Ledger
               </h2>
               <p style={{ margin: '6px 0 0', color: 'var(--muted)', fontSize: '0.92rem' }}>
-                Comprehensive tracking of all 7 financial streams allocated directly on-chain into user balances.
+                Real-time on-chain statistics of all 8 financial channels and member earnings.
               </p>
             </div>
 
@@ -121,7 +139,30 @@ export function AdminIncomePage() {
           </div>
         </div>
 
-        {/* 7 STREAMS ARCHITECTURE CARDS */}
+        {/* 8 STREAMS TELEMETRY CARDS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+          {STREAMS_CONFIG.map((s) => {
+            const streamVal = streamTotals[s.field?.replace('Income', '')] ?? 0
+            return (
+              <div key={s.id} className="glass-card" style={{ padding: 20, borderRadius: 18, background: 'rgba(11, 15, 36, 0.85)', border: `1px solid ${s.color}33` }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: '0.74rem', color: s.color, fontWeight: 800, textTransform: 'uppercase' }}>
+                    {s.pct} • {s.name}
+                  </span>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color }} />
+                </div>
+                <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#fff' }}>
+                  ${(streamTotals[s.field?.replace('Income', '')] || 0).toFixed(2)} USDT
+                </div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--muted)', marginTop: 6 }}>
+                  {s.amount} • {s.desc}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* 8 STREAMS ARCHITECTURE CARDS */}
         <div className="glass-card" style={{ padding: 24, borderRadius: 24, background: 'rgba(11, 15, 36, 0.85)' }}>
           <h3 style={{ margin: '0 0 16px', color: '#fff', fontSize: '1.2rem', fontWeight: 900 }}>
             ELZORA Mathematical Distribution Architecture ($50 Package)
@@ -133,6 +174,7 @@ export function AdminIncomePage() {
                   <th style={{ padding: '12px 16px' }}>STREAM NAME</th>
                   <th style={{ padding: '12px 16px' }}>PERCENTAGE</th>
                   <th style={{ padding: '12px 16px' }}>ALLOCATION</th>
+                  <th style={{ padding: '12px 16px' }}>TOTAL PAID TO MEMBERS</th>
                   <th style={{ padding: '12px 16px' }}>DISTRIBUTION MECHANISM</th>
                 </tr>
               </thead>
@@ -150,6 +192,9 @@ export function AdminIncomePage() {
                     </td>
                     <td style={{ padding: '14px 16px', fontWeight: 900, color: '#4ade80' }}>
                       {s.amount} USDT
+                    </td>
+                    <td style={{ padding: '14px 16px', fontWeight: 900, color: '#fff' }}>
+                      ${(streamTotals[s.field?.replace('Income', '')] || 0).toFixed(2)} USDT
                     </td>
                     <td style={{ padding: '14px 16px', color: 'var(--muted)', fontSize: '0.84rem' }}>
                       {s.desc}
@@ -175,22 +220,25 @@ export function AdminIncomePage() {
             background: 'rgba(11, 15, 36, 0.85)',
           }}
         >
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {[
               { id: 'ALL', label: 'All Streams' },
               { id: 'DIRECT', label: 'Direct ($10)' },
               { id: 'AFFILIATE', label: '20-Level ($7)' },
               { id: 'MATCHING', label: 'Matching ($2/pr)' },
-              { id: 'CLUB', label: 'Clubs ($12)' },
+              { id: 'CLUB', label: '8 Clubs ($12)' },
               { id: 'CHAMPION', label: 'Champion (6%)' },
+              { id: 'WEEKLY', label: 'Weekly (6%)' },
+              { id: 'MILESTONE', label: 'Milestones (10%)' },
+              { id: 'GLOBAL_CLUB', label: 'Single Leg / Global ($25)' },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 style={{
-                  padding: '8px 18px',
+                  padding: '8px 16px',
                   borderRadius: 12,
-                  fontSize: '0.84rem',
+                  fontSize: '0.82rem',
                   fontWeight: 800,
                   cursor: 'pointer',
                   background: activeTab === tab.id ? 'linear-gradient(135deg, #8b5cf6, #6366f1)' : 'rgba(255,255,255,0.04)',

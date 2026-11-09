@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useWalletAuth } from '../hooks/useWalletAuth'
 import { useTetherStream } from '../hooks/useTetherStream'
 import { ConnectWalletButton } from '../components/ConnectWalletButton'
+import { PublicNavbar } from '../components/PublicNavbar'
 import BackgroundCanvas from '../components/BackgroundCanvas'
 import {
   Sparkles,
@@ -103,6 +104,14 @@ export function LandingPage() {
       icon: TrendingUp,
       desc: 'Cumulative dual-team milestones starting from $25 up to a staggering $21,000,000 USDT reward.',
     },
+    {
+      title: 'Single Leg / Global Club ($25)',
+      pct: 'Autonomous Queue',
+      amount: '$25 / Cycle',
+      color: '#06b6d4',
+      icon: RefreshCw,
+      desc: '1-to-2 automated decentralized queue: every 2 entries cycling behind you triggers a $25 USDT instant payout + 1 automatic re-entry spot.',
+    },
   ]
 
   const ranks = [
@@ -145,234 +154,7 @@ export function LandingPage() {
       />
 
       {/* TOP NAVIGATION BAR */}
-      <nav
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          backdropFilter: 'blur(20px)',
-          background: 'rgba(6, 8, 20, 0.85)',
-          borderBottom: '1px solid rgba(139, 92, 246, 0.25)',
-          padding: '16px 24px',
-        }}
-      >
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          
-          {/* Logo & Network Badge */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span
-                style={{
-                  fontSize: '1.9rem',
-                  fontWeight: 900,
-                  letterSpacing: '0.08em',
-                  background: 'linear-gradient(135deg, #f8fafc 10%, #c084fc 45%, #6366f1 80%, #38bdf8)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                ELZORA
-              </span>
-            </Link>
-
-            <div
-              className="landing-network-badge"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '4px 10px',
-                borderRadius: 20,
-                background: 'rgba(234, 179, 8, 0.12)',
-                border: '1px solid rgba(234, 179, 8, 0.3)',
-                color: '#facc15',
-                fontSize: '0.72rem',
-                fontWeight: 800,
-              }}
-            >
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#facc15', boxShadow: '0 0 8px #facc15' }} />
-              BSC Testnet (97)
-            </div>
-          </div>
-
-          {/* Desktop Nav Links */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28, fontSize: '0.9rem', fontWeight: 700 }} className="desktop-nav">
-            <a href="#plan" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>The $50 Plan</a>
-            <a href="#streams" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>7 Streams</a>
-            <a href="#ranks" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>8 Club Ranks</a>
-            <a href="#globalclub" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>Global Club ($25)</a>
-            <a href="#security" style={{ color: '#cbd5e1', textDecoration: 'none', transition: 'color 0.2s' }}>Security</a>
-          </div>
-
-          {/* Wallet & Auth Action Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {isConnected ? (
-              <button
-                onClick={handleAction}
-                style={{
-                  padding: '10px 18px',
-                  borderRadius: 12,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: '0.88rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  transition: 'all 0.2s',
-                }}
-              >
-                <Wallet size={16} />
-                <span>{isRegistered ? 'Dashboard' : 'Complete Registration'}</span>
-                <ArrowRight size={16} />
-              </button>
-            ) : (
-              <button
-                onClick={() => navigate('/login')}
-                style={{
-                  padding: '10px 20px',
-                  borderRadius: 12,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: '0.88rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  transition: 'all 0.2s',
-                }}
-              >
-                <Wallet size={16} />
-                <span>Connect Wallet</span>
-              </button>
-            )}
-
-            {/* Mobile Hamburger Button */}
-            <button
-              className="landing-burger-btn"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle navigation"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* MOBILE DRAWER */}
-      {mobileMenuOpen && (
-        <>
-          <div
-            onClick={() => setMobileMenuOpen(false)}
-            style={{
-              position: 'fixed',
-              inset: 0,
-              background: 'rgba(6, 8, 20, 0.85)',
-              backdropFilter: 'blur(8px)',
-              zIndex: 198,
-            }}
-          />
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              bottom: 0,
-              width: 'min(85vw, 320px)',
-              background: 'linear-gradient(180deg, #0e1438 0%, #060814 100%)',
-              borderLeft: '1px solid rgba(139, 92, 246, 0.35)',
-              padding: '24px 20px',
-              zIndex: 199,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              boxShadow: '-10px 0 40px rgba(0,0,0,0.85)',
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
-                <span style={{ fontSize: '1.4rem', fontWeight: 900, background: 'linear-gradient(135deg, #f8fafc, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                  ELZORA
-                </span>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ background: 'transparent', border: 'none', color: '#c084fc', cursor: 'pointer', padding: 4 }}
-                >
-                  <X size={22} />
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, fontSize: '1rem', fontWeight: 700 }}>
-                <a href="#plan" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>The $50 Plan</a>
-                <a href="#streams" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>7 Streams</a>
-                <a href="#ranks" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>8 Club Ranks</a>
-                <a href="#globalclub" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>Global Club ($25)</a>
-                <a href="#security" onClick={() => setMobileMenuOpen(false)} style={{ color: '#cbd5e1', textDecoration: 'none' }}>Security</a>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 20, borderTop: '1px solid rgba(139, 92, 246, 0.2)' }}>
-              {isConnected ? (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false)
-                    handleAction()
-                  }}
-                  style={{
-                    padding: '12px 18px',
-                    borderRadius: 12,
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                    color: '#fff',
-                    fontWeight: 800,
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                  }}
-                >
-                  <Wallet size={18} />
-                  <span>{isRegistered ? 'Launch Dashboard' : 'Complete Registration'}</span>
-                  <ArrowRight size={16} />
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false)
-                    navigate('/login')
-                  }}
-                  style={{
-                    padding: '12px 18px',
-                    borderRadius: 12,
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                    color: '#fff',
-                    fontWeight: 800,
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 8,
-                    boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)',
-                  }}
-                >
-                  <Wallet size={18} />
-                  <span>Connect Wallet</span>
-                </button>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+      <PublicNavbar />
 
       {/* HERO SECTION */}
       <header style={{ position: 'relative', zIndex: 10, padding: '90px 24px 70px', textAlign: 'center' }}>
@@ -398,6 +180,18 @@ export function LandingPage() {
           >
             <Sparkles size={16} color="#c084fc" />
             <span>100% NON-CUSTODIAL BINARY MATRIX & SMART CLUB PROTOCOL</span>
+          </div>
+
+          {/* Animated 3D Golden Logo (Centered & Proportional) */}
+          <div className="elzora-hero-logo-container">
+            <div className="elzora-hero-logo-wrap">
+              <img
+                src="/logo.png"
+                alt="ELZORA"
+                className="elzora-hero-logo"
+              />
+              <div className="elzora-hero-shimmer" />
+            </div>
           </div>
 
           {/* Main Headline */}
@@ -426,7 +220,7 @@ export function LandingPage() {
               margin: '0 auto 40px',
             }}
           >
-            Join ELZORA with <strong>$50 USDT</strong> on BNB Smart Chain. 100% of registration fees are mathematically routed in real-time across 7 transparent income streams with automated cascading upgrades and zero admin delays.
+            Join ELZORA with <strong>$50 USDT</strong> on BNB Smart Chain. 100% of registration fees are mathematically routed in real-time across 8 transparent income streams with automated cascading upgrades, a perpetual $25 Single Leg Global Club, and zero admin delays.
           </p>
 
           {/* CTA Buttons */}
@@ -469,7 +263,7 @@ export function LandingPage() {
                 gap: 8,
               }}
             >
-              <span>Explore The 7 Streams</span>
+              <span>Explore The 8 Incomes</span>
               <ChevronRight size={18} color="#c084fc" />
             </a>
           </div>
@@ -490,7 +284,7 @@ export function LandingPage() {
             </div>
 
             <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#c084fc' }}>7 Streams</div>
+              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#c084fc' }}>8 Incomes</div>
               <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Comprehensive Financial Channels</div>
             </div>
 
@@ -580,10 +374,26 @@ export function LandingPage() {
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f97316' }} />
               Lifetime (10% - $5)
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#06b6d4' }} />
+              Single Leg ($25 Autonomous Queue)
+            </div>
           </div>
         </div>
 
-        {/* 7 STREAMS CARDS GRID */}
+        {/* 8 INCOMES CARDS GRID */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ color: '#38bdf8', fontWeight: 800, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+            Comprehensive Compensation Channels
+          </div>
+          <h3 style={{ fontSize: '1.7rem', fontWeight: 900, color: '#fff', margin: '0 0 6px' }}>
+            8 Core Income Streams Breakdown
+          </h3>
+          <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: 0 }}>
+            Mathematically routed in real-time on BSC directly into member Web3 wallets
+          </p>
+        </div>
+
         <div id="streams" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
           {streams.map((stream, idx) => {
             const Icon = stream.icon
@@ -783,7 +593,7 @@ export function LandingPage() {
             </div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>1-Click Instant Payouts</h3>
             <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
-              Zero withdrawal deductions, zero mandatory wait windows. Whenever you want your rewards, trigger an on-chain transfer to your Web3 wallet.
+              Zero withdrawal delays, zero manual claim wait windows. All commissions and rewards are transferred directly and instantly to your Web3 wallet upon generation.
             </p>
           </div>
 
@@ -802,8 +612,17 @@ export function LandingPage() {
       {/* FOOTER */}
       <footer style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(139, 92, 246, 0.2)', padding: '50px 24px', textAlign: 'center' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ fontSize: '1.6rem', fontWeight: 900, letterSpacing: '0.08em', color: '#f8fafc', marginBottom: 8 }}>
-            ELZORA
+          <div style={{ marginBottom: 12 }}>
+            <img
+              src="/logo.png"
+              alt="ELZORA"
+              style={{
+                height: 38,
+                width: 'auto',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 2px 10px rgba(245, 158, 11, 0.35))',
+              }}
+            />
           </div>
           <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: 20 }}>
             Next-Generation Decentralized Binary Matrix & Smart Club Ecosystem • Powered by BNB Smart Chain

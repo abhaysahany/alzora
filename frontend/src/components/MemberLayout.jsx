@@ -22,6 +22,8 @@ import {
   Search,
   Wallet,
   History,
+  FileText,
+  HelpCircle,
 } from 'lucide-react'
 
 export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
@@ -67,15 +69,16 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/tree', label: 'Binary Matrix Tree', icon: GitCommit },
+    { path: '/tree', label: 'Sponsor Tree & Directs', icon: GitCommit },
     { path: '/ranks', label: '8 Club Ranks', icon: Award },
-    { path: '/packages', label: 'Global Club ($25)', icon: RefreshCw },
-    { path: '/withdrawal', label: 'Withdrawal', icon: Wallet },
+    { path: '/packages', label: 'Single Leg / Global ($25)', icon: RefreshCw },
     { path: '/history', label: 'Transaction History', icon: History },
     { path: '/earnings', label: 'Income Breakdown', icon: DollarSign },
     { path: '/team', label: 'Team & Lineage', icon: Users },
     { path: '/referrals', label: 'Referral Link & QR', icon: Share2 },
     { path: '/income-history', label: 'Income Streams Ledger', icon: Receipt },
+    { path: '/business-plan', label: 'Business Plan', icon: FileText },
+    { path: '/faqs', label: "FAQ's", icon: HelpCircle },
   ]
 
   return (
@@ -118,32 +121,18 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
 
       {/* SIDEBAR */}
       <aside className={`dashboard-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
-        <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link to="/" className="brand" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 10,
-                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 900,
-                color: '#ffffff',
-                fontSize: '1.1rem',
-                boxShadow: '0 0 16px rgba(124, 58, 237, 0.5)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-              }}
-            >
-              E
-            </div>
-            <span style={{ fontWeight: 900, background: 'linear-gradient(135deg, #e2e8f0, #c084fc 40%, #6366f1 80%, #38bdf8)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', letterSpacing: '0.08em', fontSize: '1.4rem' }}>ELZORA</span>
+        <div className="sidebar-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', width: '100%', padding: '0 16px' }}>
+          <Link to="/" className="brand" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', textDecoration: 'none' }}>
+            <img
+              src="/logo.png"
+              alt="ELZORA"
+              className="elzora-logo-sidebar"
+            />
           </Link>
           <button
             className="mobile-burger-btn"
             onClick={() => setMobileMenuOpen(false)}
-            style={{ display: mobileMenuOpen ? 'block' : 'none' }}
+            style={{ display: mobileMenuOpen ? 'block' : 'none', position: 'absolute', right: 16 }}
           >
             <X size={20} />
           </button>

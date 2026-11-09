@@ -1,6 +1,8 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { LandingPage } from './pages/LandingPage'
+import { BusinessPlanPage } from './pages/BusinessPlanPage'
+import { FaqPage } from './pages/FaqPage'
 import { LoginPage } from './pages/LoginPage'
 import { UserLookupPage } from './pages/UserLookupPage'
 import { UserDetailsPage } from './pages/UserDetailsPage'
@@ -25,6 +27,7 @@ import { AdminIncomePage } from './pages/admin/AdminIncomePage'
 import { AdminWithdrawalsPage } from './pages/admin/AdminWithdrawalsPage'
 import { AdminTransactionsPage } from './pages/admin/AdminTransactionsPage'
 import { AdminControlsPage } from './pages/admin/AdminControlsPage'
+import { AdminTreePage } from './pages/admin/AdminTreePage'
 import { ReferralListener } from './components/ReferralListener'
 
 export default function App() {
@@ -33,6 +36,9 @@ export default function App() {
       <ReferralListener />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/business-plan" element={<BusinessPlanPage />} />
+        <Route path="/faqs" element={<FaqPage />} />
+        <Route path="/faq" element={<FaqPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/lookup" element={<UserLookupPage />} />
         <Route path="/user-lookup" element={<UserLookupPage />} />
@@ -129,19 +135,11 @@ export default function App() {
         />
         <Route
           path="/withdrawal"
-          element={
-            <ProtectedRoute>
-              <WithdrawalPage />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/dashboard" replace />}
         />
         <Route
           path="/withdraw"
-          element={
-            <ProtectedRoute>
-              <WithdrawalPage />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/dashboard" replace />}
         />
 
         {/* ADMIN PROTECTED ROUTES */}
@@ -158,6 +156,14 @@ export default function App() {
           element={
             <AdminProtectedRoute>
               <AdminMembersPage />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/tree"
+          element={
+            <AdminProtectedRoute>
+              <AdminTreePage />
             </AdminProtectedRoute>
           }
         />

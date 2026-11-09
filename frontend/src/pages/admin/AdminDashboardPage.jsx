@@ -46,12 +46,14 @@ export function AdminDashboardPage() {
   const totalInvestedUsd = activeMembers * 50
   const totalIncomePaidUsd = members?.reduce((sum, m) => sum + (m.totalIncome || 0), 0) || 0
 
-  // 7 Financial Streams Aggregates
+  // 8 Financial Streams Aggregates
   const totalDirectIncomeUsd = members?.reduce((sum, m) => sum + (m.directIncome || 0), 0) || 0
   const totalAffiliateIncomeUsd = members?.reduce((sum, m) => sum + (m.affiliateIncome || 0), 0) || 0
   const totalMatchingIncomeUsd = members?.reduce((sum, m) => sum + (m.matchingIncome || 0), 0) || 0
   const totalClubIncomeUsd = members?.reduce((sum, m) => sum + (m.clubIncome || 0), 0) || 0
   const totalChampionIncomeUsd = members?.reduce((sum, m) => sum + (m.championIncome || 0), 0) || 0
+  const totalWeeklyIncomeUsd = members?.reduce((sum, m) => sum + (m.weeklyIncome || 0), 0) || 0
+  const totalLifetimeIncomeUsd = members?.reduce((sum, m) => sum + (m.lifetimeIncome || 0), 0) || 0
   const totalGlobalClubIncomeUsd = members?.reduce((sum, m) => sum + (m.globalClubIncome || 0), 0) || 0
 
   const recentIncomeList = (adminGlobalIncomeEntries || []).slice(0, 8)
@@ -218,19 +220,19 @@ export function AdminDashboardPage() {
 
         </div>
 
-        {/* 7 FINANCIAL STREAMS TELEMETRY */}
+        {/* 8 FINANCIAL STREAMS TELEMETRY */}
         <div className="glass-card" style={{ padding: 28, borderRadius: 24, background: 'rgba(11, 15, 36, 0.85)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <div>
               <h3 style={{ margin: 0, color: '#fff', fontSize: '1.25rem', fontWeight: 800 }}>
-                ELZORA 7 Financial Streams Telemetry
+                ELZORA 8 Financial Streams Telemetry
               </h3>
               <p style={{ margin: '4px 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>
-                100% of each $50 registration is mathematically routed across these 7 channels.
+                Complete breakdown of all 8 income channels generated across the network.
               </p>
             </div>
             <Link to="/admin/income" style={{ color: 'var(--purple-light)', fontSize: '0.85rem', fontWeight: 800, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-              Full Income Ledger <ChevronRight size={16} />
+              Full 8-Stream Ledger <ChevronRight size={16} />
             </Link>
           </div>
 
@@ -284,6 +286,58 @@ export function AdminDashboardPage() {
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
                 $12.00 cascading queue upgrades
+              </div>
+            </div>
+
+            {/* Stream 5 */}
+            <div style={{ background: 'rgba(251, 191, 36, 0.05)', border: '1px solid rgba(251, 191, 36, 0.2)', padding: 20, borderRadius: 16 }}>
+              <div style={{ fontSize: '0.76rem', color: '#fbbf24', fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>
+                Champion Royalty (6%)
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>
+                ${totalChampionIncomeUsd.toFixed(2)} USDT
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
+                $3.00 pool / month batch
+              </div>
+            </div>
+
+            {/* Stream 6 */}
+            <div style={{ background: 'rgba(244, 63, 94, 0.05)', border: '1px solid rgba(244, 63, 94, 0.2)', padding: 20, borderRadius: 16 }}>
+              <div style={{ fontSize: '0.76rem', color: '#f43f5e', fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>
+                Weekly Performance (6%)
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>
+                ${totalWeeklyIncomeUsd.toFixed(2)} USDT
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
+                $3.00 pool / weekly batch
+              </div>
+            </div>
+
+            {/* Stream 7 */}
+            <div style={{ background: 'rgba(129, 140, 248, 0.05)', border: '1px solid rgba(129, 140, 248, 0.2)', padding: 20, borderRadius: 16 }}>
+              <div style={{ fontSize: '0.76rem', color: '#818cf8', fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>
+                27 Lifetime Milestones (10%)
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>
+                ${totalLifetimeIncomeUsd.toFixed(2)} USDT
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
+                $5.00 pool ($25 to $21M)
+              </div>
+            </div>
+
+            {/* Stream 8 */}
+            <div style={{ background: 'rgba(6, 182, 212, 0.05)', border: '1px solid rgba(6, 182, 212, 0.2)', padding: 20, borderRadius: 16 }}>
+              <div style={{ fontSize: '0.76rem', color: '#06b6d4', fontWeight: 800, textTransform: 'uppercase', marginBottom: 6 }}>
+                Single Leg / Global ($25)
+              </div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff' }}>
+                ${totalGlobalClubIncomeUsd.toFixed(2)} USDT
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: 4 }}>
+                $25 per cycle + re-entry
               </div>
             </div>
           </div>

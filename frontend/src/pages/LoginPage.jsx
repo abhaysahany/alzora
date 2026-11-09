@@ -100,7 +100,16 @@ export function LoginPage() {
       <header className="nav" style={{ position: 'relative', zIndex: 100 }}>
         <div className="wrap nav-inner">
           <Link to="/" className="brand" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontWeight: 900, fontSize: '1.6rem', letterSpacing: '0.08em', background: 'linear-gradient(135deg, #f8fafc, #c084fc 40%, #6366f1 80%, #38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>ELZORA</span>
+            <img
+              src="/logo.png"
+              alt="ELZORA"
+              style={{
+                height: 32,
+                width: 'auto',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 2px 10px rgba(245, 158, 11, 0.35))',
+              }}
+            />
           </Link>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <Link
@@ -121,45 +130,17 @@ export function LoginPage() {
       {/* LOGIN CARD CONTAINER */}
       <div className="login-page-container" style={{ position: 'relative', zIndex: 10 }}>
         <div className="glass-card glass-card-glow login-card" style={{ zIndex: 10 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-            <div
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+            <img
+              src="/logo.png"
+              alt="ELZORA"
               style={{
-                width: 68,
-                height: 68,
-                borderRadius: 20,
-                background: 'linear-gradient(135deg, #0e1438 0%, #060814 100%)',
-                border: '2px solid rgba(192, 132, 252, 0.5)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 30px rgba(124, 58, 237, 0.45)',
-                marginBottom: 12,
+                height: 48,
+                width: 'auto',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 4px 20px rgba(245, 158, 11, 0.45))',
               }}
-            >
-              <span
-                style={{
-                  fontWeight: 900,
-                  fontSize: '2rem',
-                  background: 'linear-gradient(135deg, #ffffff 0%, #c084fc 50%, #38bdf8 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}
-              >
-                E
-              </span>
-            </div>
-            <div
-              style={{
-                fontWeight: 900,
-                fontSize: '1.6rem',
-                letterSpacing: '0.12em',
-                background: 'linear-gradient(135deg, #f8fafc 10%, #c084fc 45%, #6366f1 80%, #38bdf8)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              ELZORA
-            </div>
+            />
           </div>
 
           <div className="login-badge">
