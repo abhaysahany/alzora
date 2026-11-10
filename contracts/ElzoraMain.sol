@@ -5,7 +5,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Ownable2StepUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Ownable2StepUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -20,7 +20,7 @@ import {IElzora} from "./interfaces/IElzora.sol";
  */
 contract ElzoraMain is
     Initializable,
-    OwnableUpgradeable,
+    Ownable2StepUpgradeable,
     PausableUpgradeable,
     ReentrancyGuard,
     UUPSUpgradeable,
@@ -155,6 +155,7 @@ contract ElzoraMain is
         ) revert ZeroAddress();
 
         __Ownable_init(initialOwner);
+        __Ownable2Step_init();
         __Pausable_init();
 
         paymentToken = initialPaymentToken;
@@ -942,6 +943,14 @@ contract ElzoraMain is
         if (recipient == address(0)) revert ZeroAddress();
         IERC20(token).safeTransfer(recipient, amount);
         emit EmergencyRescued(token, recipient, amount);
+    }
+
+    /**
+     * @notice Cancels an initiated 2-step ownership transfer.
+     * @dev Only callable by the current owner. Resets pending owner to address(0).
+     */
+    function cancelOwnershipTransfer() external onlyOwner {
+        transferOwnership(address(0));
     }
 
     // --- View Functions ---

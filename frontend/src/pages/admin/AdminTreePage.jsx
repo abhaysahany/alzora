@@ -63,7 +63,7 @@ export function AdminTreePage() {
   const activeChain = activeChainId === 97 ? bscTestnet : bsc
   const rpcUrl = getRpcUrl(activeChainId)
   const CONTRACT_ADDRESSES = getContractAddresses(activeChainId)
-  const rootAddress = CONTRACT_ADDRESSES.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
+  const rootAddress = CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb'
 
   const [activeTab, setActiveTab] = useState('binary') // 'binary', 'sponsor', or 'single_leg'
   const [focusAddress, setFocusAddress] = useState(rootAddress)

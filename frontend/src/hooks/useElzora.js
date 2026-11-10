@@ -146,6 +146,35 @@ export function useElzora() {
     },
   })
 
+  // 4. Fetch Contract Owner & Pending Owner On-Chain
+  const {
+    data: onChainOwnerData,
+    isLoading: isOwnerLoading,
+    isFetched: isOwnerFetched,
+    refetch: refetchOwner,
+  } = useReadContract({
+    address: CONTRACT_ADDRESSES.TETHER_STREAM,
+    abi: ELZORA_MAIN_ABI,
+    functionName: 'owner',
+    query: {
+      refetchInterval: 10_000,
+    },
+  })
+
+  const {
+    data: onChainPendingOwnerData,
+    isLoading: isPendingOwnerLoading,
+    isFetched: isPendingOwnerFetched,
+    refetch: refetchPendingOwner,
+  } = useReadContract({
+    address: CONTRACT_ADDRESSES.TETHER_STREAM,
+    abi: ELZORA_MAIN_ABI,
+    functionName: 'pendingOwner',
+    query: {
+      refetchInterval: 5_000,
+    },
+  })
+
   // Format User Profile
   const rawProfile = dashData?.profile || directUserData
   const rawIncome = dashData?.income || directIncomeData
@@ -153,11 +182,32 @@ export function useElzora() {
     ? dashData.directReferrals
     : (directRefsData || [])
 
+  const contractOwnerAddress = onChainOwnerData || CONTRACT_ADDRESSES.OWNER_ADDRESS || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
+  const pendingOwnerAddress = onChainPendingOwnerData || '0x0000000000000000000000000000000000000000'
+  const isPendingOwner = Boolean(
+    address &&
+    pendingOwnerAddress &&
+    pendingOwnerAddress !== '0x0000000000000000000000000000000000000000' &&
+    address.toLowerCase() === pendingOwnerAddress.toLowerCase()
+  )
+
   const isRoot = Boolean(
     address &&
     CONTRACT_ADDRESSES.ROOT_ID &&
     address.toLowerCase() === CONTRACT_ADDRESSES.ROOT_ID.toLowerCase()
   )
+  // A wallet is confirmed owner ONLY when on-chain owner equals their address, AND they are NOT pending
+  const isOwner = Boolean(
+    !isPendingOwner &&
+    address &&
+    (
+      (onChainOwnerData && address.toLowerCase() === onChainOwnerData.toLowerCase()) ||
+      (!onChainOwnerData && CONTRACT_ADDRESSES.OWNER_ADDRESS && address.toLowerCase() === CONTRACT_ADDRESSES.OWNER_ADDRESS.toLowerCase())
+    )
+  )
+
+  // User does NOT get admin access until they accept ownership!
+  const isAdmin = Boolean(isOwner && !isPendingOwner)
   const isUserRegistered = Boolean(rawProfile?.isRegistered || directUserData?.isRegistered || isRoot)
 
   // Calculate total income sum from breakdown if totalIncomeEarned is 0 (fallback)
@@ -300,7 +350,9 @@ export function useElzora() {
     refetchOverview()
     refetchUsdtBal()
     refetchUsdtAllowance()
-  }, [refetchDash, refetchOverview, refetchUsdtBal, refetchUsdtAllowance])
+    refetchOwner()
+    refetchPendingOwner()
+  }, [refetchDash, refetchOverview, refetchUsdtBal, refetchUsdtAllowance, refetchOwner, refetchPendingOwner])
 
   // --- Actions ---
 
@@ -603,12 +655,41 @@ export function useElzora() {
         args: [newOwner],
         chain: activeChain,
       })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
       await refreshAll()
+      await refetchPendingOwner?.()
       setLoading(false)
       return tx
     } catch (err) {
       console.error('Transfer ownership failed:', err)
       setError(err.message || 'Transfer ownership failed')
+      setLoading(false)
+      throw err
+    }
+  }
+
+  const cancelOwnershipTransfer = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'cancelOwnershipTransfer',
+        chain: activeChain,
+      })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
+      await refreshAll()
+      await refetchPendingOwner?.()
+      setLoading(false)
+      return tx
+    } catch (err) {
+      console.error('Cancel ownership transfer failed:', err)
+      setError(err.message || 'Cancel ownership transfer failed')
       setLoading(false)
       throw err
     }
@@ -624,7 +705,11 @@ export function useElzora() {
         functionName: 'acceptOwnership',
         chain: activeChain,
       })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
       await refreshAll()
+      await Promise.all([refetchOwner?.(), refetchPendingOwner?.()])
       setLoading(false)
       return tx
     } catch (err) {
@@ -757,6 +842,11 @@ export function useElzora() {
     isProfileFetched: isDashFetched,
     isProfileLoading: isDashLoading,
     refreshAll,
+    refetchAll: refreshAll,
+    isOwnerLoading,
+    isOwnerFetched,
+    isPendingOwnerLoading,
+    isPendingOwnerFetched,
     approveUSDT,
     register,
     joinGlobalClub,
@@ -771,7 +861,11 @@ export function useElzora() {
     setGatewayContract,
     setTreasuryWallet,
     emergencyTokenRescue,
+    contractOwnerAddress,
+    pendingOwnerAddress,
+    isPendingOwner,
     transferOwnership,
+    cancelOwnershipTransfer,
     acceptOwnership,
     createChampionMonthlySnapshot,
     distributeChampionBatch,
@@ -782,7 +876,9 @@ export function useElzora() {
     active: isUserRegistered,
     memberInfo: profile,
     isMemberInfoFetched: Boolean(isDashFetched || isDirectUserFetched),
-    isAdmin: isRoot,
+    isAdmin,
+    isOwner,
+    isRoot,
   }
 }
 

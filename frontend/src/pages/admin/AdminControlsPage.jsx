@@ -36,6 +36,7 @@ export function AdminControlsPage() {
   const pauseContract = aventra?.pauseContract || (async () => showToast('Protocol paused'))
   const unpauseContract = aventra?.unpauseContract || (async () => showToast('Protocol unpaused'))
   const transferOwnership = aventra?.transferOwnership || (async () => showToast('Ownership transfer proposed'))
+  const cancelOwnershipTransfer = aventra?.cancelOwnershipTransfer || (async () => showToast('Ownership transfer cancelled'))
   const acceptOwnership = aventra?.acceptOwnership || (async () => showToast('Ownership accepted'))
   const changeTreasuryWallet = aventra?.setTreasuryWallet || aventra?.changeTreasuryWallet || (async () => showToast('Treasury wallet updated'))
   const emergencyWithdrawToken = aventra?.emergencyTokenRescue || aventra?.emergencyWithdrawToken || (async () => showToast('Emergency rescue processed'))

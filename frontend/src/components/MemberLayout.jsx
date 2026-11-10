@@ -24,14 +24,24 @@ import {
   History,
   FileText,
   HelpCircle,
+  Crown,
+  Loader2,
 } from 'lucide-react'
 
 export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
   const { isConnected, logout } = useWalletAuth()
-  const { memberInfo, isMemberInfoFetched, isAdmin } = useAventraContracts()
+  const {
+    memberInfo,
+    isMemberInfoFetched,
+    isAdmin,
+    isPendingOwner,
+    acceptOwnership,
+    refreshAll,
+  } = useAventraContracts()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [toastMessage, setToastMessage] = useState(null)
+  const [isAcceptingOwnership, setIsAcceptingOwnership] = useState(false)
 
   const isRegistered = Boolean(memberInfo?.isRegistered || memberInfo?.active)
 
@@ -54,6 +64,21 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
   const showToast = (msg) => {
     setToastMessage(msg)
     setTimeout(() => setToastMessage(null), 4000)
+  }
+
+  const handleAcceptOwnership = async () => {
+    try {
+      setIsAcceptingOwnership(true)
+      showToast('Accepting ownership on-chain in MetaMask...')
+      await acceptOwnership()
+      if (refreshAll) await refreshAll()
+      showToast('🎉 Ownership accepted! Redirecting to Admin Console...')
+      navigate('/admin', { replace: true })
+    } catch (err) {
+      showToast(`Accept failed: ${err.message}`)
+    } finally {
+      setIsAcceptingOwnership(false)
+    }
   }
 
   if (!isConnected || (isMemberInfoFetched && !isRegistered)) {
@@ -138,6 +163,35 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
         </div>
 
         <nav className="sidebar-nav">
+          {isPendingOwner && (
+            <button
+              onClick={handleAcceptOwnership}
+              disabled={isAcceptingOwnership}
+              className="sidebar-item"
+              style={{
+                textDecoration: 'none',
+                background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(0, 229, 255, 0.15))',
+                border: '1px solid #ffd700',
+                color: '#ffd700',
+                fontWeight: 800,
+                marginBottom: 12,
+                borderRadius: 10,
+                width: '100%',
+                cursor: isAcceptingOwnership ? 'not-allowed' : 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <div className="sidebar-item-left">
+                {isAcceptingOwnership ? (
+                  <Loader2 size={18} className="animate-spin" color="#ffd700" />
+                ) : (
+                  <Crown size={18} color="#ffd700" />
+                )}
+                <span>{isAcceptingOwnership ? 'Accepting...' : 'Accept Contract Owner'}</span>
+              </div>
+            </button>
+          )}
+
           {isAdmin && (
             <NavLink
               to="/admin"
@@ -216,6 +270,61 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
 
         {/* PAGE CONTENT */}
         <div className="dashboard-content">
+          {/* PENDING OWNERSHIP ALERT BANNER */}
+          {isPendingOwner && (
+            <div
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,215,0,0.18), rgba(0,229,255,0.12))',
+                border: '2px solid #ffd700',
+                borderRadius: 18,
+                padding: '20px 24px',
+                marginBottom: 24,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 16,
+                boxShadow: '0 8px 30px rgba(255,215,0,0.2)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(255,215,0,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffd700' }}>
+                  <Crown size={26} />
+                </div>
+                <div>
+                  <div style={{ fontWeight: 900, color: '#fff', fontSize: '1.05rem', marginBottom: 4 }}>
+                    👑 Smart Contract Ownership Transfer Proposed!
+                  </div>
+                  <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.86rem' }}>
+                    Your wallet has been nominated as Contract Owner. Accept ownership on-chain to activate the Admin Control Center.
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleAcceptOwnership}
+                disabled={isAcceptingOwnership}
+                className="btn btn-primary"
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: 12,
+                  fontWeight: 900,
+                  fontSize: '0.9rem',
+                  background: 'linear-gradient(135deg, #ffd700 0%, #ff8c00 100%)',
+                  color: '#000',
+                  border: 'none',
+                  cursor: isAcceptingOwnership ? 'not-allowed' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                {isAcceptingOwnership && <Loader2 size={16} className="animate-spin" />}
+                <span>{isAcceptingOwnership ? 'Confirming On-Chain...' : 'Accept Ownership & Enter Admin'}</span>
+              </button>
+            </div>
+          )}
+
           {typeof children === 'function' ? children({ showToast }) : children}
         </div>
       </main>

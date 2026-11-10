@@ -102,7 +102,7 @@ export function useAdminMembers() {
 
       const gatewayAddr = contractAddresses.GATEWAY
       const mainAddr = contractAddresses.TETHER_STREAM
-      const rootAddr = (contractAddresses.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5')
+      const rootAddr = (contractAddresses.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb')
 
       // ── PRIMARY: BFS traversal via getDirectReferrals ──────────────────────
       const bfsAddresses = await discoverAllMembersViaBFS(

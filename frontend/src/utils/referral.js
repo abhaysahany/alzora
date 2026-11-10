@@ -3,7 +3,7 @@ import { bsc } from 'viem/chains'
 import { CONTRACT_ADDRESSES, AVENTRA_XMLM_ABI } from '../web3/contracts'
 
 export const REFERRAL_STORAGE_KEY = 'aventrax_referral_sponsor'
-export const DEFAULT_ROOT_ADDRESS = import.meta.env.VITE_ROOT_ID || CONTRACT_ADDRESSES.ROOT_ID || '0xFC4163220762D645a5e256704532494Ed3d3282F'
+export const DEFAULT_ROOT_ADDRESS = import.meta.env.VITE_ROOT_ID || CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb'
 export const DEFAULT_ROOT_ID = 1
 
 /**

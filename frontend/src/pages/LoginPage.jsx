@@ -16,9 +16,14 @@ export function LoginPage() {
     isAdmin,
     isOperator,
     isPendingOwner,
+    isOwnerLoading,
+    isOwnerFetched,
+    isPendingOwnerLoading,
+    isPendingOwnerFetched,
     pendingOwnerAddress,
     contractOwnerAddress,
     acceptOwnership,
+    refreshAll,
     refetchAll,
   } = useAventraContracts()
   const { closeConnectModal } = useConnectModal()
@@ -35,13 +40,22 @@ export function LoginPage() {
       try { closeConnectModal() } catch (e) {}
     }
 
-    // Wait for member info to load before deciding where to redirect
-    if (!isMemberInfoFetched) return
+    // Must wait until member info AND ownership queries have completely finished on-chain!
+    if (
+      !isMemberInfoFetched ||
+      !isPendingOwnerFetched ||
+      !isOwnerFetched ||
+      isOwnerLoading ||
+      isPendingOwnerLoading
+    ) {
+      return
+    }
 
-    // If wallet is pending owner, do NOT redirect away yet; allow user to accept ownership on this page!
+    // If wallet has a pending ownership nomination, STOP! DO NOT redirect!
+    // User must accept ownership first before login to gain admin access.
     if (isPendingOwner) return
 
-    // If connected wallet is Admin or Operator, redirect straight to Admin Control Center
+    // Only confirmed on-chain owner/admin can enter Admin Console
     if (isAdmin || isOperator) {
       navigate('/admin', { replace: true })
       return
@@ -66,6 +80,10 @@ export function LoginPage() {
     isAuthenticated,
     address,
     isMemberInfoFetched,
+    isOwnerFetched,
+    isPendingOwnerFetched,
+    isOwnerLoading,
+    isPendingOwnerLoading,
     isPendingOwner,
     isAdmin,
     isOperator,
@@ -83,7 +101,8 @@ export function LoginPage() {
     setIsAccepting(true)
     try {
       await acceptOwnership()
-      await refetchAll()
+      const syncFn = refreshAll || refetchAll
+      if (syncFn) await syncFn()
       navigate('/admin', { replace: true })
     } catch (err) {
       setAcceptError(err?.message || 'Failed to accept contract ownership.')
@@ -158,6 +177,14 @@ export function LoginPage() {
             <ConnectWalletButton size="large" />
           </div>
 
+          {/* WALLET CONNECTED STATUS & VERIFYING STATE */}
+          {isAuthenticated && (!isPendingOwnerFetched || isPendingOwnerLoading) && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: 12, margin: '8px 0 16px', borderRadius: 12, background: 'rgba(0, 229, 255, 0.08)', border: '1px solid rgba(0, 229, 255, 0.2)', color: '#00e5ff' }}>
+              <Loader2 size={16} className="animate-spin" />
+              <span style={{ fontSize: '0.84rem', fontWeight: 600 }}>Verifying smart contract ownership & permissions...</span>
+            </div>
+          )}
+
           {/* PENDING OWNER ACCEPTANCE CARD */}
           {isAuthenticated && isPendingOwner && (
             <div
@@ -166,23 +193,23 @@ export function LoginPage() {
                 margin: '20px 0',
                 padding: 24,
                 borderRadius: 20,
-                background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,229,255,0.08))',
-                border: '2px solid rgba(255,215,0,0.5)',
-                boxShadow: '0 0 25px rgba(255,215,0,0.2)',
+                background: 'linear-gradient(135deg, rgba(255,215,0,0.18), rgba(0,229,255,0.08))',
+                border: '2px solid rgba(255,215,0,0.6)',
+                boxShadow: '0 0 30px rgba(255,215,0,0.25)',
                 textAlign: 'left',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#ffd700', marginBottom: 10 }}>
                 <Crown size={24} />
-                <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#fff' }}>
-                  Contract Ownership Transfer Proposed!
+                <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 900, color: '#fff' }}>
+                  Smart Contract Ownership Transfer Proposed!
                 </h3>
               </div>
               <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: 16, lineHeight: 1.5 }}>
-                You have been proposed as the new Owner of the <b>AventraX Smart Contract</b> by current owner{' '}
+                Your connected wallet has been nominated as the new Owner of the <b>ELZORA Smart Contract</b> by current owner{' '}
                 <code style={{ color: '#00e5ff' }}>
                   {contractOwnerAddress && typeof contractOwnerAddress === 'string' ? `${contractOwnerAddress.slice(0, 6)}...${contractOwnerAddress.slice(-4)}` : 'Current Owner'}
-                </code>. Click below to accept ownership on-chain.
+                </code>. You must accept ownership on-chain before you can login and access the Admin Control Center.
               </p>
 
               {acceptError && (
@@ -191,39 +218,59 @@ export function LoginPage() {
                 </div>
               )}
 
-              <button
-                onClick={handleAcceptOwnership}
-                disabled={isAccepting}
-                className="btn btn-primary"
-                style={{
-                  width: '100%',
-                  padding: '14px 20px',
-                  fontWeight: 800,
-                  borderRadius: 14,
-                  fontSize: '0.92rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 10,
-                  background: 'linear-gradient(135deg, #ffd700, #ff8c00)',
-                  color: '#000',
-                  border: 'none',
-                  cursor: isAccepting ? 'not-allowed' : 'pointer',
-                }}
-              >
-                {isAccepting ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>Confirming Ownership On-Chain...</span>
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck size={20} />
-                    <span>Accept Ownership & Enter Admin Control Center</span>
-                    <ArrowRight size={18} />
-                  </>
-                )}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <button
+                  onClick={handleAcceptOwnership}
+                  disabled={isAccepting}
+                  className="btn btn-primary"
+                  style={{
+                    width: '100%',
+                    padding: '14px 20px',
+                    fontWeight: 900,
+                    borderRadius: 14,
+                    fontSize: '0.94rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 10,
+                    background: 'linear-gradient(135deg, #ffd700, #ff8c00)',
+                    color: '#000',
+                    border: 'none',
+                    cursor: isAccepting ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {isAccepting ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      <span>Confirming Ownership On-Chain...</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck size={20} />
+                      <span>Accept Ownership & Enter Admin Control Center</span>
+                      <ArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/dashboard', { replace: true })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 16px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 12,
+                    color: 'var(--muted)',
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                  }}
+                >
+                  Skip & Continue to Member Dashboard as Standard User
+                </button>
+              </div>
             </div>
           )}
 

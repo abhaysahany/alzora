@@ -13,13 +13,14 @@ export const CHAIN_CONTRACTS = {
   // BSC Testnet (Chain ID 97)
   97: {
     USDT: import.meta.env.VITE_USDT_CONTRACT_ADDRESS || '0x90a1De2cC063786fC7e6C69514988cBb03E6665e',
-    ELZORA: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x476Fa8Bb20B79d1EffcF417EBaBb14E89f785809',
-    TETHER_STREAM: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x476Fa8Bb20B79d1EffcF417EBaBb14E89f785809',
-    XMLM: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0x476Fa8Bb20B79d1EffcF417EBaBb14E89f785809',
+    ELZORA: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0xf21b249b1040d8435Bc13B3d5Aeffe782F0B2B17',
+    TETHER_STREAM: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0xf21b249b1040d8435Bc13B3d5Aeffe782F0B2B17',
+    XMLM: import.meta.env.VITE_ELZORA_ADDRESS || import.meta.env.ELZORA_ADDRESS || '0xf21b249b1040d8435Bc13B3d5Aeffe782F0B2B17',
     AVX: import.meta.env.VITE_USDT_CONTRACT_ADDRESS || '0x90a1De2cC063786fC7e6C69514988cBb03E6665e',
-    GATEWAY: import.meta.env.VITE_ELZORA_GATEWAY_ADDRESS || import.meta.env.ELZORA_GATEWAY_ADDRESS || '0xC2CD75Fa7dF6eBC67acec5Ad0C0cda6Cf379e093',
+    GATEWAY: import.meta.env.VITE_ELZORA_GATEWAY_ADDRESS || import.meta.env.ELZORA_GATEWAY_ADDRESS || '0xB900a1418728d5f3b98D96E8e26B2beA2A89b8D8',
     TREASURY: import.meta.env.VITE_TREASURY_WALLET || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
-    ROOT_ID: import.meta.env.VITE_ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
+    ROOT_ID: import.meta.env.VITE_ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb',
+    OWNER_ADDRESS: import.meta.env.VITE_OWNER_ADDRESS || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
   },
 }
 
@@ -251,12 +252,12 @@ export const ELZORA_GATEWAY_ABI = [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "milestoneIndex",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
       }
     ],
-    "name": "claimLifetimeMilestone",
+    "name": "checkAndAwardLifetimeMilestones",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -264,12 +265,12 @@ export const ELZORA_GATEWAY_ABI = [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
-    "name": "checkAndAwardLifetimeMilestones",
+    "name": "claimLifetimeMilestone",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -353,6 +354,32 @@ export const ELZORA_GATEWAY_ABI = [
         "internalType": "struct ElzoraGateway.BinaryTeamSummary",
         "name": "summary",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentMonthEpoch",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCurrentWeeklyEpoch",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -722,6 +749,11 @@ export const ELZORA_GATEWAY_ABI = [
           {
             "internalType": "uint256",
             "name": "currentWeeklyEpoch",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentMonthEpoch",
             "type": "uint256"
           },
           {
@@ -1153,7 +1185,33 @@ export const ELZORA_GATEWAY_ABI = [
   },
   {
     "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "paymentToken",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingOwner",
     "outputs": [
       {
         "internalType": "address",
@@ -1873,6 +1931,25 @@ export const ELZORA_MAIN_ABI = [
         "type": "address"
       }
     ],
+    "name": "OwnershipTransferStarted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
     "name": "OwnershipTransferred",
     "type": "event"
   },
@@ -2338,6 +2415,20 @@ export const ELZORA_MAIN_ABI = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "acceptOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "cancelOwnershipTransfer",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -2416,12 +2507,12 @@ export const ELZORA_MAIN_ABI = [
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "milestoneIndex",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
       }
     ],
-    "name": "claimLifetimeMilestone",
+    "name": "checkAndAwardLifetimeMilestones",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2429,12 +2520,12 @@ export const ELZORA_MAIN_ABI = [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "milestoneIndex",
+        "type": "uint256"
       }
     ],
-    "name": "checkAndAwardLifetimeMilestones",
+    "name": "claimLifetimeMilestone",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2846,6 +2937,11 @@ export const ELZORA_MAIN_ABI = [
           {
             "internalType": "uint256",
             "name": "currentWeeklyEpoch",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentMonthEpoch",
             "type": "uint256"
           },
           {
@@ -3384,6 +3480,19 @@ export const ELZORA_MAIN_ABI = [
   },
   {
     "inputs": [],
+    "name": "pendingOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "proxiableUUID",
     "outputs": [
       {
@@ -3528,6 +3637,19 @@ export const ELZORA_MAIN_ABI = [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "newStartTime",
+        "type": "uint256"
+      }
+    ],
+    "name": "setSystemStartTime",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "newTreasury",
         "type": "address"
@@ -3536,6 +3658,19 @@ export const ELZORA_MAIN_ABI = [
     "name": "setTreasuryWallet",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "systemStartTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

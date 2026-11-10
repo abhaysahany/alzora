@@ -301,5 +301,13 @@ contract ElzoraGateway {
     function rootAddress() external view returns (address) {
         return elzoraMain.rootAddress();
     }
+
+    function owner() external view returns (address) {
+        return elzoraMain.owner();
+    }
+
+    function pendingOwner() external view returns (address) {
+        return elzoraMain.pendingOwner();
+    }
 }
 

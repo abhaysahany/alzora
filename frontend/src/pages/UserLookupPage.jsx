@@ -113,7 +113,7 @@ export function UserLookupPage() {
           if (connectedAddress && (cleanQuery.toLowerCase() === 'me' || cleanQuery === '1')) {
             targetAddr = connectedAddress
           } else {
-            targetAddr = CONTRACT_ADDRESSES.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
+            targetAddr = CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb'
           }
         }
 
@@ -259,7 +259,7 @@ export function UserLookupPage() {
       fetchMemberDossier(initialSearch)
     } else {
       // Default to root ID on landing
-      const defaultAddr = CONTRACT_ADDRESSES.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
+      const defaultAddr = CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb'
       setSearchInput(defaultAddr)
       fetchMemberDossier(defaultAddr)
     }
@@ -524,7 +524,7 @@ export function UserLookupPage() {
             <span style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>Quick Audit:</span>
             <button
               type="button"
-              onClick={() => inspectAddress(CONTRACT_ADDRESSES.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5')}
+              onClick={() => inspectAddress(CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb')}
               style={{
                 padding: '4px 12px',
                 borderRadius: 12,

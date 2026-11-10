@@ -32,13 +32,13 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { isConnected, logout, address } = useWalletAuth()
-  const { isAdmin, contractPaused, memberInfo, overview } = useTetherStream()
+  const { isAdmin, isPendingOwner, contractPaused, memberInfo, overview } = useTetherStream()
 
   useEffect(() => {
-    if (!isConnected) {
+    if (!isConnected || isPendingOwner) {
       navigate('/login', { replace: true })
     }
-  }, [isConnected, navigate])
+  }, [isConnected, isPendingOwner, navigate])
 
   const navItems = [
     { label: 'Overview', path: '/admin', icon: LayoutDashboard },

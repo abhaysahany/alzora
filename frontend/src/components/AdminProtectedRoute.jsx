@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ShieldAlert, ArrowLeft } from 'lucide-react'
+import { ShieldAlert, ArrowLeft, Crown } from 'lucide-react'
 import { useWalletAuth } from '../hooks/useWalletAuth'
 import { useAventraContracts } from '../hooks/useAventraContracts'
 import { CONTRACT_ADDRESSES } from '../web3/contracts'
@@ -8,7 +8,7 @@ import { ConnectWalletButton } from './ConnectWalletButton'
 
 export function AdminProtectedRoute({ children }) {
   const { isConnected } = useWalletAuth()
-  const { isAdmin, isOperator, loading } = useAventraContracts()
+  const { isAdmin, isOperator, isPendingOwner, loading } = useAventraContracts()
   const navigate = useNavigate()
 
   if (!isConnected) {
@@ -52,11 +52,92 @@ export function AdminProtectedRoute({ children }) {
             Admin Access Required
           </h2>
           <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginBottom: 24 }}>
-            Please connect the authorized Admin wallet ({CONTRACT_ADDRESSES?.ROOT_ID?.slice(0, 8)}...{CONTRACT_ADDRESSES?.ROOT_ID?.slice(-6)}) to access the ELZORA Admin Control Center.
+            Please connect the authorized Admin or Root wallet to access the ELZORA Admin Control Center.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <ConnectWalletButton />
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  // If the user has a pending ownership nomination, require them to accept ownership first!
+  if (isPendingOwner) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg-main)',
+          padding: 24,
+        }}
+      >
+        <div
+          className="glass-card"
+          style={{
+            maxWidth: 500,
+            width: '100%',
+            padding: 40,
+            textAlign: 'center',
+            borderRadius: 24,
+            border: '2px solid rgba(255, 215, 0, 0.5)',
+            background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(16, 21, 54, 0.95))',
+          }}
+        >
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 20,
+              background: 'rgba(255, 215, 0, 0.2)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 20px',
+              color: '#ffd700',
+            }}
+          >
+            <Crown size={36} />
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 900, margin: '0 0 12px', color: '#fff' }}>
+            Ownership Acceptance Required
+          </h2>
+          <p style={{ color: 'var(--muted)', fontSize: '0.92rem', marginBottom: 28, lineHeight: '1.5' }}>
+            Your wallet has been nominated as the Smart Contract Owner, but you have <b>not accepted ownership on-chain yet</b>. You must accept ownership before you can access the Admin Control Center.
+          </p>
+
+          <button
+            onClick={() => navigate('/login')}
+            className="btn btn-primary"
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              fontSize: '0.95rem',
+              fontWeight: 800,
+              borderRadius: 14,
+              cursor: 'pointer',
+              marginBottom: 12,
+            }}
+          >
+            Go to Login & Accept Ownership
+          </button>
+
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="btn btn-ghost"
+            style={{
+              width: '100%',
+              padding: '12px 20px',
+              fontSize: '0.9rem',
+              borderRadius: 14,
+              cursor: 'pointer',
+            }}
+          >
+            Return to Dashboard
+          </button>
         </div>
       </div>
     )
