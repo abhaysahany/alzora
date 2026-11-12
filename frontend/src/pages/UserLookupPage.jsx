@@ -294,14 +294,14 @@ export function UserLookupPage() {
 
   return (
     <div
-      className="login-container"
+      className="login-container elzora-page-enter"
       style={{
         position: 'relative',
         overflow: 'hidden',
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: '#060814',
+        background: '#050611',
       }}
     >
       <BackgroundCanvas />

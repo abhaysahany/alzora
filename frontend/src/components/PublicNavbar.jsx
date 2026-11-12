@@ -53,9 +53,10 @@ export function PublicNavbar() {
           position: 'sticky',
           top: 0,
           zIndex: 100,
-          backdropFilter: 'blur(20px)',
-          background: 'rgba(6, 8, 20, 0.88)',
-          borderBottom: '1px solid rgba(139, 92, 246, 0.25)',
+          backdropFilter: 'blur(22px) saturate(165%)',
+          background: 'rgba(5, 6, 17, 0.86)',
+          borderBottom: '1px solid rgba(139, 92, 246, 0.28)',
+          boxShadow: '0 10px 36px -18px rgba(0, 0, 0, 0.85)',
           padding: '14px 24px',
         }}
       >
@@ -154,20 +155,20 @@ export function PublicNavbar() {
             {isConnected ? (
               <button
                 onClick={handleAction}
+                className="elzora-shimmer-btn"
                 style={{
-                  padding: '9px 18px',
+                  padding: '10px 18px',
                   borderRadius: 12,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  border: '1px solid rgba(192, 132, 252, 0.45)',
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
                   color: '#fff',
                   fontWeight: 800,
                   fontSize: '0.86rem',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)',
+                  boxShadow: '0 6px 20px rgba(139, 92, 246, 0.45)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  transition: 'all 0.2s',
                 }}
               >
                 <span>{isRegistered ? 'Dashboard' : 'Register Now'}</span>
@@ -176,20 +177,20 @@ export function PublicNavbar() {
             ) : (
               <button
                 onClick={() => navigate('/login')}
+                className="elzora-shimmer-btn"
                 style={{
-                  padding: '9px 18px',
+                  padding: '10px 18px',
                   borderRadius: 12,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
+                  border: '1px solid rgba(192, 132, 252, 0.45)',
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
                   color: '#fff',
                   fontWeight: 800,
                   fontSize: '0.86rem',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(124, 58, 237, 0.4)',
+                  boxShadow: '0 6px 20px rgba(139, 92, 246, 0.45)',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 8,
-                  transition: 'all 0.2s',
                 }}
               >
                 <Wallet size={15} />

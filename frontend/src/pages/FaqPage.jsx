@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { PublicNavbar } from '../components/PublicNavbar'
 import BackgroundCanvas from '../components/BackgroundCanvas'
 import { useWalletAuth } from '../hooks/useWalletAuth'
+import { PageTransitionShell } from '../components/MotionPrimitives'
 import {
   HelpCircle,
   ChevronDown,
@@ -140,10 +141,10 @@ export function FaqPage() {
   }
 
   return (
-    <div
+    <PageTransitionShell
       style={{
         minHeight: '100vh',
-        background: '#060814',
+        background: '#050611',
         color: '#f8fafc',
         fontFamily: "'Space Grotesk', sans-serif",
         position: 'relative',
@@ -194,7 +195,7 @@ export function FaqPage() {
           >
             <HelpCircle size={14} /> KNOWLEDGE BASE & FREQUENTLY ASKED QUESTIONS
           </div>
-          <h1 style={{ fontSize: '2.3rem', fontWeight: 900, color: '#fff', margin: '0 0 8px' }}>
+          <h1 className="elzora-hero-title" style={{ fontSize: 'clamp(1.85rem, 4vw, 2.4rem)', margin: '0 0 8px' }}>
             Frequently Asked Questions (FAQ)
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '0.94rem', maxWidth: 640, margin: '0 auto 20px' }}>
@@ -267,13 +268,13 @@ export function FaqPage() {
               return (
                 <div
                   key={item.id}
+                  className="elzora-glass"
                   style={{
-                    background: 'rgba(11, 15, 36, 0.85)',
-                    border: isOpen ? '1px solid rgba(139, 92, 246, 0.5)' : '1px solid rgba(255, 255, 255, 0.08)',
+                    border: isOpen ? '1px solid rgba(192, 132, 252, 0.55)' : '1px solid rgba(139, 92, 246, 0.22)',
                     borderRadius: 16,
                     overflow: 'hidden',
-                    transition: 'all 0.2s',
-                    boxShadow: isOpen ? '0 8px 24px rgba(139, 92, 246, 0.15)' : 'none',
+                    transition: 'all 0.24s cubic-bezier(0.22, 1, 0.36, 1)',
+                    boxShadow: isOpen ? '0 12px 30px rgba(139, 92, 246, 0.22)' : 'none',
                   }}
                 >
                   <button
@@ -375,7 +376,7 @@ export function FaqPage() {
         </div>
 
       </main>
-    </div>
+    </PageTransitionShell>
   )
 }
 
