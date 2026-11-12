@@ -53,7 +53,7 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
   ]
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#060814', color: '#f8fafc', fontFamily: "'Space Grotesk', sans-serif" }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#050611', color: '#f8fafc', fontFamily: "'Space Grotesk', sans-serif" }}>
       {/* MOBILE OVERLAY BACKDROP */}
       {mobileDrawerOpen && (
         <div
@@ -308,7 +308,7 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
         </header>
 
         {/* CONTENT AREA */}
-        <main className="admin-content" style={{ flex: 1, padding: 32, maxWidth: 1400, width: '100%', margin: '0 auto' }}>
+        <main className="admin-content elzora-page-enter" style={{ flex: 1, padding: 32, maxWidth: 1400, width: '100%', margin: '0 auto' }}>
           {children}
         </main>
       </div>

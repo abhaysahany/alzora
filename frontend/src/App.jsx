@@ -31,10 +31,12 @@ import { AdminTreePage } from './pages/admin/AdminTreePage'
 import { ReferralListener } from './components/ReferralListener'
 import { PlanExplainerPage } from './pages/PlanExplainerPage'
 import { SentinelGuardChat } from './components/SentinelGuardChat'
+import { CosmicEffectsLayer } from './components/CosmicEffectsLayer'
 
 export default function App() {
   return (
     <Router>
+      <CosmicEffectsLayer />
       <ReferralListener />
       <SentinelGuardChat />
       <Routes>

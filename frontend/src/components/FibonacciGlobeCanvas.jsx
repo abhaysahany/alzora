@@ -39,8 +39,9 @@ export function FibonacciGlobeCanvas() {
     const colors = new Float32Array(pointCount * 3)
     const goldenAngle = Math.PI * (3 - Math.sqrt(5))
 
-    const colorGreen = new THREE.Color('#2be86b')
-    const colorCyan = new THREE.Color('#38bdf8')
+    const colorPrimary = new THREE.Color('#8b5cf6')
+    const colorHighlight = new THREE.Color('#c084fc')
+    const colorGold = new THREE.Color('#ffd700')
 
     for (let i = 0; i < pointCount; i++) {
       const y = 1 - (i / (pointCount - 1)) * 2
@@ -53,7 +54,11 @@ export function FibonacciGlobeCanvas() {
       positions[i * 3 + 1] = y * radius
       positions[i * 3 + 2] = z * radius
 
-      const mixed = colorGreen.clone().lerp(colorCyan, (y + 1) * 0.5)
+      const t = (y + 1) * 0.5
+      const mixed =
+        t < 0.75
+          ? colorPrimary.clone().lerp(colorHighlight, t / 0.75)
+          : colorHighlight.clone().lerp(colorGold, (t - 0.75) / 0.25)
       colors[i * 3] = mixed.r
       colors[i * 3 + 1] = mixed.g
       colors[i * 3 + 2] = mixed.b
@@ -75,10 +80,10 @@ export function FibonacciGlobeCanvas() {
     // 2. Wireframe Inner Sphere
     const wireGeom = new THREE.IcosahedronGeometry(1.52, 2)
     const wireMat = new THREE.MeshBasicMaterial({
-      color: 0x2be86b,
+      color: 0xa855f7,
       wireframe: true,
       transparent: true,
-      opacity: 0.14,
+      opacity: 0.2,
     })
     const wireSphere = new THREE.Mesh(wireGeom, wireMat)
     rootGroup.add(wireSphere)
@@ -86,7 +91,7 @@ export function FibonacciGlobeCanvas() {
     // 3. Orbiting Neon Nodes
     const orbitGroup = new THREE.Group()
     const nodeGeom = new THREE.SphereGeometry(0.055, 12, 12)
-    const nodeColors = [0x2be86b, 0x38bdf8, 0xc084fc, 0x10b981]
+    const nodeColors = [0x8b5cf6, 0xa855f7, 0xc084fc, 0xffd700]
     const nodeMaterials = []
     const orbitingNodes = []
 
@@ -113,10 +118,10 @@ export function FibonacciGlobeCanvas() {
     const dustGeom = new THREE.BufferGeometry()
     dustGeom.setAttribute('position', new THREE.BufferAttribute(dustPos, 3))
     const dustMat = new THREE.PointsMaterial({
-      color: 0x38bdf8,
+      color: 0xc084fc,
       size: 0.03,
       transparent: true,
-      opacity: 0.4,
+      opacity: 0.42,
     })
     const dustPoints = new THREE.Points(dustGeom, dustMat)
     scene.add(dustPoints)

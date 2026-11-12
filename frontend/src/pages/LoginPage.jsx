@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import BackgroundCanvas from '../components/BackgroundCanvas'
+import { PageTransitionShell, FloatingParticles } from '../components/MotionPrimitives'
 import { ConnectWalletButton } from '../components/ConnectWalletButton'
 import { useWalletAuth, closeWeb3Modal } from '../hooks/useWalletAuth'
 import { useAventraContracts } from '../hooks/useAventraContracts'
@@ -112,8 +113,9 @@ export function LoginPage() {
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', zIndex: 1, display: 'flex', flexDirection: 'column' }}>
+    <PageTransitionShell style={{ position: 'relative', minHeight: '100vh', zIndex: 1, display: 'flex', flexDirection: 'column', background: '#050611' }}>
       <BackgroundCanvas />
+      <FloatingParticles />
 
       {/* TOP HEADER */}
       <header className="nav" style={{ position: 'relative', zIndex: 100 }}>
@@ -126,7 +128,7 @@ export function LoginPage() {
                 height: 32,
                 width: 'auto',
                 objectFit: 'contain',
-                filter: 'drop-shadow(0 2px 10px rgba(245, 158, 11, 0.35))',
+                filter: 'drop-shadow(0 2px 10px rgba(255, 215, 0, 0.35))',
               }}
             />
           </Link>
@@ -134,7 +136,7 @@ export function LoginPage() {
             <Link
               to="/lookup"
               className="btn btn-ghost btn-sm"
-              style={{ display: 'flex', alignItems: 'center', gap: 6, borderColor: 'var(--panel-line)', color: 'var(--green)' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, borderColor: 'rgba(192, 132, 252, 0.35)', color: '#c084fc' }}
             >
               <Search size={14} />
               <span>User Lookup</span>
@@ -148,7 +150,7 @@ export function LoginPage() {
 
       {/* LOGIN CARD CONTAINER */}
       <div className="login-page-container" style={{ position: 'relative', zIndex: 10 }}>
-        <div className="glass-card glass-card-glow login-card" style={{ zIndex: 10 }}>
+        <div className="glass-card glass-card-glow login-card elzora-glass" style={{ zIndex: 10 }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
             <img
               src="/logo.png"
@@ -329,6 +331,6 @@ export function LoginPage() {
           No traditional passwords required. Your Web3 wallet acts as your secure cryptographic key.
         </div>
       </div>
-    </div>
+    </PageTransitionShell>
   )
 }

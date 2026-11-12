@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { PublicNavbar } from '../components/PublicNavbar'
 import BackgroundCanvas from '../components/BackgroundCanvas'
 import { useWalletAuth } from '../hooks/useWalletAuth'
+import { PageTransitionShell, RevealOnScroll } from '../components/MotionPrimitives'
 import {
   Sparkles,
   Zap,
@@ -115,10 +116,10 @@ export function BusinessPlanPage() {
   ]
 
   return (
-    <div
+    <PageTransitionShell
       style={{
         minHeight: '100vh',
-        background: '#060814',
+        background: '#050611',
         color: '#f8fafc',
         fontFamily: "'Space Grotesk', sans-serif",
         position: 'relative',
@@ -144,17 +145,17 @@ export function BusinessPlanPage() {
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 14px', borderRadius: 20, background: 'rgba(139, 92, 246, 0.18)', border: '1px solid rgba(139, 92, 246, 0.4)', color: '#c084fc', fontSize: '0.8rem', fontWeight: 800, marginBottom: 12 }}>
             <Sparkles size={14} /> OFFICIAL SPECIFICATION & MATHEMATICAL FORMULA
           </div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 10px', color: '#fff', letterSpacing: '-0.02em' }}>
+          <h1 className="elzora-hero-title" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.55rem)', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
             ELZORA Decentralized Business Plan
           </h1>
           <p style={{ color: '#94a3b8', fontSize: '1rem', maxWidth: 840, lineHeight: 1.6, margin: '0 0 20px' }}>
-            A mathematically guaranteed, non-custodial MLM protocol built on BNB Smart Chain. 100% of all $50 USDT package registration fees are routed in real-time across 7 core income streams plus an autonomous $25 Single Leg Global Club.
+            A non-custodial, smart-contract protocol built on BNB Smart Chain. 100% of all $50 USDT package registration fees are routed in real-time across 7 core income streams plus an optional $25 Single Leg Global Club.
           </p>
 
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
             <button
               onClick={() => navigate(isConnected ? '/dashboard' : '/login')}
-              className="btn btn-primary"
+              className="btn btn-primary elzora-shimmer-btn"
               style={{ padding: '12px 24px', borderRadius: 12, fontWeight: 800, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 8 }}
             >
               <span>{isConnected ? 'Open Dashboard' : 'Join ELZORA ($50 USDT)'}</span>
@@ -163,6 +164,7 @@ export function BusinessPlanPage() {
             <button
               type="button"
               onClick={() => navigate('/ai/plan-explainer')}
+              className="elzora-shimmer-btn"
               style={{
                 padding: '12px 20px',
                 borderRadius: 12,
@@ -171,9 +173,9 @@ export function BusinessPlanPage() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
-                background: 'rgba(43, 232, 107, 0.14)',
-                border: '1px solid rgba(43, 232, 107, 0.45)',
-                color: '#86efac',
+                background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.14), rgba(139, 92, 246, 0.18))',
+                border: '1px solid rgba(255, 215, 0, 0.42)',
+                color: '#ffd700',
                 cursor: 'pointer',
               }}
             >
@@ -288,12 +290,11 @@ export function BusinessPlanPage() {
               return (
                 <div
                   key={idx}
-                  className="glass-card"
+                  className="glass-card elzora-glass elzora-glass-hover"
                   style={{
                     padding: 20,
                     borderRadius: 18,
-                    background: 'rgba(11, 15, 36, 0.85)',
-                    border: `1px solid ${s.color}35`,
+                    border: `1px solid ${s.color}40`,
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
@@ -472,25 +473,48 @@ export function BusinessPlanPage() {
           </div>
         </div>
 
+        {/* FEES, ELIGIBILITY & RISK NOTICE */}
+        <RevealOnScroll>
+          <div
+            className="elzora-glass"
+            style={{
+              padding: '22px 26px',
+              borderColor: 'rgba(255, 215, 0, 0.32)',
+              background: 'linear-gradient(135deg, rgba(16, 19, 38, 0.9), rgba(11, 13, 27, 0.95))',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, color: '#ffd700', fontWeight: 800, fontSize: '0.92rem' }}>
+              <ShieldCheck size={18} />
+              <span>Applicable Fees, Eligibility Conditions & Risk Disclosure</span>
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 18, color: '#cbd5e1', fontSize: '0.84rem', lineHeight: 1.7 }}>
+              <li><strong>Activation & Gas Fees:</strong> Core registration requires $50.00 BEP-20 USDT (optional $25.00 USDT for manual Global Club entry) plus standard BNB Smart Chain network gas (~$0.10 BNB).</li>
+              <li><strong>Eligibility Rules:</strong> Binary matching payouts require at least 1 active Left direct and 1 active Right direct referral; Champion & Weekly pools require their respective direct referral thresholds.</li>
+              <li><strong>Protocol Risk Notice:</strong> Participation depends on real network activity and on-chain smart contract execution. There are no guaranteed returns or passive-income promises; verify your sponsor address before confirming any irreversible blockchain transaction.</li>
+            </ul>
+          </div>
+        </RevealOnScroll>
+
         {/* BOTTOM CTA */}
         <div
+          className="elzora-glass"
           style={{
             padding: '28px 32px',
             borderRadius: 22,
-            background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2) 0%, rgba(79, 70, 229, 0.15) 100%)',
-            border: '1px solid rgba(139, 92, 246, 0.4)',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(168, 85, 247, 0.12) 100%)',
+            border: '1px solid rgba(192, 132, 252, 0.42)',
             textAlign: 'center',
           }}
         >
           <h2 style={{ fontSize: '1.7rem', fontWeight: 900, color: '#fff', margin: '0 0 8px' }}>
-            Ready to Begin Your Financial Journey with ELZORA?
+            Ready to Begin Your Journey with ELZORA?
           </h2>
           <p style={{ color: '#cbd5e1', fontSize: '0.9rem', maxWidth: 640, margin: '0 auto 20px' }}>
             Connect your Web3 wallet (MetaMask, Trust Wallet, or SafePal) on BNB Smart Chain and activate your binary position.
           </p>
           <button
             onClick={() => navigate(isConnected ? '/dashboard' : '/login')}
-            className="btn btn-primary"
+            className="btn btn-primary elzora-shimmer-btn"
             style={{ padding: '12px 28px', fontSize: '0.95rem', fontWeight: 900, borderRadius: 14 }}
           >
             {isConnected ? 'Go to Member Dashboard →' : 'Connect Wallet & Get Started →'}
@@ -498,7 +522,7 @@ export function BusinessPlanPage() {
         </div>
 
       </main>
-    </div>
+    </PageTransitionShell>
   )
 }
 

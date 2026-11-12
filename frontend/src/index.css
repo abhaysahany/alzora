@@ -1,41 +1,44 @@
 
       :root {
-        --bg: #060814;
-        --bg-2: #0b0f24;
-        --panel: rgba(13, 18, 45, 0.75);
-        --panel-2: rgba(20, 27, 65, 0.85);
+        --bg: #050611;
+        --bg-2: #0b0d1b;
+        --card-bg: #101326;
+        --panel: rgba(16, 19, 38, 0.78);
+        --panel-2: rgba(20, 24, 52, 0.88);
         --blue: #38bdf8;
         --blue-bright: #60a5fa;
         --cyan: #818cf8;
         --cyan-2: #6366f1;
         --silver: #e2e8f0;
         --steel: #94a3b8;
-        --gold: #fbbf24;
+        --gold: #ffd700;
         --green: #10b981;
         --green2: #059669;
         --green-dark: #064e3b;
         --purple: #a855f7;
         --purple-bright: #c084fc;
+        --highlight: #c084fc;
         --violet: #8b5cf6;
         --pink: #ec4899;
         --ink: #f8fafc;
         --muted: #94a3b8;
         --muted-2: #64748b;
         --line: rgba(139, 92, 246, 0.25);
-        --line-2: rgba(168, 85, 247, 0.4);
-        --line-cyan: rgba(99, 102, 241, 0.35);
-        --grad-blue: linear-gradient(135deg, #6366f1, #8b5cf6);
-        --grad-cyan: linear-gradient(135deg, #38bdf8, #818cf8);
-        --grad-purple: linear-gradient(135deg, #8b5cf6, #d946ef);
+        --line-2: rgba(168, 85, 247, 0.45);
+        --line-cyan: rgba(192, 132, 252, 0.35);
+        --grad-blue: linear-gradient(135deg, #8b5cf6, #a855f7);
+        --grad-cyan: linear-gradient(135deg, #38bdf8, #8b5cf6);
+        --grad-purple: linear-gradient(135deg, #8b5cf6, #a855f7, #c084fc);
+        --grad-gold: linear-gradient(135deg, #ffd700, #f59e0b);
         --grad-steel: linear-gradient(135deg, #ffffff, #cbd5e1 40%, #94a3b8);
         --grad-head: linear-gradient(
           120deg,
-          #ffffff 10%,
-          #c084fc 50%,
-          #6366f1 100%
+          #f8fafc 10%,
+          #c084fc 52%,
+          #8b5cf6 100%
         );
-        --glow-blue: 0 0 40px rgba(99, 102, 241, 0.4);
-        --glow: 0 0 45px rgba(168, 85, 247, 0.45);
+        --glow-blue: 0 0 40px rgba(139, 92, 246, 0.38);
+        --glow: 0 0 45px rgba(168, 85, 247, 0.42);
         --r: 18px;
         --maxw: 1280px;
       }
@@ -277,8 +280,11 @@
 
       /* ============ BUTTONS ============ */
       .btn {
+        position: relative;
+        overflow: hidden;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 10px;
         font-family: "Space Grotesk";
         font-weight: 700;
@@ -286,47 +292,70 @@
         text-transform: uppercase;
         font-size: 0.85rem;
         padding: 14px 24px;
-        border-radius: 12px;
+        border-radius: 13px;
         cursor: pointer;
-        transition: 0.25s;
+        transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease, background 0.28s ease;
         border: 1px solid transparent;
+      }
+      .btn::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -120%;
+        width: 55%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.26), transparent);
+        transform: skewX(-22deg);
+        transition: left 0.55s ease;
+        pointer-events: none;
+      }
+      .btn:hover::after {
+        left: 160%;
+      }
+      .btn:active {
+        transform: scale(0.98);
       }
       .btn svg {
         width: 16px;
         height: 16px;
       }
       .btn-primary {
-        background: var(--grad-blue);
-        color: #04121f;
-        box-shadow: 0 14px 40px -12px rgba(46, 169, 255, 0.6);
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 52%, #a855f7 100%);
+        color: #ffffff;
+        border-color: rgba(192, 132, 252, 0.45);
+        box-shadow: 0 14px 36px -10px rgba(139, 92, 246, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.22);
       }
       .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 20px 50px -12px rgba(46, 169, 255, 0.8);
+        transform: translateY(-3px);
+        box-shadow: 0 22px 46px -10px rgba(139, 92, 246, 0.85), 0 0 28px -6px rgba(56, 189, 248, 0.4);
       }
       .btn-cyan {
-        background: var(--grad-cyan);
-        color: #042420;
-        box-shadow: 0 14px 40px -12px rgba(34, 227, 214, 0.55);
+        background: linear-gradient(135deg, #06b6d4 0%, #38bdf8 50%, #6366f1 100%);
+        color: #ffffff;
+        border-color: rgba(125, 211, 252, 0.45);
+        box-shadow: 0 14px 36px -10px rgba(56, 189, 248, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.22);
       }
       .btn-cyan:hover {
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        box-shadow: 0 22px 44px -10px rgba(56, 189, 248, 0.78);
       }
       .btn-ghost {
-        border: 1px solid var(--line-2);
+        border: 1px solid rgba(139, 92, 246, 0.42);
         color: var(--ink);
-        background: rgba(46, 169, 255, 0.05);
+        background: rgba(139, 92, 246, 0.08);
+        backdrop-filter: blur(10px);
       }
       .btn-ghost:hover {
-        border-color: var(--blue);
-        background: rgba(46, 169, 255, 0.12);
-        transform: translateY(-2px);
+        border-color: var(--cyan);
+        background: rgba(139, 92, 246, 0.18);
+        box-shadow: 0 12px 30px -12px rgba(139, 92, 246, 0.55);
+        transform: translateY(-3px);
       }
       .connect {
         display: inline-flex;
         align-items: center;
         gap: 9px;
-        border: 1px solid var(--line-cyan);
+        border: 1px solid rgba(139, 92, 246, 0.45);
         padding: 11px 20px;
         border-radius: 12px;
         font-family: "Space Grotesk";
@@ -334,14 +363,17 @@
         font-size: 0.82rem;
         letter-spacing: 0.05em;
         text-transform: uppercase;
-        color: var(--cyan);
-        background: rgba(34, 227, 214, 0.06);
-        transition: 0.25s;
+        color: #e2e8f0;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.16), rgba(168, 85, 247, 0.12));
+        backdrop-filter: blur(12px);
+        transition: 0.25s cubic-bezier(0.22, 1, 0.36, 1);
       }
       .connect:hover {
-        background: rgba(34, 227, 214, 0.14);
-        border-color: var(--cyan);
-        box-shadow: 0 0 26px -6px rgba(34, 227, 214, 0.6);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.28), rgba(56, 189, 248, 0.2));
+        border-color: rgba(56, 189, 248, 0.7);
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 0 28px -6px rgba(139, 92, 246, 0.7);
       }
       .connect svg {
         width: 16px;
@@ -2869,7 +2901,7 @@
         align-items: center;
         justify-content: center;
         width: 100%;
-        margin: 0 auto 32px;
+        margin: 0 auto 18px;
         perspective: 1000px;
         text-align: center;
       }
@@ -2880,12 +2912,17 @@
         align-items: center;
         justify-content: center;
         overflow: hidden;
-        border-radius: 20px;
-        padding: 10px 24px;
+        padding: 0;
+        mix-blend-mode: screen;
       }
 
       .elzora-hero-logo {
-        width: clamp(260px, 45vw, 420px);
+        width: clamp(210px, 36vw, 330px);
+        height: auto;
+        object-fit: contain;
+        -webkit-mask-image: radial-gradient(ellipse 82% 72% at 50% 50%, #000 50%, transparent 98%);
+        mask-image: radial-gradient(ellipse 82% 72% at 50% 50%, #000 50%, transparent 98%);
+        filter: drop-shadow(0 0 26px rgba(255, 215, 0, 0.45));
         max-width: 90vw;
         height: auto;
         object-fit: contain;
@@ -2938,4 +2975,566 @@
         70%, 100% {
           left: 200%;
         }
+      }
+
+      /* ==========================================================================
+         GLOBAL COSMIC ROYAL UI & ANIMATION REDESIGN LAYER
+         Applies rich glassmorphism, aurora glow, micro-interactions, & unified
+         Indigo / Violet / Cyan / Gold palette across Public + Member UI widgets.
+         ========================================================================== */
+
+      ::selection {
+        background: rgba(139, 92, 246, 0.38);
+        color: #ffffff;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(6, 8, 20, 0.9);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, rgba(99, 102, 241, 0.7), rgba(168, 85, 247, 0.7));
+        border-radius: 999px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(180deg, #6366f1, #c084fc);
+      }
+
+      @keyframes elzoraCardRise {
+        from {
+          opacity: 0;
+          transform: translateY(14px) scale(0.985);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes elzoraAuroraPulse {
+        0%, 100% {
+          opacity: 0.85;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.03);
+        }
+      }
+
+      body::before {
+        animation: elzoraAuroraPulse 14s ease-in-out infinite;
+      }
+
+      /* Navbar Glass Refinement */
+      header.nav.scrolled {
+        background: rgba(6, 8, 22, 0.86);
+        backdrop-filter: blur(20px) saturate(165%);
+        border-bottom: 1px solid rgba(139, 92, 246, 0.28);
+        box-shadow: 0 14px 44px -20px rgba(0, 0, 0, 0.85), 0 1px 0 rgba(56, 189, 248, 0.08);
+      }
+
+      .nav-links a::after {
+        background: linear-gradient(90deg, #38bdf8, #8b5cf6, #ec4899);
+        border-radius: 999px;
+      }
+
+      /* Unified Frosted Glass Cards & Interactive Widgets */
+      .card,
+      .stat-card,
+      .chart-card,
+      .referral-card,
+      .activity-card,
+      .login-card,
+      .rank,
+      .lad,
+      .bento {
+        background: linear-gradient(165deg, rgba(16, 23, 56, 0.78) 0%, rgba(8, 12, 28, 0.92) 100%);
+        border: 1px solid rgba(139, 92, 246, 0.26);
+        backdrop-filter: blur(18px) saturate(150%);
+        box-shadow: 0 20px 50px -28px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.34s ease;
+      }
+
+      .card:hover,
+      .stat-card:hover,
+      .rank:hover,
+      .lad:hover,
+      .bento:hover {
+        transform: translateY(-6px);
+        border-color: rgba(192, 132, 252, 0.52);
+        box-shadow:
+          0 28px 60px -26px rgba(99, 102, 241, 0.45),
+          0 0 32px -12px rgba(56, 189, 248, 0.32),
+          inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      }
+
+      .stat-card {
+        animation: elzoraCardRise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .stat-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 14px;
+        right: 14px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.65), rgba(56, 189, 248, 0.65), transparent);
+        opacity: 0.45;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      .stat-card:hover::after {
+        opacity: 1;
+      }
+
+      .stat-icon,
+      .card .ic {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.14));
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        color: #c084fc;
+        box-shadow: 0 8px 22px -8px rgba(99, 102, 241, 0.45);
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, color 0.3s ease;
+      }
+
+      .stat-card:hover .stat-icon,
+      .card:hover .ic {
+        transform: scale(1.08) rotate(-3deg);
+        color: #38bdf8;
+        box-shadow: 0 10px 26px -6px rgba(56, 189, 248, 0.55);
+      }
+
+      .stat-value {
+        background: linear-gradient(135deg, #ffffff 15%, #e0e7ff 65%, #c084fc 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      /* Member Sidebar & Active Indicators */
+      .dashboard-sidebar {
+        background: linear-gradient(180deg, rgba(9, 13, 36, 0.96) 0%, rgba(6, 8, 22, 0.98) 100%);
+        border-right: 1px solid rgba(139, 92, 246, 0.24);
+        backdrop-filter: blur(20px);
+      }
+
+      .sidebar-header {
+        background: rgba(9, 13, 36, 0.85);
+        border-bottom: 1px solid rgba(139, 92, 246, 0.24);
+      }
+
+      .sidebar-item {
+        position: relative;
+        transition: transform 0.22s ease, background 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+      }
+
+      .sidebar-item:hover {
+        transform: translateX(4px);
+        background: rgba(139, 92, 246, 0.12);
+        border-color: rgba(139, 92, 246, 0.28);
+        color: #f8fafc;
+      }
+
+      .sidebar-item.active {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.24), rgba(168, 85, 247, 0.18));
+        border-color: rgba(192, 132, 252, 0.48);
+        color: #ffffff;
+        box-shadow: 0 10px 26px -12px rgba(139, 92, 246, 0.65);
+      }
+
+      .sidebar-item.active::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        bottom: 8px;
+        width: 3px;
+        border-radius: 0 4px 4px 0;
+        background: linear-gradient(180deg, #38bdf8, #a855f7);
+      }
+
+      /* Tabs, Inputs & Tables */
+      .tab-group {
+        background: rgba(6, 9, 24, 0.78);
+        border: 1px solid rgba(139, 92, 246, 0.28);
+        backdrop-filter: blur(12px);
+      }
+
+      .tab-btn.active {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #ffffff;
+        box-shadow: 0 6px 18px -6px rgba(139, 92, 246, 0.75);
+      }
+
+      .referral-input-group {
+        border: 1px solid rgba(139, 92, 246, 0.35);
+        background: rgba(6, 9, 24, 0.85);
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      .referral-input-group:focus-within {
+        border-color: rgba(56, 189, 248, 0.7);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+      }
+
+      .activity-table tr,
+      table tbody tr {
+        transition: background-color 0.2s ease;
+      }
+
+      .activity-table tbody tr:hover,
+      table tbody tr:hover {
+        background: rgba(139, 92, 246, 0.08);
+      }
+
+      /* Login / Register / Lookup Glass Glow */
+      .glass-card-glow::before {
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.45), rgba(99, 102, 241, 0.2), rgba(192, 132, 252, 0.45));
+      }
+
+      .login-badge {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.14));
+        border-color: rgba(139, 92, 246, 0.4);
+        color: #c084fc;
+      }
+
+      /* Footer Polish */
+      footer {
+        background: linear-gradient(180deg, rgba(6, 8, 20, 0.6), rgba(4, 6, 16, 0.96));
+        border-top: 1px solid rgba(139, 92, 246, 0.22);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* ==========================================================================
+         ELZORA DESIGN SYSTEM UTILITIES (PHASE 2 — SHARED ACROSS ALL PAGES)
+         ========================================================================== */
+
+      @keyframes elzoraPageFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes elzoraParticleFloat {
+        0%, 100% {
+          transform: translate3d(0, 0, 0) scale(1);
+          opacity: 0.35;
+        }
+        50% {
+          transform: translate3d(10px, -22px, 0) scale(1.25);
+          opacity: 0.85;
+        }
+      }
+
+      @keyframes elzoraSkeletonSweep {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+
+      .elzora-page-enter {
+        animation: elzoraPageFadeIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+
+      .elzora-reveal {
+        opacity: 0;
+        transform: translateY(22px) scale(0.985);
+        transition:
+          opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      .elzora-reveal.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      .elzora-glass {
+        position: relative;
+        background: linear-gradient(165deg, rgba(16, 19, 38, 0.86) 0%, rgba(11, 13, 27, 0.94) 100%);
+        border: 1px solid rgba(139, 92, 246, 0.28);
+        border-radius: 20px;
+        backdrop-filter: blur(18px) saturate(155%);
+        box-shadow:
+          0 20px 50px -24px rgba(0, 0, 0, 0.85),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
+
+      .elzora-glass-hover {
+        transition:
+          transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+          border-color 0.3s ease,
+          box-shadow 0.34s ease;
+      }
+
+      .elzora-glass-hover:hover {
+        transform: translateY(-6px);
+        border-color: rgba(192, 132, 252, 0.52);
+        box-shadow:
+          0 28px 60px -24px rgba(139, 92, 246, 0.38),
+          0 0 28px -10px rgba(168, 85, 247, 0.28),
+          inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      }
+
+      .elzora-hero-title {
+        font-family: 'Orbitron', 'Space Grotesk', sans-serif;
+        font-weight: 900;
+        background: linear-gradient(135deg, #f8fafc 10%, #c084fc 52%, #ffd700 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .elzora-pill-violet {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(139, 92, 246, 0.14);
+        border: 1px solid rgba(192, 132, 252, 0.38);
+        color: #c084fc;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+      }
+
+      .elzora-pill-gold {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        background: rgba(255, 215, 0, 0.12);
+        border: 1px solid rgba(255, 215, 0, 0.35);
+        color: #ffd700;
+        font-size: 0.74rem;
+        font-weight: 800;
+      }
+
+      .elzora-shimmer-btn {
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.26s ease;
+      }
+
+      .elzora-shimmer-btn::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -120%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+        transform: skewX(-22deg);
+        transition: left 0.55s ease;
+        pointer-events: none;
+      }
+
+      .elzora-shimmer-btn:hover::after {
+        left: 160%;
+      }
+
+      .elzora-shimmer-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .elzora-icon-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(168, 85, 247, 0.14));
+        border: 1px solid rgba(192, 132, 252, 0.35);
+        color: #c084fc;
+        transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+      }
+
+      .elzora-glass-hover:hover .elzora-icon-badge {
+        transform: scale(1.08) rotate(-3deg);
+        box-shadow: 0 8px 22px -6px rgba(139, 92, 246, 0.55);
+      }
+
+      .elzora-particle-dot {
+        position: absolute;
+        border-radius: 999px;
+        pointer-events: none;
+        animation: elzoraParticleFloat var(--p-dur, 7s) ease-in-out var(--p-delay, 0s) infinite;
+      }
+
+      .elzora-skeleton {
+        background: linear-gradient(90deg, rgba(16, 19, 38, 0.8) 25%, rgba(139, 92, 246, 0.2) 50%, rgba(16, 19, 38, 0.8) 75%);
+        background-size: 200% 100%;
+        animation: elzoraSkeletonSweep 1.6s infinite linear;
+        border-radius: 12px;
+      }
+
+      /* ==========================================================================
+         COSMIC BACKGROUND IMAGE + MOUSE SPOTLIGHT + CLICK STAR-BURST EFFECTS
+         ========================================================================== */
+
+      @keyframes elzoraBgDrift {
+        0%, 100% {
+          transform: scale(1.03) translate3d(0, 0, 0);
+        }
+        50% {
+          transform: scale(1.09) translate3d(-1.2%, -1%, 0);
+        }
+      }
+
+      @keyframes elzoraClickRing {
+        0% {
+          width: 12px;
+          height: 12px;
+          opacity: 0.9;
+        }
+        100% {
+          width: 96px;
+          height: 96px;
+          opacity: 0;
+        }
+      }
+
+      @keyframes elzoraClickStar {
+        0% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+        }
+        60% {
+          opacity: 1;
+          transform: translate(calc(-50% + var(--tx) * 0.78), calc(-50% + var(--ty) * 0.78)) scale(1.15) rotate(95deg);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(0.2) rotate(160deg);
+        }
+      }
+
+      @keyframes elzoraCardClickPulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.6), 0 0 28px rgba(255, 215, 0, 0.35);
+        }
+        100% {
+          box-shadow: 0 0 0 18px rgba(192, 132, 252, 0), 0 28px 60px -24px rgba(139, 92, 246, 0.38);
+        }
+      }
+
+      .elzora-cosmic-bg-wrap {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      .elzora-cosmic-bg-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.28;
+        mix-blend-mode: screen;
+        filter: saturate(1.15) contrast(1.05);
+        animation: elzoraBgDrift 28s ease-in-out infinite;
+      }
+
+      .elzora-mouse-aura {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 360px;
+        height: 360px;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9990;
+        opacity: 0;
+        background: radial-gradient(
+          circle,
+          rgba(139, 92, 246, 0.14) 0%,
+          rgba(255, 215, 0, 0.05) 36%,
+          transparent 70%
+        );
+        transition: opacity 0.25s ease;
+        will-change: transform;
+      }
+
+      .elzora-burst-layer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 9995;
+        overflow: hidden;
+      }
+
+      .elzora-click-ring {
+        position: fixed;
+        border-radius: 50%;
+        border: 1.5px solid rgba(192, 132, 252, 0.8);
+        box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
+        transform: translate(-50%, -50%);
+        animation: elzoraClickRing 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      .elzora-click-star {
+        position: fixed;
+        line-height: 1;
+        text-shadow: 0 0 10px currentColor;
+        user-select: none;
+        animation: elzoraClickStar 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+
+      /* Card Hover: Crisp Violet-Gold Border Glow + Star-Burst Pulse (No Muddy Wash) */
+      .elzora-glass-hover,
+      .stat-card,
+      .chart-card,
+      .referral-card,
+      .activity-card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(155deg, rgba(18, 22, 48, 0.86) 0%, rgba(11, 13, 27, 0.96) 100%);
+        border: 1px solid rgba(139, 92, 246, 0.28);
+        transition:
+          transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+          border-color 0.28s ease,
+          box-shadow 0.28s ease;
+      }
+
+      .elzora-glass-hover::before,
+      .stat-card::before,
+      .chart-card::before,
+      .referral-card::before,
+      .activity-card::before {
+        display: none;
+      }
+
+      .elzora-glass-hover:hover,
+      .stat-card:hover,
+      .chart-card:hover,
+      .referral-card:hover,
+      .activity-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(192, 132, 252, 0.72);
+        box-shadow:
+          0 18px 42px -16px rgba(139, 92, 246, 0.52),
+          0 0 24px -8px rgba(255, 215, 0, 0.28),
+          inset 0 1px 0 rgba(255, 255, 255, 0.16);
+      }
+
+      .elzora-card-clicked {
+        animation: elzoraCardClickPulse 0.52s ease-out;
       }

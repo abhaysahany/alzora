@@ -6,6 +6,11 @@ import { ConnectWalletButton } from '../components/ConnectWalletButton'
 import { PublicNavbar } from '../components/PublicNavbar'
 import BackgroundCanvas from '../components/BackgroundCanvas'
 import {
+  PageTransitionShell,
+  FloatingParticles,
+  RevealOnScroll,
+} from '../components/MotionPrimitives'
+import {
   Sparkles,
   GitCommit,
   Award,
@@ -127,10 +132,10 @@ export function LandingPage() {
   ]
 
   return (
-    <div
+    <PageTransitionShell
       style={{
         minHeight: '100vh',
-        background: '#060814',
+        background: '#050611',
         color: '#f8fafc',
         fontFamily: "'Space Grotesk', sans-serif",
         position: 'relative',
@@ -147,9 +152,9 @@ export function LandingPage() {
           pointerEvents: 'none',
           zIndex: 0,
           background: `
-            radial-gradient(ellipse 60% 40% at 50% -10%, rgba(139, 92, 246, 0.22), transparent 70%),
-            radial-gradient(ellipse 50% 50% at 85% 30%, rgba(99, 102, 241, 0.16), transparent 60%),
-            radial-gradient(ellipse 45% 45% at 15% 70%, rgba(217, 70, 239, 0.12), transparent 60%)
+            radial-gradient(ellipse 62% 42% at 50% -10%, rgba(139, 92, 246, 0.25), transparent 70%),
+            radial-gradient(ellipse 50% 50% at 86% 28%, rgba(168, 85, 247, 0.16), transparent 60%),
+            radial-gradient(ellipse 45% 45% at 14% 72%, rgba(255, 215, 0, 0.08), transparent 60%)
           `,
         }}
       />
@@ -158,28 +163,50 @@ export function LandingPage() {
       <PublicNavbar />
 
       {/* HERO SECTION */}
-      <header style={{ position: 'relative', zIndex: 10, padding: '90px 24px 70px', textAlign: 'center' }}>
-        <div style={{ maxWidth: 940, margin: '0 auto' }}>
-          
-          {/* Status Pill */}
-          <div
+      <header style={{ position: 'relative', zIndex: 10, padding: '44px 24px 44px', textAlign: 'center', overflow: 'hidden' }}>
+        {/* Dedicated Hero Theme-Matched Background Video */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden',
+          }}
+        >
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster="/assets/cosmic-bg.jpg"
+            className="elzora-hero-bg-video"
             style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '6px 20px',
-              borderRadius: 30,
-              background: 'rgba(124, 58, 237, 0.15)',
-              border: '1px solid rgba(192, 132, 252, 0.4)',
-              color: '#c084fc',
-              fontSize: '0.82rem',
-              fontWeight: 800,
-              letterSpacing: '0.04em',
-              marginBottom: 24,
-              boxShadow: '0 4px 20px rgba(124, 58, 237, 0.2)',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              opacity: 0.56,
+              filter: 'saturate(1.2) contrast(1.06)',
             }}
           >
-            <Sparkles size={16} color="#c084fc" />
+            <source src="/assets/cosmic-bg.webm" type="video/webm" />
+          </video>
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(180deg, rgba(5, 6, 17, 0.35) 0%, rgba(5, 6, 17, 0.48) 65%, #050611 100%)',
+            }}
+          />
+        </div>
+        <FloatingParticles />
+        <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 2 }}>
+          
+          {/* Status Pill */}
+          <div className="elzora-pill-violet" style={{ marginBottom: 16, boxShadow: '0 6px 24px rgba(139, 92, 246, 0.24)' }}>
+            <Sparkles size={16} color="#ffd700" />
             <span>100% NON-CUSTODIAL BINARY MATRIX & SMART CLUB PROTOCOL</span>
           </div>
 
@@ -191,21 +218,17 @@ export function LandingPage() {
                 alt="ELZORA"
                 className="elzora-hero-logo"
               />
-              <div className="elzora-hero-shimmer" />
             </div>
           </div>
 
           {/* Main Headline */}
           <h1
+            className="elzora-hero-title"
             style={{
-              fontSize: 'clamp(2.4rem, 5.5vw, 4.2rem)',
-              fontWeight: 900,
-              lineHeight: 1.15,
-              letterSpacing: '-0.03em',
-              margin: '0 0 24px',
-              background: 'linear-gradient(135deg, #ffffff 0%, #cbd5e1 35%, #c084fc 70%, #6366f1 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              fontSize: 'clamp(2.1rem, 4.6vw, 3.6rem)',
+              lineHeight: 1.13,
+              letterSpacing: '-0.025em',
+              margin: '0 0 14px',
             }}
           >
             Autonomous Decentralized Binary Matrix & Perpetual Global Club
@@ -214,34 +237,34 @@ export function LandingPage() {
           {/* Subtitle */}
           <p
             style={{
-              fontSize: '1.15rem',
+              fontSize: '1.08rem',
               color: '#94a3b8',
-              lineHeight: 1.65,
+              lineHeight: 1.62,
               maxWidth: 740,
-              margin: '0 auto 40px',
+              margin: '0 auto 24px',
             }}
           >
-            Join ELZORA with <strong>$50 USDT</strong> on BNB Smart Chain. 100% of registration fees are mathematically routed in real-time across 8 transparent income streams with automated cascading upgrades, a perpetual $25 Single Leg Global Club, and zero admin delays.
+            Join ELZORA with <strong style={{ color: '#f8fafc' }}>$50 USDT</strong> on BNB Smart Chain. 100% of registration fees are mathematically routed in real-time across 8 transparent income streams with automated cascading upgrades, a perpetual $25 Single Leg Global Club, and zero admin delays.
           </p>
 
           {/* CTA Buttons */}
           <div className="landing-hero-actions" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <button
               onClick={handleAction}
+              className="elzora-shimmer-btn"
               style={{
-                padding: '16px 36px',
-                borderRadius: 16,
-                border: 'none',
-                background: 'linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)',
-                color: '#fff',
+                padding: '16px 34px',
+                borderRadius: 15,
+                border: '1px solid rgba(192, 132, 252, 0.5)',
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
+                color: '#ffffff',
                 fontWeight: 900,
-                fontSize: '1.05rem',
+                fontSize: '1.02rem',
                 cursor: 'pointer',
-                boxShadow: '0 10px 30px rgba(124, 58, 237, 0.5)',
+                boxShadow: '0 14px 34px -8px rgba(139, 92, 246, 0.65)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 10,
-                transition: 'all 0.2s',
               }}
             >
               <span>{isRegistered ? 'Launch Dashboard' : 'Join ELZORA ($50 USDT)'}</span>
@@ -250,18 +273,20 @@ export function LandingPage() {
 
             <a
               href="#plan"
+              className="elzora-shimmer-btn"
               style={{
-                padding: '16px 30px',
-                borderRadius: 16,
-                background: 'rgba(15, 23, 42, 0.8)',
-                border: '1px solid rgba(139, 92, 246, 0.35)',
+                padding: '16px 28px',
+                borderRadius: 15,
+                background: 'rgba(16, 19, 38, 0.85)',
+                border: '1px solid rgba(139, 92, 246, 0.38)',
                 color: '#f8fafc',
                 fontWeight: 800,
-                fontSize: '1.02rem',
+                fontSize: '1rem',
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
+                backdropFilter: 'blur(14px)',
               }}
             >
               <span>Explore The 8 Incomes</span>
@@ -270,18 +295,20 @@ export function LandingPage() {
 
             <Link
               to="/ai/plan-explainer"
+              className="elzora-shimmer-btn"
               style={{
                 padding: '16px 26px',
-                borderRadius: 16,
-                background: 'rgba(43, 232, 107, 0.12)',
-                border: '1px solid rgba(43, 232, 107, 0.45)',
-                color: '#86efac',
+                borderRadius: 15,
+                background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.14), rgba(139, 92, 246, 0.16))',
+                border: '1px solid rgba(255, 215, 0, 0.4)',
+                color: '#ffd700',
                 fontWeight: 800,
-                fontSize: '1rem',
+                fontSize: '0.98rem',
                 textDecoration: 'none',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 8,
+                backdropFilter: 'blur(14px)',
               }}
             >
               <Volume2 size={18} />
@@ -290,35 +317,37 @@ export function LandingPage() {
           </div>
 
           {/* 4 PRIMARY PROTOCOL METRIC CARDS */}
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: 16,
-              marginTop: 64,
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#38bdf8' }}>100%</div>
-              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Mathematical Allocation</div>
-            </div>
+          <RevealOnScroll delay={100}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: 16,
+                marginTop: 36,
+                textAlign: 'center',
+              }}
+            >
+              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(192, 132, 252, 0.3)' }}>
+                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#c084fc' }}>100%</div>
+                <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Mathematical Allocation</div>
+              </div>
 
-            <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#c084fc' }}>8 Incomes</div>
-              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Comprehensive Financial Channels</div>
-            </div>
+              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(139, 92, 246, 0.35)' }}>
+                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#a855f7' }}>8 Incomes</div>
+                <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Comprehensive Financial Channels</div>
+              </div>
 
-            <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(217, 70, 239, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#f472b6' }}>8 Ranks</div>
-              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Starter up to Legend</div>
-            </div>
+              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(255, 215, 0, 0.3)' }}>
+                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffd700' }}>8 Ranks</div>
+                <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Starter up to Legend</div>
+              </div>
 
-            <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.9))', border: '1px solid rgba(74, 222, 128, 0.3)', padding: '22px 16px', borderRadius: 18, boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
-              <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#4ade80' }}>$25 Queue</div>
-              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Perpetual Global Club Re-entry</div>
+              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(56, 189, 248, 0.3)' }}>
+                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#38bdf8' }}>$25 Queue</div>
+                <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Perpetual Global Club Re-entry</div>
+              </div>
             </div>
-          </div>
+          </RevealOnScroll>
 
         </div>
       </header>
@@ -338,15 +367,16 @@ export function LandingPage() {
         </div>
 
         {/* Visual Allocation Ribbon */}
-        <div
-          style={{
-            background: 'rgba(15, 23, 42, 0.8)',
-            border: '1px solid rgba(139, 92, 246, 0.3)',
-            borderRadius: 20,
-            padding: 24,
-            marginBottom: 36,
-          }}
-        >
+        <RevealOnScroll>
+          <div
+            className="elzora-glass elzora-glass-hover"
+            style={{
+              border: '1px solid rgba(192, 132, 252, 0.35)',
+              borderRadius: 22,
+              padding: 26,
+              marginBottom: 40,
+            }}
+          >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
             <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#f8fafc' }}>
               Real-Time Protocol Allocation Matrix ($50 = 100%)
@@ -400,7 +430,8 @@ export function LandingPage() {
               Single Leg ($25 Autonomous Queue)
             </div>
           </div>
-        </div>
+          </div>
+        </RevealOnScroll>
 
         {/* 8 INCOMES CARDS GRID */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
@@ -419,42 +450,61 @@ export function LandingPage() {
           {streams.map((stream, idx) => {
             const Icon = stream.icon
             return (
-              <div
-                key={idx}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
-                  border: `1px solid ${stream.color}35`,
-                  borderRadius: 22,
-                  padding: 26,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-                }}
-              >
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-                    <div style={{ padding: 10, borderRadius: 12, background: `${stream.color}18`, color: stream.color }}>
-                      <Icon size={22} />
+              <RevealOnScroll key={idx} delay={(idx % 4) * 70}>
+                <div
+                  className="elzora-glass elzora-glass-hover"
+                  style={{
+                    borderColor: `${stream.color}40`,
+                    borderRadius: 22,
+                    padding: 26,
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                      <div
+                        className="elzora-icon-badge"
+                        style={{
+                          padding: 11,
+                          background: `${stream.color}1a`,
+                          borderColor: `${stream.color}44`,
+                          color: stream.color,
+                        }}
+                      >
+                        <Icon size={22} />
+                      </div>
+                      <span
+                        style={{
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          color: stream.color,
+                          padding: '4px 10px',
+                          borderRadius: 999,
+                          background: `${stream.color}14`,
+                          border: `1px solid ${stream.color}33`,
+                        }}
+                      >
+                        {stream.pct} Share
+                      </span>
                     </div>
-                    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: stream.color }}>
-                      {stream.pct} Share
-                    </span>
+
+                    <h3 style={{ fontSize: '1.18rem', fontWeight: 900, color: '#f8fafc', margin: '0 0 6px' }}>
+                      {stream.title}
+                    </h3>
+
+                    <div style={{ fontSize: '1.8rem', fontWeight: 900, color: stream.color, marginBottom: 10 }}>
+                      {stream.amount} <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>USDT</span>
+                    </div>
+
+                    <p style={{ color: '#94a3b8', fontSize: '0.86rem', lineHeight: 1.62, margin: 0 }}>
+                      {stream.desc}
+                    </p>
                   </div>
-
-                  <h3 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#f8fafc', margin: '0 0 6px' }}>
-                    {stream.title}
-                  </h3>
-
-                  <div style={{ fontSize: '1.8rem', fontWeight: 900, color: stream.color, marginBottom: 10 }}>
-                    {stream.amount} <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>USDT</span>
-                  </div>
-
-                  <p style={{ color: '#94a3b8', fontSize: '0.86rem', lineHeight: 1.6, margin: 0 }}>
-                    {stream.desc}
-                  </p>
                 </div>
-              </div>
+              </RevealOnScroll>
             )
           })}
         </div>
@@ -474,16 +524,16 @@ export function LandingPage() {
           </p>
         </div>
 
-        <div
-          style={{
-            background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
-            border: '1px solid rgba(139, 92, 246, 0.35)',
-            borderRadius: 24,
-            padding: 26,
-            boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-            overflowX: 'auto',
-          }}
-        >
+        <RevealOnScroll>
+          <div
+            className="elzora-glass"
+            style={{
+              border: '1px solid rgba(192, 132, 252, 0.35)',
+              borderRadius: 24,
+              padding: 26,
+              overflowX: 'auto',
+            }}
+          >
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(139, 92, 246, 0.35)', color: '#c084fc', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -516,80 +566,68 @@ export function LandingPage() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </RevealOnScroll>
       </section>
 
       {/* SECTION 3: GLOBAL CLUB ($25 RE-ENTRY) */}
       <section id="globalclub" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
-        <div
-          style={{
-            background: 'linear-gradient(135deg, rgba(25, 15, 60, 0.95), rgba(9, 13, 35, 0.98))',
-            border: '1px solid rgba(217, 70, 239, 0.4)',
-            borderRadius: 28,
-            padding: '52px 36px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-          }}
-        >
-          <div style={{ maxWidth: 740, margin: '0 auto', textAlign: 'center', marginBottom: 40 }}>
-            <div
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '5px 16px',
-                borderRadius: 20,
-                background: 'rgba(217, 70, 239, 0.2)',
-                color: '#f472b6',
-                fontSize: '0.8rem',
-                fontWeight: 800,
-                marginBottom: 14,
-              }}
-            >
-              <RefreshCw size={14} /> AUTONOMOUS $25 CYCLING ALGORITHM
-            </div>
-            <h2 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 14px' }}>
-              Global Club Perpetual Re-entry Engine
-            </h2>
-            <p style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: 1.6 }}>
-              An independent 1-to-2 automated queue: When 2 members join behind you in the global queue, you instantly receive a <strong>$25 payout (100% ROI)</strong> plus an <strong>auto-funded re-entry spot</strong> at the end of the line.
-            </p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 16, textAlign: 'center' }}>
-            <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 22, borderRadius: 18, border: '1px solid rgba(217, 70, 239, 0.25)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>CYCLE #1</div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginTop: 8 }}>Entries #2 & #3 enter queue</div>
-              <div style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800, marginTop: 6 }}>→ Earn $25 + Re-entry #4 created!</div>
+        <RevealOnScroll>
+          <div
+            className="elzora-glass"
+            style={{
+              border: '1px solid rgba(192, 132, 252, 0.38)',
+              borderRadius: 28,
+              padding: '52px 36px',
+            }}
+          >
+            <div style={{ maxWidth: 740, margin: '0 auto', textAlign: 'center', marginBottom: 40 }}>
+              <div className="elzora-pill-violet" style={{ marginBottom: 14 }}>
+                <RefreshCw size={14} /> AUTONOMOUS $25 CYCLING ALGORITHM
+              </div>
+              <h2 className="elzora-hero-title" style={{ fontSize: 'clamp(1.85rem, 3.8vw, 2.4rem)', margin: '0 0 14px' }}>
+                Global Club Perpetual Re-entry Engine
+              </h2>
+              <p style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: 1.6 }}>
+                An independent 1-to-2 automated queue: When 2 members join behind you in the global queue, you instantly receive a <strong style={{ color: '#f8fafc' }}>$25 payout (100% ROI)</strong> plus an <strong style={{ color: '#ffd700' }}>auto-funded re-entry spot</strong> at the end of the line.
+              </p>
             </div>
 
-            <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 22, borderRadius: 18, border: '1px solid rgba(217, 70, 239, 0.25)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>CYCLE #2</div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginTop: 8 }}>Entries #4 & #5 enter queue</div>
-              <div style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800, marginTop: 6 }}>→ Earn $25 + Re-entry #6 created!</div>
-            </div>
-
-            <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 22, borderRadius: 18, border: '1px solid rgba(217, 70, 239, 0.25)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>CYCLE #3</div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginTop: 8 }}>Entries #6 & #7 enter queue</div>
-              <div style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800, marginTop: 6 }}>→ Earn $25 + Re-entry #8 created!</div>
-            </div>
-
-            <div style={{ background: 'rgba(6, 8, 20, 0.85)', padding: 22, borderRadius: 18, border: '1px solid rgba(217, 70, 239, 0.25)' }}>
-              <div style={{ fontSize: '0.8rem', color: '#c084fc', fontWeight: 800 }}>CYCLE #4</div>
-              <div style={{ fontSize: '1rem', fontWeight: 800, color: '#f8fafc', marginTop: 8 }}>Entries #8 & #9 enter queue</div>
-              <div style={{ fontSize: '0.82rem', color: '#4ade80', fontWeight: 800, marginTop: 6 }}>→ Earn $25 + Re-entry #10 created!</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 18, textAlign: 'center' }}>
+              {[
+                { cycle: 'CYCLE #1', entries: 'Entries #2 & #3 enter queue', reward: '→ Earn $25 + Re-entry #4 created!' },
+                { cycle: 'CYCLE #2', entries: 'Entries #4 & #5 enter queue', reward: '→ Earn $25 + Re-entry #6 created!' },
+                { cycle: 'CYCLE #3', entries: 'Entries #6 & #7 enter queue', reward: '→ Earn $25 + Re-entry #8 created!' },
+                { cycle: 'CYCLE #4', entries: 'Entries #8 & #9 enter queue', reward: '→ Earn $25 + Re-entry #10 created!' },
+              ].map((c, idx) => (
+                <RevealOnScroll key={c.cycle} delay={idx * 70}>
+                  <div
+                    className="elzora-glass elzora-glass-hover"
+                    style={{
+                      padding: 24,
+                      borderRadius: 20,
+                      borderColor: 'rgba(192, 132, 252, 0.35)',
+                      height: '100%',
+                    }}
+                  >
+                    <div className="elzora-pill-gold" style={{ marginBottom: 10 }}>{c.cycle}</div>
+                    <div style={{ fontSize: '1.02rem', fontWeight: 800, color: '#f8fafc', marginTop: 4 }}>{c.entries}</div>
+                    <div style={{ fontSize: '0.84rem', color: '#4ade80', fontWeight: 800, marginTop: 8 }}>{c.reward}</div>
+                  </div>
+                </RevealOnScroll>
+              ))}
             </div>
           </div>
-        </div>
+        </RevealOnScroll>
       </section>
 
       {/* SECTION 4: PROTOCOL ADVANTAGES & TRANSPARENCY */}
       <section id="security" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
-          <div style={{ color: '#38bdf8', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          <div style={{ color: '#c084fc', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Built for Longevity & Trust
           </div>
-          <h2 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 14px', letterSpacing: '-0.02em' }}>
+          <h2 className="elzora-hero-title" style={{ fontSize: 'clamp(1.85rem, 3.8vw, 2.4rem)', margin: '0 0 14px', letterSpacing: '-0.02em' }}>
             Why ELZORA Outperforms Traditional Matrices
           </h2>
           <p style={{ color: '#94a3b8', maxWidth: 680, margin: '0 auto', fontSize: '1rem' }}>
@@ -598,35 +636,41 @@ export function LandingPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
-          <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.95))', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: 22, padding: 26 }}>
-            <div style={{ padding: 10, borderRadius: 12, background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8', width: 'fit-content', marginBottom: 16 }}>
-              <Lock size={24} />
+          <RevealOnScroll delay={0}>
+            <div className="elzora-glass elzora-glass-hover" style={{ borderColor: 'rgba(56, 189, 248, 0.35)', borderRadius: 22, padding: 28, height: '100%' }}>
+              <div className="elzora-icon-badge" style={{ padding: 12, background: 'rgba(56, 189, 248, 0.16)', borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8', marginBottom: 16 }}>
+                <Lock size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>Non-Custodial Reserves</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.65, margin: 0 }}>
+                All member funds reside directly within the open-source smart contract vault. The protocol owner cannot confiscate or alter your earned balance.
+              </p>
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>Non-Custodial Reserves</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
-              All member funds reside directly within the open-source smart contract vault. The protocol owner cannot confiscate or alter your earned balance.
-            </p>
-          </div>
+          </RevealOnScroll>
 
-          <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.95))', border: '1px solid rgba(74, 222, 128, 0.3)', borderRadius: 22, padding: 26 }}>
-            <div style={{ padding: 10, borderRadius: 12, background: 'rgba(74, 222, 128, 0.15)', color: '#4ade80', width: 'fit-content', marginBottom: 16 }}>
-              <Zap size={24} />
+          <RevealOnScroll delay={80}>
+            <div className="elzora-glass elzora-glass-hover" style={{ borderColor: 'rgba(255, 215, 0, 0.35)', borderRadius: 22, padding: 28, height: '100%' }}>
+              <div className="elzora-icon-badge" style={{ padding: 12, background: 'rgba(255, 215, 0, 0.14)', borderColor: 'rgba(255, 215, 0, 0.4)', color: '#ffd700', marginBottom: 16 }}>
+                <Zap size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>1-Click Instant Payouts</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.65, margin: 0 }}>
+                Zero withdrawal delays, zero manual claim wait windows. All commissions and rewards are transferred directly and instantly to your Web3 wallet upon generation.
+              </p>
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>1-Click Instant Payouts</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
-              Zero withdrawal delays, zero manual claim wait windows. All commissions and rewards are transferred directly and instantly to your Web3 wallet upon generation.
-            </p>
-          </div>
+          </RevealOnScroll>
 
-          <div style={{ background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.8), rgba(10, 14, 38, 0.95))', border: '1px solid rgba(192, 132, 252, 0.3)', borderRadius: 22, padding: 26 }}>
-            <div style={{ padding: 10, borderRadius: 12, background: 'rgba(192, 132, 252, 0.15)', color: '#c084fc', width: 'fit-content', marginBottom: 16 }}>
-              <GitCommit size={24} />
+          <RevealOnScroll delay={160}>
+            <div className="elzora-glass elzora-glass-hover" style={{ borderColor: 'rgba(192, 132, 252, 0.35)', borderRadius: 22, padding: 28, height: '100%' }}>
+              <div className="elzora-icon-badge" style={{ padding: 12, background: 'rgba(192, 132, 252, 0.16)', borderColor: 'rgba(192, 132, 252, 0.4)', color: '#c084fc', marginBottom: 16 }}>
+                <GitCommit size={24} />
+              </div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>Automated Dual-Leg Spillover</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.65, margin: 0 }}>
+                Smart placement resolution automatically locates the nearest vacant leaf on your chosen leg, maximizing team binary matching pairs.
+              </p>
             </div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>Automated Dual-Leg Spillover</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.88rem', lineHeight: 1.6, margin: 0 }}>
-              Smart placement resolution automatically locates the nearest vacant leaf on your chosen leg, maximizing team binary matching pairs.
-            </p>
-          </div>
+          </RevealOnScroll>
         </div>
       </section>
 
@@ -659,7 +703,7 @@ export function LandingPage() {
           </div>
         </div>
       </footer>
-    </div>
+    </PageTransitionShell>
   )
 }
 
