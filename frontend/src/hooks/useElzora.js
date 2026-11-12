@@ -22,6 +22,35 @@ const RANK_NAMES = [
   'Legend',
 ]
 
+function decodeElzoraError(err) {
+  const raw = err?.shortMessage || err?.message || String(err || 'Transaction failed')
+  if (raw.includes('0x3a81d6fc') || raw.includes('AlreadyRegistered')) {
+    return 'This wallet address is already registered in ELZORA.'
+  }
+  if (raw.includes('SponsorNotRegistered')) {
+    return 'The Sponsor wallet address is not registered yet in ELZORA.'
+  }
+  if (raw.includes('ParentNotRegistered')) {
+    return 'The Binary Parent wallet address is not registered yet.'
+  }
+  if (raw.includes('PositionOccupied') || raw.includes('PositionAlreadyOccupied')) {
+    return 'The selected Left/Right binary position under this parent is already occupied.'
+  }
+  if (raw.includes('0x118cdaa7') || raw.includes('OwnableUnauthorizedAccount')) {
+    return 'Your connected wallet is not authorized (not the current pending owner or owner).'
+  }
+  if (raw.includes('insufficient funds for gas')) {
+    return 'Wallet RPC reported insufficient BNB for gas. Please ensure your wallet is switched to BNB Smart Chain Testnet (Chain ID 97) and your selected account matches the connected address.'
+  }
+  if (raw.includes('ERC20InsufficientAllowance')) {
+    return 'Insufficient USDT allowance. Please click Approve USDT first before registering.'
+  }
+  if (raw.includes('ERC20InsufficientBalance')) {
+    return 'Insufficient USDT balance ($50 USDT required).'
+  }
+  return raw
+}
+
 export function useElzora() {
   const { address, isConnected } = useWalletAuth()
   const chainId = useChainId()
@@ -394,12 +423,32 @@ export function useElzora() {
     setLoading(true)
     setError(null)
     try {
+      let gasLimit = 3_000_000n
+      if (publicClient && address) {
+        try {
+          const estimated = await publicClient.estimateContractGas({
+            address: CONTRACT_ADDRESSES.GATEWAY,
+            abi: ELZORA_GATEWAY_ABI,
+            functionName: 'register',
+            args: [sponsor, parent, Number(position)],
+            account: address,
+          })
+          const buffered = (estimated * 125n) / 100n
+          gasLimit = buffered > 8_000_000n ? 8_000_000n : buffered
+        } catch (simErr) {
+          throw new Error(decodeElzoraError(simErr))
+        }
+      }
+
       const txHash = await writeContractAsync({
         address: CONTRACT_ADDRESSES.GATEWAY,
         abi: ELZORA_GATEWAY_ABI,
         functionName: 'register',
         args: [sponsor, parent, Number(position)],
         chain: activeChain,
+        chainId: activeChain.id,
+        account: address,
+        gas: gasLimit,
       })
 
       if (publicClient && txHash) {
@@ -411,9 +460,10 @@ export function useElzora() {
       return txHash
     } catch (err) {
       console.error('Registration failed:', err)
-      setError(err.message || 'Registration failed')
+      const cleanMsg = decodeElzoraError(err)
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -699,11 +749,30 @@ export function useElzora() {
     setLoading(true)
     setError(null)
     try {
+      let gasLimit = 100_000n
+      if (publicClient && address) {
+        try {
+          const estimated = await publicClient.estimateContractGas({
+            address: CONTRACT_ADDRESSES.TETHER_STREAM,
+            abi: ELZORA_MAIN_ABI,
+            functionName: 'acceptOwnership',
+            account: address,
+          })
+          const buffered = (estimated * 130n) / 100n
+          gasLimit = buffered > 300_000n ? 300_000n : buffered
+        } catch (simErr) {
+          throw new Error(decodeElzoraError(simErr))
+        }
+      }
+
       const tx = await writeContractAsync({
         address: CONTRACT_ADDRESSES.TETHER_STREAM,
         abi: ELZORA_MAIN_ABI,
         functionName: 'acceptOwnership',
         chain: activeChain,
+        chainId: activeChain.id,
+        account: address,
+        gas: gasLimit,
       })
       if (publicClient && tx) {
         await publicClient.waitForTransactionReceipt({ hash: tx })
@@ -714,9 +783,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Accept ownership failed:', err)
-      setError(err.message || 'Accept ownership failed')
+      const cleanMsg = decodeElzoraError(err)
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
