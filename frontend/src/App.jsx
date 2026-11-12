@@ -29,14 +29,18 @@ import { AdminTransactionsPage } from './pages/admin/AdminTransactionsPage'
 import { AdminControlsPage } from './pages/admin/AdminControlsPage'
 import { AdminTreePage } from './pages/admin/AdminTreePage'
 import { ReferralListener } from './components/ReferralListener'
+import { PlanExplainerPage } from './pages/PlanExplainerPage'
+import { SentinelGuardChat } from './components/SentinelGuardChat'
 
 export default function App() {
   return (
     <Router>
       <ReferralListener />
+      <SentinelGuardChat />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/business-plan" element={<BusinessPlanPage />} />
+        <Route path="/ai/plan-explainer" element={<PlanExplainerPage />} />
         <Route path="/faqs" element={<FaqPage />} />
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/login" element={<LoginPage />} />

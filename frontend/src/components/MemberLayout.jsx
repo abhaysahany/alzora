@@ -26,6 +26,7 @@ import {
   HelpCircle,
   Crown,
   Loader2,
+  Volume2,
 } from 'lucide-react'
 
 export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
@@ -102,6 +103,7 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
     { path: '/team', label: 'Team & Lineage', icon: Users },
     { path: '/referrals', label: 'Referral Link & QR', icon: Share2 },
     { path: '/income-history', label: 'Income Streams Ledger', icon: Receipt },
+    { path: '/ai/plan-explainer', label: 'Plan Voice AI', icon: Volume2 },
   ]
 
   return (

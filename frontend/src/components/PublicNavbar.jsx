@@ -37,6 +37,7 @@ export function PublicNavbar() {
   const navLinks = [
     { label: 'Home', path: '/', isRoute: true },
     { label: 'Business Plan', path: '/business-plan', isRoute: true },
+    { label: 'Voice AI', path: '/ai/plan-explainer', isRoute: true },
     { label: "FAQ's", path: '/faqs', isRoute: true },
   ]
 
