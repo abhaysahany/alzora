@@ -27,6 +27,7 @@ import {
   Menu,
   X,
   Wallet,
+  Volume2,
 } from 'lucide-react'
 
 export function LandingPage() {
@@ -266,6 +267,26 @@ export function LandingPage() {
               <span>Explore The 8 Incomes</span>
               <ChevronRight size={18} color="#c084fc" />
             </a>
+
+            <Link
+              to="/ai/plan-explainer"
+              style={{
+                padding: '16px 26px',
+                borderRadius: 16,
+                background: 'rgba(43, 232, 107, 0.12)',
+                border: '1px solid rgba(43, 232, 107, 0.45)',
+                color: '#86efac',
+                fontWeight: 800,
+                fontSize: '1rem',
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <Volume2 size={18} />
+              <span>Voice AI Plan Explainer</span>
+            </Link>
           </div>
 
           {/* 4 PRIMARY PROTOCOL METRIC CARDS */}

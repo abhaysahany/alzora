@@ -21,6 +21,7 @@ import {
   Activity,
   Wallet,
   GitCommit,
+  Volume2,
 } from 'lucide-react'
 import { ConnectWalletButton } from './ConnectWalletButton'
 import { useWalletAuth } from '../hooks/useWalletAuth'
@@ -48,6 +49,7 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
     { label: '8-Stream Income', path: '/admin/income', icon: BadgeDollarSign },
     { label: 'Live Transactions', path: '/admin/transactions', icon: Receipt },
     { label: 'Protocol Controls', path: '/admin/controls', icon: Sliders },
+    { label: 'Plan Voice AI & Docs', path: '/ai/plan-explainer', icon: Volume2 },
   ]
 
   return (

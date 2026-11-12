@@ -20,6 +20,8 @@ import {
   FileText,
   DollarSign,
   Users,
+  Volume2,
+  Bot,
 } from 'lucide-react'
 
 export function BusinessPlanPage() {
@@ -157,6 +159,46 @@ export function BusinessPlanPage() {
             >
               <span>{isConnected ? 'Open Dashboard' : 'Join ELZORA ($50 USDT)'}</span>
               <ArrowRight size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/ai/plan-explainer')}
+              style={{
+                padding: '12px 20px',
+                borderRadius: 12,
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'rgba(43, 232, 107, 0.14)',
+                border: '1px solid rgba(43, 232, 107, 0.45)',
+                color: '#86efac',
+                cursor: 'pointer',
+              }}
+            >
+              <Volume2 size={16} />
+              <span>Plan Explainer Voice AI</span>
+            </button>
+            <button
+              type="button"
+              className="open-ai-chat-trigger"
+              style={{
+                padding: '12px 18px',
+                borderRadius: 12,
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'rgba(56, 189, 248, 0.12)',
+                border: '1px solid rgba(56, 189, 248, 0.38)',
+                color: '#7dd3fc',
+                cursor: 'pointer',
+              }}
+            >
+              <Bot size={16} />
+              <span>Ask Sentinel Guard AI</span>
             </button>
             <div
               style={{
