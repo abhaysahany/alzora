@@ -113,13 +113,13 @@ export function AnimatedCounter({
 }
 
 const DEFAULT_PARTICLES = [
-  { left: '8%', top: '18%', size: 5, color: 'rgba(192, 132, 252, 0.55)', dur: '7.5s', delay: '0s' },
-  { left: '19%', top: '64%', size: 4, color: 'rgba(255, 215, 0, 0.45)', dur: '9s', delay: '1.2s' },
-  { left: '34%', top: '26%', size: 6, color: 'rgba(139, 92, 246, 0.48)', dur: '8.2s', delay: '0.6s' },
-  { left: '52%', top: '14%', size: 4, color: 'rgba(56, 189, 248, 0.45)', dur: '6.8s', delay: '2s' },
-  { left: '68%', top: '72%', size: 5, color: 'rgba(168, 85, 247, 0.5)', dur: '8.8s', delay: '0.9s' },
+  { left: '8%', top: '18%', size: 5, color: 'rgba(255, 215, 0, 0.55)', dur: '7.5s', delay: '0s' },
+  { left: '19%', top: '64%', size: 4, color: 'rgba(251, 191, 36, 0.45)', dur: '9s', delay: '1.2s' },
+  { left: '34%', top: '26%', size: 6, color: 'rgba(245, 158, 11, 0.48)', dur: '8.2s', delay: '0.6s' },
+  { left: '52%', top: '14%', size: 4, color: 'rgba(254, 240, 138, 0.45)', dur: '6.8s', delay: '2s' },
+  { left: '68%', top: '72%', size: 5, color: 'rgba(217, 119, 6, 0.5)', dur: '8.8s', delay: '0.9s' },
   { left: '82%', top: '24%', size: 6, color: 'rgba(255, 215, 0, 0.4)', dur: '7.8s', delay: '1.7s' },
-  { left: '91%', top: '56%', size: 4, color: 'rgba(192, 132, 252, 0.5)', dur: '9.4s', delay: '0.4s' },
+  { left: '91%', top: '56%', size: 4, color: 'rgba(251, 191, 36, 0.5)', dur: '9.4s', delay: '0.4s' },
 ]
 
 /**

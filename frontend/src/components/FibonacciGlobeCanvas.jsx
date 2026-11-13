@@ -39,8 +39,8 @@ export function FibonacciGlobeCanvas() {
     const colors = new Float32Array(pointCount * 3)
     const goldenAngle = Math.PI * (3 - Math.sqrt(5))
 
-    const colorPrimary = new THREE.Color('#8b5cf6')
-    const colorHighlight = new THREE.Color('#c084fc')
+    const colorPrimary = new THREE.Color('#d97706')
+    const colorHighlight = new THREE.Color('#fbbf24')
     const colorGold = new THREE.Color('#ffd700')
 
     for (let i = 0; i < pointCount; i++) {
@@ -80,10 +80,10 @@ export function FibonacciGlobeCanvas() {
     // 2. Wireframe Inner Sphere
     const wireGeom = new THREE.IcosahedronGeometry(1.52, 2)
     const wireMat = new THREE.MeshBasicMaterial({
-      color: 0xa855f7,
+      color: 0xf59e0b,
       wireframe: true,
       transparent: true,
-      opacity: 0.2,
+      opacity: 0.22,
     })
     const wireSphere = new THREE.Mesh(wireGeom, wireMat)
     rootGroup.add(wireSphere)
@@ -91,7 +91,7 @@ export function FibonacciGlobeCanvas() {
     // 3. Orbiting Neon Nodes
     const orbitGroup = new THREE.Group()
     const nodeGeom = new THREE.SphereGeometry(0.055, 12, 12)
-    const nodeColors = [0x8b5cf6, 0xa855f7, 0xc084fc, 0xffd700]
+    const nodeColors = [0xffd700, 0xfbbf24, 0xf59e0b, 0xfef08a]
     const nodeMaterials = []
     const orbitingNodes = []
 

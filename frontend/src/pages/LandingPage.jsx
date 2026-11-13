@@ -58,7 +58,7 @@ export function LandingPage() {
       title: 'Direct Referral Commission',
       pct: '20%',
       amount: '$10.00',
-      color: '#c084fc',
+      color: '#fbbf24',
       icon: Zap,
       desc: 'Instant direct reward credited immediately for every member who registers using your referral link.',
     },
@@ -74,7 +74,7 @@ export function LandingPage() {
       title: '8 Club Matrix Queues',
       pct: '24%',
       amount: '$12.00',
-      color: '#a855f7',
+      color: '#f59e0b',
       icon: Award,
       desc: 'Cascading automated queue advancing members from Starter up to Legend with auto-funded upgrades.',
     },
@@ -135,7 +135,7 @@ export function LandingPage() {
     <PageTransitionShell
       style={{
         minHeight: '100vh',
-        background: '#050611',
+        background: '#030508',
         color: '#f8fafc',
         fontFamily: "'Space Grotesk', sans-serif",
         position: 'relative',
@@ -144,7 +144,7 @@ export function LandingPage() {
     >
       <BackgroundCanvas />
 
-      {/* AMBIENT LIGHT BLOBS */}
+      {/* AMBIENT LIGHT BLOBS - LUXURY DARK & GOLD */}
       <div
         style={{
           position: 'fixed',
@@ -152,9 +152,9 @@ export function LandingPage() {
           pointerEvents: 'none',
           zIndex: 0,
           background: `
-            radial-gradient(ellipse 62% 42% at 50% -10%, rgba(139, 92, 246, 0.25), transparent 70%),
-            radial-gradient(ellipse 50% 50% at 86% 28%, rgba(168, 85, 247, 0.16), transparent 60%),
-            radial-gradient(ellipse 45% 45% at 14% 72%, rgba(255, 215, 0, 0.08), transparent 60%)
+            radial-gradient(ellipse 65% 45% at 50% -10%, rgba(245, 158, 11, 0.22), transparent 70%),
+            radial-gradient(ellipse 50% 45% at 86% 28%, rgba(217, 119, 6, 0.16), transparent 60%),
+            radial-gradient(ellipse 45% 45% at 14% 72%, rgba(251, 191, 36, 0.12), transparent 60%)
           `,
         }}
       />
@@ -186,8 +186,8 @@ export function LandingPage() {
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              opacity: 0.56,
-              filter: 'saturate(1.2) contrast(1.06)',
+              opacity: 0.52,
+              filter: 'saturate(1.1) contrast(1.06)',
             }}
           >
             <source src="/assets/cosmic-bg.webm" type="video/webm" />
@@ -197,7 +197,7 @@ export function LandingPage() {
               position: 'absolute',
               inset: 0,
               background:
-                'linear-gradient(180deg, rgba(5, 6, 17, 0.35) 0%, rgba(5, 6, 17, 0.48) 65%, #050611 100%)',
+                'linear-gradient(180deg, rgba(3, 5, 8, 0.35) 0%, rgba(3, 5, 8, 0.55) 65%, #030508 100%)',
             }}
           />
         </div>
@@ -205,7 +205,7 @@ export function LandingPage() {
         <div style={{ maxWidth: 960, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           
           {/* Status Pill */}
-          <div className="elzora-pill-violet" style={{ marginBottom: 16, boxShadow: '0 6px 24px rgba(139, 92, 246, 0.24)' }}>
+          <div className="elzora-pill-gold" style={{ marginBottom: 16, boxShadow: '0 6px 24px rgba(245, 158, 11, 0.28)' }}>
             <Sparkles size={16} color="#ffd700" />
             <span>100% NON-CUSTODIAL BINARY MATRIX & SMART CLUB PROTOCOL</span>
           </div>
@@ -255,13 +255,13 @@ export function LandingPage() {
               style={{
                 padding: '16px 34px',
                 borderRadius: 15,
-                border: '1px solid rgba(192, 132, 252, 0.5)',
-                background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
-                color: '#ffffff',
+                border: '1px solid rgba(254, 240, 138, 0.6)',
+                background: 'linear-gradient(135deg, #fde047 0%, #f59e0b 55%, #d97706 100%)',
+                color: '#030508',
                 fontWeight: 900,
                 fontSize: '1.02rem',
                 cursor: 'pointer',
-                boxShadow: '0 14px 34px -8px rgba(139, 92, 246, 0.65)',
+                boxShadow: '0 14px 34px -8px rgba(245, 158, 11, 0.65)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: 10,
@@ -277,8 +277,8 @@ export function LandingPage() {
               style={{
                 padding: '16px 28px',
                 borderRadius: 15,
-                background: 'rgba(16, 19, 38, 0.85)',
-                border: '1px solid rgba(139, 92, 246, 0.38)',
+                background: 'rgba(11, 16, 27, 0.85)',
+                border: '1px solid rgba(245, 158, 11, 0.38)',
                 color: '#f8fafc',
                 fontWeight: 800,
                 fontSize: '1rem',
@@ -290,7 +290,7 @@ export function LandingPage() {
               }}
             >
               <span>Explore The 8 Incomes</span>
-              <ChevronRight size={18} color="#c084fc" />
+              <ChevronRight size={18} color="#fbbf24" />
             </a>
 
             <Link
@@ -299,8 +299,8 @@ export function LandingPage() {
               style={{
                 padding: '16px 26px',
                 borderRadius: 15,
-                background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.14), rgba(139, 92, 246, 0.16))',
-                border: '1px solid rgba(255, 215, 0, 0.4)',
+                background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.14), rgba(245, 158, 11, 0.16))',
+                border: '1px solid rgba(255, 215, 0, 0.45)',
                 color: '#ffd700',
                 fontWeight: 800,
                 fontSize: '0.98rem',
@@ -327,23 +327,23 @@ export function LandingPage() {
                 textAlign: 'center',
               }}
             >
-              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(192, 132, 252, 0.3)' }}>
-                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#c084fc' }}>100%</div>
+              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(251, 191, 36, 0.35)' }}>
+                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#fbbf24' }}>100%</div>
                 <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Mathematical Allocation</div>
               </div>
 
-              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(139, 92, 246, 0.35)' }}>
-                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#a855f7' }}>8 Incomes</div>
+              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(245, 158, 11, 0.35)' }}>
+                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#f59e0b' }}>8 Incomes</div>
                 <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Comprehensive Financial Channels</div>
               </div>
 
-              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(255, 215, 0, 0.3)' }}>
+              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(255, 215, 0, 0.35)' }}>
                 <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#ffd700' }}>8 Ranks</div>
                 <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Starter up to Legend</div>
               </div>
 
-              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(56, 189, 248, 0.3)' }}>
-                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#38bdf8' }}>$25 Queue</div>
+              <div className="elzora-glass elzora-glass-hover" style={{ padding: '22px 16px', borderColor: 'rgba(251, 191, 36, 0.35)' }}>
+                <div style={{ fontSize: '2.1rem', fontWeight: 900, color: '#fbbf24' }}>$25 Queue</div>
                 <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontWeight: 700, marginTop: 4 }}>Perpetual Global Club Re-entry</div>
               </div>
             </div>
@@ -355,7 +355,7 @@ export function LandingPage() {
       {/* SECTION 1: THE $50 MEMBERSHIP ALLOCATION (100% SOLVENCY) */}
       <section id="plan" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
-          <div style={{ color: '#c084fc', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          <div style={{ color: '#fbbf24', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Zero Inflation • Pure Solvency
           </div>
           <h2 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 14px', letterSpacing: '-0.02em' }}>
@@ -371,7 +371,7 @@ export function LandingPage() {
           <div
             className="elzora-glass elzora-glass-hover"
             style={{
-              border: '1px solid rgba(192, 132, 252, 0.35)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
               borderRadius: 22,
               padding: 26,
               marginBottom: 40,
@@ -387,18 +387,18 @@ export function LandingPage() {
           </div>
 
           <div style={{ height: 14, borderRadius: 8, overflow: 'hidden', display: 'flex', background: 'rgba(255,255,255,0.05)', marginBottom: 16 }}>
-            <div style={{ width: '20%', background: '#c084fc' }} title="Direct 20%" />
+            <div style={{ width: '20%', background: '#fbbf24' }} title="Direct 20%" />
             <div style={{ width: '14%', background: '#38bdf8' }} title="Affiliate 14%" />
-            <div style={{ width: '24%', background: '#a855f7' }} title="Club Matrix 24%" />
+            <div style={{ width: '24%', background: '#f59e0b' }} title="Club Matrix 24%" />
             <div style={{ width: '20%', background: '#4ade80' }} title="Matching 20%" />
-            <div style={{ width: '6%', background: '#fbbf24' }} title="Champion 6%" />
+            <div style={{ width: '6%', background: '#fde047' }} title="Champion 6%" />
             <div style={{ width: '6%', background: '#ec4899' }} title="Weekly 6%" />
             <div style={{ width: '10%', background: '#f97316' }} title="Lifetime 10%" />
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 18px', fontSize: '0.78rem', color: '#cbd5e1', fontWeight: 700 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#c084fc' }} />
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#fbbf24' }} />
               Direct (20% - $10)
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -406,7 +406,7 @@ export function LandingPage() {
               Affiliate (14% - $7)
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#a855f7' }} />
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#f59e0b' }} />
               Club Matrix (24% - $12)
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -513,7 +513,7 @@ export function LandingPage() {
       {/* SECTION 2: 8 CLUB RANKS (STARTER TO LEGEND) */}
       <section id="ranks" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
-          <div style={{ color: '#c084fc', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          <div style={{ color: '#fbbf24', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Cascading Queue Progression
           </div>
           <h2 style={{ fontSize: '2.4rem', fontWeight: 900, margin: '0 0 14px', letterSpacing: '-0.02em' }}>
@@ -528,7 +528,7 @@ export function LandingPage() {
           <div
             className="elzora-glass"
             style={{
-              border: '1px solid rgba(192, 132, 252, 0.35)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
               borderRadius: 24,
               padding: 26,
               overflowX: 'auto',
@@ -536,7 +536,7 @@ export function LandingPage() {
           >
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: 700 }}>
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(139, 92, 246, 0.35)', color: '#c084fc', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              <tr style={{ borderBottom: '1px solid rgba(245, 158, 11, 0.35)', color: '#fbbf24', fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 <th style={{ padding: '14px 16px' }}>Rank</th>
                 <th style={{ padding: '14px 16px' }}>Rank Name</th>
                 <th style={{ padding: '14px 16px' }}>Matrix Team</th>
@@ -555,7 +555,7 @@ export function LandingPage() {
                     transition: 'background 0.2s',
                   }}
                 >
-                  <td style={{ padding: '16px', fontWeight: 800, color: '#c084fc' }}>#{r.rank}</td>
+                  <td style={{ padding: '16px', fontWeight: 800, color: '#fbbf24' }}>#{r.rank}</td>
                   <td style={{ padding: '16px', fontWeight: 900, color: '#f8fafc' }}>{r.name}</td>
                   <td style={{ padding: '16px', color: '#cbd5e1', fontWeight: 600 }}>{r.members} Members</td>
                   <td style={{ padding: '16px', color: '#38bdf8', fontWeight: 800 }}>{r.gross}</td>
@@ -576,13 +576,13 @@ export function LandingPage() {
           <div
             className="elzora-glass"
             style={{
-              border: '1px solid rgba(192, 132, 252, 0.38)',
+              border: '1px solid rgba(245, 158, 11, 0.35)',
               borderRadius: 28,
               padding: '52px 36px',
             }}
           >
             <div style={{ maxWidth: 740, margin: '0 auto', textAlign: 'center', marginBottom: 40 }}>
-              <div className="elzora-pill-violet" style={{ marginBottom: 14 }}>
+              <div className="elzora-pill-gold" style={{ marginBottom: 14 }}>
                 <RefreshCw size={14} /> AUTONOMOUS $25 CYCLING ALGORITHM
               </div>
               <h2 className="elzora-hero-title" style={{ fontSize: 'clamp(1.85rem, 3.8vw, 2.4rem)', margin: '0 0 14px' }}>
@@ -606,7 +606,7 @@ export function LandingPage() {
                     style={{
                       padding: 24,
                       borderRadius: 20,
-                      borderColor: 'rgba(192, 132, 252, 0.35)',
+                      borderColor: 'rgba(245, 158, 11, 0.30)',
                       height: '100%',
                     }}
                   >
@@ -624,7 +624,7 @@ export function LandingPage() {
       {/* SECTION 4: PROTOCOL ADVANTAGES & TRANSPARENCY */}
       <section id="security" style={{ position: 'relative', zIndex: 10, padding: '70px 24px', maxWidth: 1240, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 44 }}>
-          <div style={{ color: '#c084fc', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          <div style={{ color: '#fbbf24', fontWeight: 800, fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Built for Longevity & Trust
           </div>
           <h2 className="elzora-hero-title" style={{ fontSize: 'clamp(1.85rem, 3.8vw, 2.4rem)', margin: '0 0 14px', letterSpacing: '-0.02em' }}>
@@ -661,8 +661,8 @@ export function LandingPage() {
           </RevealOnScroll>
 
           <RevealOnScroll delay={160}>
-            <div className="elzora-glass elzora-glass-hover" style={{ borderColor: 'rgba(192, 132, 252, 0.35)', borderRadius: 22, padding: 28, height: '100%' }}>
-              <div className="elzora-icon-badge" style={{ padding: 12, background: 'rgba(192, 132, 252, 0.16)', borderColor: 'rgba(192, 132, 252, 0.4)', color: '#c084fc', marginBottom: 16 }}>
+            <div className="elzora-glass elzora-glass-hover" style={{ borderColor: 'rgba(245, 158, 11, 0.35)', borderRadius: 22, padding: 28, height: '100%' }}>
+              <div className="elzora-icon-badge" style={{ padding: 12, background: 'rgba(245, 158, 11, 0.16)', borderColor: 'rgba(245, 158, 11, 0.4)', color: '#fbbf24', marginBottom: 16 }}>
                 <GitCommit size={24} />
               </div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#f8fafc', margin: '0 0 8px' }}>Automated Dual-Leg Spillover</h3>
@@ -675,7 +675,7 @@ export function LandingPage() {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(139, 92, 246, 0.2)', padding: '50px 24px', textAlign: 'center' }}>
+      <footer style={{ position: 'relative', zIndex: 10, borderTop: '1px solid rgba(245, 158, 11, 0.22)', padding: '50px 24px', textAlign: 'center' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ marginBottom: 12 }}>
             <img
@@ -693,8 +693,8 @@ export function LandingPage() {
             Next-Generation Decentralized Binary Matrix & Smart Club Ecosystem • Powered by BNB Smart Chain
           </div>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 24, fontSize: '0.82rem', fontWeight: 700, marginBottom: 24, flexWrap: 'wrap' }}>
-            <Link to="/login" style={{ color: '#c084fc', textDecoration: 'none' }}>Member Login</Link>
-            <Link to="/register" style={{ color: '#38bdf8', textDecoration: 'none' }}>Register ($50 USDT)</Link>
+            <Link to="/login" style={{ color: '#fbbf24', textDecoration: 'none' }}>Member Login</Link>
+            <Link to="/register" style={{ color: '#f59e0b', textDecoration: 'none' }}>Register ($50 USDT)</Link>
             <Link to="/lookup" style={{ color: '#cbd5e1', textDecoration: 'none' }}>Public Account Explorer</Link>
             <a href="https://testnet.bscscan.com" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', textDecoration: 'none' }}>BSC Testnet Explorer</a>
           </div>

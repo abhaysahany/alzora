@@ -54,8 +54,8 @@ export function PublicNavbar() {
           top: 0,
           zIndex: 100,
           backdropFilter: 'blur(22px) saturate(165%)',
-          background: 'rgba(5, 6, 17, 0.86)',
-          borderBottom: '1px solid rgba(139, 92, 246, 0.28)',
+          background: 'rgba(3, 5, 8, 0.88)',
+          borderBottom: '1px solid rgba(245, 158, 11, 0.22)',
           boxShadow: '0 10px 36px -18px rgba(0, 0, 0, 0.85)',
           padding: '14px 24px',
         }}

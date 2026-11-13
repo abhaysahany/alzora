@@ -22,22 +22,22 @@ export default function BackgroundCanvas() {
       h = canvas.height = window.innerHeight * DPR
       canvas.style.width = window.innerWidth + 'px'
       canvas.style.height = window.innerHeight + 'px'
-      const count = Math.min(80, Math.floor(window.innerWidth / 18))
+      const count = Math.min(85, Math.floor(window.innerWidth / 16))
       nodes = Array.from({ length: count }, () => {
-        // Multi-color celestial palette: Gold, Purple, Cyan, Emerald
+        // Luxury Dark & Gold celestial palette matching the metallic gold logo
         const colors = [
-          { r: 245, g: 158, b: 11 },   // Gold (#f59e0b)
-          { r: 251, g: 191, b: 36 },   // Warm Gold (#fbbf24)
-          { r: 168, g: 85, b: 247 },   // Violet/Purple (#a855f7)
-          { r: 129, g: 140, b: 248 },  // Electric Indigo (#818cf8)
-          { r: 56, g: 189, b: 248 },   // Cyber Cyan (#38bdf8)
+          { r: 255, g: 215, b: 0 },    // Pure Radiant Gold (#ffd700)
+          { r: 251, g: 191, b: 36 },   // Warm Sun Gold (#fbbf24)
+          { r: 245, g: 158, b: 11 },   // Amber Gold (#f59e0b)
+          { r: 217, g: 119, b: 6 },    // Deep Bronze Gold (#d97706)
+          { r: 254, g: 240, b: 138 },  // Champagne Light Gold (#fef08a)
         ]
         const col = colors[Math.floor(Math.random() * colors.length)]
         return {
           x: Math.random() * w,
           y: Math.random() * h,
-          vx: (Math.random() - 0.5) * 0.35 * DPR,
-          vy: (Math.random() - 0.5) * 0.35 * DPR,
+          vx: (Math.random() - 0.5) * 0.32 * DPR,
+          vy: (Math.random() - 0.5) * 0.32 * DPR,
           r: (Math.random() * 2 + 1) * DPR,
           pulse: Math.random() * Math.PI * 2,
           pulseSpeed: 0.02 + Math.random() * 0.025,
