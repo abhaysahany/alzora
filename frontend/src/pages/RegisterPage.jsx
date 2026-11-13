@@ -6,10 +6,12 @@ import { bsc, bscTestnet } from 'viem/chains'
 import { useWalletAuth } from '../hooks/useWalletAuth'
 import { useTetherStream } from '../hooks/useTetherStream'
 import { ConnectWalletButton } from '../components/ConnectWalletButton'
+import { PublicNavbar } from '../components/PublicNavbar'
 import BackgroundCanvas from '../components/BackgroundCanvas'
 import { PageTransitionShell, FloatingParticles } from '../components/MotionPrimitives'
 import { getRpcUrl, ELZORA_GATEWAY_ABI } from '../web3/contracts'
 import { getStoredReferral } from '../utils/referral'
+import { formatErrorMessage } from '../utils/errorMessages'
 import {
   UserCheck,
   ShieldCheck,
@@ -37,7 +39,7 @@ export function RegisterPage() {
     usdtBalance,
     usdtAllowance,
     loading,
-    error,
+    error: tetherError,
     approveUSDT,
     register,
     CONTRACT_ADDRESSES,
@@ -54,6 +56,7 @@ export function RegisterPage() {
   const [showAdvanced, setShowAdvanced] = useState(Boolean(parentFromUrl))
   const [position, setPosition] = useState(Number(posFromUrl) === 2 ? 2 : 1) // 1 = Left, 2 = Right
   const [successMsg, setSuccessMsg] = useState('')
+  const [customError, setCustomError] = useState('')
 
   // Sync referral parameters if URL or stored referral changes or loads late
   useEffect(() => {
@@ -149,24 +152,33 @@ export function RegisterPage() {
 
   const handleApprove = async () => {
     setSuccessMsg('')
+    setCustomError('')
     try {
       await approveUSDT(REGISTRATION_PRICE)
       setLocalApproved(true)
       setSuccessMsg(`USDT spending limit of $${REGISTRATION_PRICE} approved successfully! You can now proceed to Register.`)
     } catch (err) {
       console.error(err)
+      setCustomError(formatErrorMessage(err, 'Failed to approve USDT spending. Please check your wallet.'))
     }
   }
 
   const handleRegister = async (e) => {
     e.preventDefault()
     setSuccessMsg('')
+    setCustomError('')
 
     const finalSponsor = sponsorInput?.trim() || CONTRACT_ADDRESSES.ROOT_ID
     const finalParent = parentInput?.trim() || autoParent?.trim() || finalSponsor
 
-    if (!finalSponsor) return
-    if (!finalParent) return
+    if (!finalSponsor) {
+      setCustomError('Please enter a valid sponsor address.')
+      return
+    }
+    if (!finalParent) {
+      setCustomError('Placement parent address is required.')
+      return
+    }
 
     try {
       await register(finalSponsor, finalParent, position)
@@ -174,8 +186,11 @@ export function RegisterPage() {
       setTimeout(() => navigate('/dashboard'), 2000)
     } catch (err) {
       console.error(err)
+      setCustomError(formatErrorMessage(err, 'Registration failed. Please check your USDT balance and network.'))
     }
   }
+
+  const displayError = customError || (tetherError ? formatErrorMessage(tetherError, 'An unexpected error occurred.') : '')
 
   return (
     <PageTransitionShell
@@ -185,7 +200,7 @@ export function RegisterPage() {
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: 'radial-gradient(ellipse at 50% 10%, rgba(139, 92, 246, 0.22) 0%, #050611 75%)',
+        background: 'radial-gradient(ellipse at 50% 0%, rgba(245, 158, 11, 0.12) 0%, #030408 80%)',
         color: '#f8fafc',
         fontFamily: "'Space Grotesk', sans-serif",
       }}
@@ -193,37 +208,30 @@ export function RegisterPage() {
       <FloatingParticles />
       <BackgroundCanvas />
 
-      {/* TOP HEADER */}
-      <header style={{ padding: '20px 0', borderBottom: '1px solid rgba(139, 92, 246, 0.2)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img
-              src="/logo.png"
-              alt="ELZORA"
-              style={{
-                height: 34,
-                width: 'auto',
-                objectFit: 'contain',
-                filter: 'drop-shadow(0 2px 10px rgba(245, 158, 11, 0.35))',
-              }}
-            />
-          </Link>
-          <ConnectWalletButton />
-        </div>
-      </header>
+      {/* TOP NAVBAR (BLACK & GOLD THEME, IDENTICAL TO HOMEPAGE) */}
+      <PublicNavbar />
 
-      {/* REGISTRATION FORM */}
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', zIndex: 10 }}>
+      {/* REGISTRATION FORM CONTAINER */}
+      <main
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '48px 20px',
+          zIndex: 10,
+        }}
+      >
         <div
           style={{
             width: '100%',
-            maxWidth: 580,
-            background: 'rgba(13, 18, 45, 0.85)',
+            maxWidth: 620,
+            background: 'linear-gradient(165deg, rgba(14, 18, 28, 0.94) 0%, rgba(6, 8, 14, 0.98) 100%)',
             backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(139, 92, 246, 0.35)',
+            border: '1px solid rgba(245, 158, 11, 0.32)',
             borderRadius: 24,
-            padding: '36px 32px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(139, 92, 246, 0.2)',
+            padding: '38px 32px',
+            boxShadow: '0 24px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(245, 158, 11, 0.12), inset 0 1px 0 rgba(254, 240, 138, 0.12)',
           }}
         >
           {/* Header */}
@@ -235,21 +243,34 @@ export function RegisterPage() {
                 gap: 8,
                 padding: '6px 16px',
                 borderRadius: 20,
-                background: 'rgba(99, 102, 241, 0.15)',
-                border: '1px solid rgba(99, 102, 241, 0.35)',
-                color: '#c084fc',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                marginBottom: 12,
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(217, 119, 6, 0.1))',
+                border: '1px solid rgba(251, 191, 36, 0.4)',
+                color: '#fbbf24',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                marginBottom: 14,
               }}
             >
-              <Sparkles size={15} color="#c084fc" />
+              <Sparkles size={14} color="#ffd700" />
               <span>Decentralized Binary Matrix</span>
             </div>
-            <h1 style={{ fontSize: '1.9rem', fontWeight: 800, margin: '4px 0 8px', letterSpacing: '-0.02em' }}>
+            <h1
+              style={{
+                fontSize: '2.1rem',
+                fontWeight: 900,
+                margin: '4px 0 8px',
+                letterSpacing: '-0.02em',
+                background: 'linear-gradient(135deg, #ffffff 15%, #fde047 50%, #f59e0b 82%, #d97706 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontFamily: "'Orbitron', 'Space Grotesk', sans-serif",
+              }}
+            >
               Join ELZORA Ecosystem
             </h1>
-            <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
+            <p style={{ color: '#94a3b8', fontSize: '0.94rem', margin: 0, lineHeight: 1.5 }}>
               Activate your binary position with the standard $50 USDT package
             </p>
           </div>
@@ -260,29 +281,57 @@ export function RegisterPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              padding: '16px 20px',
+              padding: '18px 22px',
               borderRadius: 16,
-              background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15))',
-              border: '1px solid rgba(168, 85, 247, 0.4)',
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.14) 0%, rgba(217, 119, 6, 0.08) 100%)',
+              border: '1px solid rgba(245, 158, 11, 0.38)',
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(254, 240, 138, 0.14)',
               marginBottom: 24,
             }}
           >
             <div>
-              <div style={{ fontSize: '0.85rem', color: '#c084fc', fontWeight: 600 }}>MEMBERSHIP PACKAGE</div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#f8fafc' }}>$50.00 USDT</div>
+              <div
+                style={{
+                  fontSize: '0.74rem',
+                  color: '#fbbf24',
+                  fontWeight: 800,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                MEMBERSHIP PACKAGE
+              </div>
+              <div
+                style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 900,
+                  color: '#ffffff',
+                  fontFamily: "'Orbitron', 'Space Grotesk', sans-serif",
+                  marginTop: 2,
+                }}
+              >
+                $50.00 <span style={{ fontSize: '0.9rem', color: '#fde047', fontWeight: 700 }}>USDT</span>
+              </div>
             </div>
-            <div style={{ textAlign: 'right', fontSize: '0.8rem', color: '#94a3b8' }}>
+            <div style={{ textAlign: 'right', fontSize: '0.82rem', color: '#94a3b8' }}>
               <div>Wallet Balance:</div>
-              <div style={{ fontWeight: 700, color: '#38bdf8' }}>${Number(usdtBalance).toFixed(2)} USDT</div>
+              <div style={{ fontWeight: 800, color: '#fbbf24', fontSize: '1.05rem', marginTop: 2 }}>
+                ${Number(usdtBalance || 0).toFixed(2)} USDT
+              </div>
             </div>
           </div>
 
           <form onSubmit={handleRegister}>
             {/* SPONSOR ADDRESS */}
             <div style={{ marginBottom: 18 }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
-                Direct Sponsor Wallet Address:
-              </label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7 }}>
+                <label style={{ fontSize: '0.84rem', fontWeight: 700, color: '#e2e8f0' }}>
+                  Direct Sponsor Wallet Address:
+                </label>
+                <span style={{ fontSize: '0.72rem', color: '#fbbf24', fontWeight: 700 }}>
+                  100% On-Chain Placement
+                </span>
+              </div>
               <input
                 type="text"
                 value={sponsorInput}
@@ -290,14 +339,24 @@ export function RegisterPage() {
                 placeholder="0x..."
                 style={{
                   width: '100%',
-                  padding: '12px 16px',
+                  padding: '13px 16px',
                   borderRadius: 12,
-                  background: 'rgba(6, 8, 20, 0.8)',
-                  border: '1px solid rgba(139, 92, 246, 0.3)',
+                  background: 'rgba(5, 7, 14, 0.85)',
+                  border: '1px solid rgba(245, 158, 11, 0.3)',
                   color: '#f8fafc',
                   fontSize: '0.9rem',
                   fontFamily: 'monospace',
                   outline: 'none',
+                  boxSizing: 'border-box',
+                  transition: 'border-color 0.2s, box-shadow 0.2s',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#fbbf24'
+                  e.target.style.boxShadow = '0 0 16px rgba(245, 158, 11, 0.25)'
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(245, 158, 11, 0.3)'
+                  e.target.style.boxShadow = 'none'
                 }}
                 required
               />
@@ -305,7 +364,7 @@ export function RegisterPage() {
 
             {/* POSITION SELECTOR (LEFT / RIGHT) */}
             <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#cbd5e1', marginBottom: 8 }}>
+              <label style={{ display: 'block', fontSize: '0.84rem', fontWeight: 700, color: '#e2e8f0', marginBottom: 8 }}>
                 Select Binary Placement Position:
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -315,22 +374,26 @@ export function RegisterPage() {
                   style={{
                     padding: '14px',
                     borderRadius: 14,
-                    border: position === 1 ? '2px solid #8b5cf6' : '1px solid rgba(139, 92, 246, 0.2)',
-                    background: position === 1 ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.3))' : 'rgba(6, 8, 20, 0.6)',
-                    color: position === 1 ? '#c084fc' : '#94a3b8',
-                    fontWeight: 700,
-                    fontSize: '0.95rem',
+                    border: position === 1 ? '2px solid #f59e0b' : '1px solid rgba(245, 158, 11, 0.18)',
+                    background:
+                      position === 1
+                        ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.24), rgba(217, 119, 6, 0.16))'
+                        : 'rgba(5, 7, 14, 0.7)',
+                    color: position === 1 ? '#fbbf24' : '#94a3b8',
+                    fontWeight: 800,
+                    fontSize: '0.92rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8,
-                    transition: 'all 0.2s',
+                    boxShadow: position === 1 ? '0 8px 22px -4px rgba(245, 158, 11, 0.38)' : 'none',
+                    transition: 'all 0.2s ease',
                   }}
                 >
-                  <GitCommit size={18} />
+                  <GitCommit size={18} color={position === 1 ? '#fbbf24' : '#94a3b8'} />
                   <span>LEFT LEG</span>
-                  {position === 1 && <Check size={16} color="#8b5cf6" />}
+                  {position === 1 && <Check size={16} color="#fbbf24" />}
                 </button>
 
                 <button
@@ -339,22 +402,26 @@ export function RegisterPage() {
                   style={{
                     padding: '14px',
                     borderRadius: 14,
-                    border: position === 2 ? '2px solid #8b5cf6' : '1px solid rgba(139, 92, 246, 0.2)',
-                    background: position === 2 ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.3))' : 'rgba(6, 8, 20, 0.6)',
-                    color: position === 2 ? '#c084fc' : '#94a3b8',
-                    fontWeight: 700,
-                    fontSize: '0.95rem',
+                    border: position === 2 ? '2px solid #f59e0b' : '1px solid rgba(245, 158, 11, 0.18)',
+                    background:
+                      position === 2
+                        ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.24), rgba(217, 119, 6, 0.16))'
+                        : 'rgba(5, 7, 14, 0.7)',
+                    color: position === 2 ? '#fbbf24' : '#94a3b8',
+                    fontWeight: 800,
+                    fontSize: '0.92rem',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8,
-                    transition: 'all 0.2s',
+                    boxShadow: position === 2 ? '0 8px 22px -4px rgba(245, 158, 11, 0.38)' : 'none',
+                    transition: 'all 0.2s ease',
                   }}
                 >
-                  <GitCommit size={18} />
+                  <GitCommit size={18} color={position === 2 ? '#fbbf24' : '#94a3b8'} />
                   <span>RIGHT LEG</span>
-                  {position === 2 && <Check size={16} color="#8b5cf6" />}
+                  {position === 2 && <Check size={16} color="#fbbf24" />}
                 </button>
               </div>
             </div>
@@ -364,8 +431,8 @@ export function RegisterPage() {
               style={{
                 padding: '14px 16px',
                 borderRadius: 14,
-                background: 'rgba(99, 102, 241, 0.1)',
-                border: '1px solid rgba(139, 92, 246, 0.25)',
+                background: 'rgba(245, 158, 11, 0.08)',
+                border: '1px solid rgba(245, 158, 11, 0.28)',
                 marginBottom: 20,
                 display: 'flex',
                 alignItems: 'center',
@@ -374,17 +441,50 @@ export function RegisterPage() {
               }}
             >
               <div>
-                <div style={{ fontSize: '0.72rem', color: '#c084fc', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <Zap size={14} color="#c084fc" />
+                <div
+                  style={{
+                    fontSize: '0.74rem',
+                    color: '#fbbf24',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Zap size={14} color="#ffd700" />
                   <span>Automated Spillover Placement</span>
                 </div>
-                <div style={{ fontSize: '0.84rem', color: '#f8fafc', fontWeight: 700, marginTop: 3, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div
+                  style={{
+                    fontSize: '0.84rem',
+                    color: '#f8fafc',
+                    fontWeight: 700,
+                    marginTop: 4,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    flexWrap: 'wrap',
+                  }}
+                >
                   <span style={{ color: '#94a3b8' }}>Auto-Placing at:</span>
-                  <span style={{ fontFamily: 'monospace', color: '#38bdf8' }}>
-                    {isResolvingParent ? 'Finding vacant node...' : `${autoParent ? `${autoParent.slice(0, 8)}...${autoParent.slice(-6)}` : 'Sponsor'}`}
+                  <span style={{ fontFamily: 'monospace', color: '#fde047' }}>
+                    {isResolvingParent
+                      ? 'Finding vacant node...'
+                      : `${autoParent ? `${autoParent.slice(0, 8)}...${autoParent.slice(-6)}` : 'Sponsor'}`}
                   </span>
-                  <span style={{ fontSize: '0.75rem', color: '#c084fc' }}>
-                    ({position === 1 ? 'Left Leg' : 'Right Leg'})
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      color: '#fbbf24',
+                      background: 'rgba(245, 158, 11, 0.15)',
+                      padding: '2px 8px',
+                      borderRadius: 8,
+                      border: '1px solid rgba(245, 158, 11, 0.3)',
+                    }}
+                  >
+                    {position === 1 ? 'Left Leg' : 'Right Leg'}
                   </span>
                 </div>
               </div>
@@ -392,26 +492,45 @@ export function RegisterPage() {
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#94a3b8',
+                  background: 'transparent',
+                  border: '1px solid rgba(245, 158, 11, 0.25)',
+                  padding: '5px 10px',
+                  borderRadius: 8,
+                  color: '#fbbf24',
                   fontSize: '0.74rem',
+                  fontWeight: 600,
                   cursor: 'pointer',
-                  textDecoration: 'underline',
                   display: 'flex',
                   alignItems: 'center',
                   gap: 4,
+                  transition: 'all 0.2s ease',
                 }}
               >
-                <Settings size={12} />
+                <Settings size={12} color="#fbbf24" />
                 <span>{showAdvanced ? 'Hide Custom' : 'Custom'}</span>
               </button>
             </div>
 
             {/* OPTIONAL CUSTOM PLACEMENT OVERRIDE (HIDDEN BY DEFAULT) */}
             {showAdvanced && (
-              <div style={{ marginBottom: 18, padding: 14, borderRadius: 12, background: 'rgba(6, 8, 20, 0.8)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
+              <div
+                style={{
+                  marginBottom: 18,
+                  padding: 14,
+                  borderRadius: 12,
+                  background: 'rgba(5, 7, 14, 0.85)',
+                  border: '1px solid rgba(245, 158, 11, 0.25)',
+                }}
+              >
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: '#e2e8f0',
+                    marginBottom: 6,
+                  }}
+                >
                   Custom Placement Parent Address (Optional Manual Override):
                 </label>
                 <input
@@ -423,31 +542,44 @@ export function RegisterPage() {
                     width: '100%',
                     padding: '10px 14px',
                     borderRadius: 10,
-                    background: 'rgba(15, 23, 42, 0.8)',
-                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                    background: 'rgba(10, 14, 24, 0.9)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
                     color: '#f8fafc',
                     fontSize: '0.85rem',
                     fontFamily: 'monospace',
                     outline: 'none',
+                    boxSizing: 'border-box',
                   }}
                 />
               </div>
             )}
 
-            {/* 100% ALLOCATION BREAKDOWN ACCORDION / SUMMARY */}
+            {/* 100% ALLOCATION BREAKDOWN */}
             <div
               style={{
-                padding: '14px 16px',
+                padding: '16px 18px',
                 borderRadius: 14,
-                background: 'rgba(6, 8, 20, 0.6)',
-                border: '1px solid rgba(99, 102, 241, 0.2)',
+                background: 'rgba(5, 7, 14, 0.75)',
+                border: '1px solid rgba(245, 158, 11, 0.22)',
                 fontSize: '0.78rem',
                 color: '#94a3b8',
                 marginBottom: 24,
               }}
             >
-              <div style={{ fontWeight: 700, color: '#cbd5e1', marginBottom: 6 }}>100% USDT Allocation Breakdown:</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px' }}>
+              <div
+                style={{
+                  fontWeight: 800,
+                  color: '#fbbf24',
+                  marginBottom: 8,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                }}
+              >
+                <Layers size={14} color="#ffd700" />
+                <span>100% USDT ALLOCATION BREAKDOWN:</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 14px' }}>
                 <div>• Direct Income: <strong style={{ color: '#f8fafc' }}>$10 (20%)</strong></div>
                 <div>• Affiliate (20L): <strong style={{ color: '#f8fafc' }}>$7 (14%)</strong></div>
                 <div>• Club Matrix: <strong style={{ color: '#f8fafc' }}>$12 (24%)</strong></div>
@@ -455,18 +587,18 @@ export function RegisterPage() {
                 <div>• Champion Pool: <strong style={{ color: '#f8fafc' }}>$3 (6%)</strong></div>
                 <div>• Weekly Pool: <strong style={{ color: '#f8fafc' }}>$3 (6%)</strong></div>
                 <div>• Lifetime Rewards: <strong style={{ color: '#f8fafc' }}>$5 (10%)</strong></div>
-                <div style={{ color: '#10b981', fontWeight: 700 }}>• Total: $50 (100%)</div>
+                <div style={{ color: '#ffd700', fontWeight: 800 }}>• Total: $50 (100%)</div>
               </div>
             </div>
 
             {/* NOTIFICATIONS */}
-            {error && (
+            {displayError && (
               <div
                 style={{
                   padding: 12,
                   borderRadius: 10,
                   background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
                   color: '#f87171',
                   fontSize: '0.85rem',
                   marginBottom: 16,
@@ -476,7 +608,7 @@ export function RegisterPage() {
                 }}
               >
                 <AlertCircle size={16} />
-                <span>{error}</span>
+                <span>{displayError}</span>
               </div>
             )}
 
@@ -486,7 +618,7 @@ export function RegisterPage() {
                   padding: 12,
                   borderRadius: 10,
                   background: 'rgba(16, 185, 129, 0.15)',
-                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  border: '1px solid rgba(16, 185, 129, 0.35)',
                   color: '#34d399',
                   fontSize: '0.85rem',
                   marginBottom: 16,
@@ -507,8 +639,19 @@ export function RegisterPage() {
               </div>
             ) : profile?.isRegistered || profile?.active ? (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ marginBottom: 12, color: '#34d399', fontWeight: 600 }}>
-                  This wallet is already registered in ELZORA!
+                <div
+                  style={{
+                    marginBottom: 12,
+                    color: '#34d399',
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <CheckCircle2 size={16} />
+                  <span>This wallet is already registered in ELZORA!</span>
                 </div>
                 <button
                   type="button"
@@ -517,21 +660,22 @@ export function RegisterPage() {
                     width: '100%',
                     padding: '16px',
                     borderRadius: 14,
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    color: '#fff',
-                    fontSize: '1rem',
-                    fontWeight: 800,
+                    border: '1px solid rgba(251, 191, 36, 0.4)',
+                    background: 'linear-gradient(135deg, #ffd700 0%, #f59e0b 50%, #d97706 100%)',
+                    color: '#080a10',
+                    fontSize: '1.02rem',
+                    fontWeight: 900,
                     cursor: 'pointer',
-                    boxShadow: '0 10px 25px rgba(16, 185, 129, 0.4)',
+                    boxShadow: '0 12px 28px rgba(245, 158, 11, 0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: 8,
+                    transition: 'all 0.25s ease',
                   }}
                 >
                   <span>Go to Dashboard</span>
-                  <ArrowRight size={18} />
+                  <ArrowRight size={18} color="#080a10" />
                 </button>
               </div>
             ) : isNeedsApproval ? (
@@ -543,17 +687,18 @@ export function RegisterPage() {
                   width: '100%',
                   padding: '16px',
                   borderRadius: 14,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                  color: '#fff',
+                  border: '1px solid rgba(254, 240, 138, 0.35)',
+                  background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #b45309 100%)',
+                  color: '#ffffff',
                   fontSize: '1rem',
                   fontWeight: 800,
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 10px 25px rgba(99, 102, 241, 0.4)',
+                  boxShadow: '0 12px 28px rgba(245, 158, 11, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
+                  transition: 'all 0.25s ease',
                 }}
               >
                 <span>{loading ? 'Approving USDT Limit...' : 'Step 1: Approve $50 USDT Spending'}</span>
@@ -567,26 +712,28 @@ export function RegisterPage() {
                   width: '100%',
                   padding: '16px',
                   borderRadius: 14,
-                  border: 'none',
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)',
-                  color: '#fff',
-                  fontSize: '1rem',
-                  fontWeight: 800,
+                  border: '1px solid rgba(254, 240, 138, 0.5)',
+                  background: 'linear-gradient(135deg, #ffd700 0%, #f59e0b 50%, #d97706 100%)',
+                  color: '#080a10',
+                  fontSize: '1.02rem',
+                  fontWeight: 900,
+                  letterSpacing: '0.02em',
                   cursor: loading || Number(usdtBalance) < 50 ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 10px 25px rgba(139, 92, 246, 0.45)',
+                  boxShadow: '0 14px 35px rgba(245, 158, 11, 0.5)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: 8,
+                  transition: 'all 0.25s ease',
                 }}
               >
                 <span>{loading ? 'Activating Membership On-Chain...' : 'Step 2: Complete $50 Registration'}</span>
-                <ArrowRight size={18} />
+                <ArrowRight size={18} color="#080a10" />
               </button>
             )}
 
             {isConnected && Number(usdtBalance) < 50 && (
-              <div style={{ textAlign: 'center', marginTop: 12, fontSize: '0.8rem', color: '#f87171' }}>
+              <div style={{ textAlign: 'center', marginTop: 12, fontSize: '0.82rem', color: '#f87171' }}>
                 Insufficient USDT balance. You need at least 50 USDT to register.
               </div>
             )}
