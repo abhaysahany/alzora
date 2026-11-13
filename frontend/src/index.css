@@ -2170,8 +2170,8 @@
       /* SIDEBAR */
       .dashboard-sidebar {
         width: 280px;
-        background: #090d24;
-        border-right: 1px solid rgba(139, 92, 246, 0.2);
+        background: #080a10;
+        border-right: 1px solid rgba(245, 158, 11, 0.18);
         display: flex;
         flex-direction: column;
         position: fixed;
@@ -2185,11 +2185,11 @@
       .sidebar-header {
         height: 96px;
         padding: 0 16px;
-        border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        border-bottom: 1px solid rgba(245, 158, 11, 0.18);
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #090d24;
+        background: #080a10;
       }
 
       .sidebar-nav {
@@ -2226,15 +2226,15 @@
 
       .sidebar-item:hover {
         color: var(--ink);
-        background: rgba(139, 92, 246, 0.1);
-        border-color: rgba(139, 92, 246, 0.25);
+        background: rgba(245, 158, 11, 0.08);
+        border-color: rgba(245, 158, 11, 0.25);
       }
 
       .sidebar-item.active {
-        color: #c084fc;
-        background: linear-gradient(90deg, rgba(168, 85, 247, 0.2), rgba(99, 102, 241, 0.12));
-        border-color: rgba(168, 85, 247, 0.45);
-        box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.35);
+        color: #fbbf24;
+        background: linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(217, 119, 6, 0.1));
+        border-color: rgba(251, 191, 36, 0.45);
+        box-shadow: 0 0 25px -5px rgba(245, 158, 11, 0.32);
       }
 
       .badge-coming {
@@ -2366,11 +2366,11 @@
       .dash-card,
       .wallet-status-banner,
       .login-card {
-        background: rgba(11, 15, 36, 0.75) !important;
-        border: 1px solid rgba(139, 92, 246, 0.25) !important;
+        background: rgba(14, 18, 28, 0.82) !important;
+        border: 1px solid rgba(245, 158, 11, 0.22) !important;
         backdrop-filter: blur(14px) !important;
         border-radius: 20px !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 25px rgba(124, 58, 237, 0.08) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 0 25px rgba(245, 158, 11, 0.08) !important;
         transition: transform 0.25s ease, box-shadow 0.35s ease, border-color 0.3s ease !important;
       }
 
@@ -2378,8 +2378,8 @@
       .stat-card:hover,
       .dash-card:hover {
         transform: translateY(-4px) !important;
-        border-color: rgba(192, 132, 252, 0.45) !important;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(124, 58, 237, 0.2) !important;
+        border-color: rgba(251, 191, 36, 0.55) !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65), 0 0 35px rgba(245, 158, 11, 0.25) !important;
       }
 
       /* WALLET STATUS BANNER */
@@ -3104,34 +3104,23 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        overflow: hidden;
-        padding: 0;
-        mix-blend-mode: screen;
+        background: transparent;
       }
 
       .elzora-hero-logo {
-        width: clamp(210px, 36vw, 330px);
-        height: auto;
-        object-fit: contain;
-        -webkit-mask-image: radial-gradient(ellipse 82% 72% at 50% 50%, #000 50%, transparent 98%);
-        mask-image: radial-gradient(ellipse 82% 72% at 50% 50%, #000 50%, transparent 98%);
-        filter: drop-shadow(0 0 26px rgba(255, 215, 0, 0.45));
-        max-width: 90vw;
+        width: clamp(210px, 36vw, 320px);
         height: auto;
         object-fit: contain;
         display: block;
         margin: 0 auto;
-        filter: drop-shadow(0 10px 30px rgba(245, 158, 11, 0.6))
-                drop-shadow(0 0 50px rgba(217, 119, 6, 0.4));
+        filter: none !important;
         animation: heroLogoFloat 5s ease-in-out infinite;
-        will-change: transform, filter;
         transition: transform 0.3s ease;
       }
 
       .elzora-hero-logo:hover {
-        transform: scale(1.04);
-        filter: drop-shadow(0 16px 40px rgba(245, 158, 11, 0.85))
-                drop-shadow(0 0 70px rgba(245, 158, 11, 0.55));
+        transform: scale(1.03);
+        filter: none !important;
       }
 
       @keyframes heroLogoFloat {
@@ -3177,7 +3166,7 @@
          ========================================================================== */
 
       ::selection {
-        background: rgba(139, 92, 246, 0.38);
+        background: rgba(245, 158, 11, 0.35);
         color: #ffffff;
       }
 
@@ -3186,14 +3175,14 @@
         height: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: rgba(6, 8, 20, 0.9);
+        background: #030508;
       }
       ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, rgba(99, 102, 241, 0.7), rgba(168, 85, 247, 0.7));
+        background: linear-gradient(180deg, rgba(251, 191, 36, 0.7), rgba(217, 119, 6, 0.7));
         border-radius: 999px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(180deg, #6366f1, #c084fc);
+        background: linear-gradient(180deg, #fde047, #f59e0b);
       }
 
       @keyframes elzoraCardRise {
@@ -3224,14 +3213,14 @@
 
       /* Navbar Glass Refinement */
       header.nav.scrolled {
-        background: rgba(6, 8, 22, 0.86);
+        background: rgba(3, 5, 8, 0.88);
         backdrop-filter: blur(20px) saturate(165%);
-        border-bottom: 1px solid rgba(139, 92, 246, 0.28);
-        box-shadow: 0 14px 44px -20px rgba(0, 0, 0, 0.85), 0 1px 0 rgba(56, 189, 248, 0.08);
+        border-bottom: 1px solid rgba(245, 158, 11, 0.22);
+        box-shadow: 0 14px 44px -20px rgba(0, 0, 0, 0.95), 0 1px 0 rgba(245, 158, 11, 0.08);
       }
 
       .nav-links a::after {
-        background: linear-gradient(90deg, #38bdf8, #8b5cf6, #ec4899);
+        background: linear-gradient(90deg, #fde047, #f59e0b, #d97706);
         border-radius: 999px;
       }
 
@@ -3245,10 +3234,10 @@
       .rank,
       .lad,
       .bento {
-        background: linear-gradient(165deg, rgba(16, 23, 56, 0.78) 0%, rgba(8, 12, 28, 0.92) 100%);
-        border: 1px solid rgba(139, 92, 246, 0.26);
+        background: linear-gradient(165deg, rgba(14, 18, 28, 0.85) 0%, rgba(5, 7, 12, 0.95) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.22);
         backdrop-filter: blur(18px) saturate(150%);
-        box-shadow: 0 20px 50px -28px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+        box-shadow: 0 20px 50px -28px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.07);
         transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease, box-shadow 0.34s ease;
       }
 
@@ -3258,11 +3247,11 @@
       .lad:hover,
       .bento:hover {
         transform: translateY(-6px);
-        border-color: rgba(192, 132, 252, 0.52);
+        border-color: rgba(251, 191, 36, 0.55);
         box-shadow:
-          0 28px 60px -26px rgba(99, 102, 241, 0.45),
-          0 0 32px -12px rgba(56, 189, 248, 0.32),
-          inset 0 1px 0 rgba(255, 255, 255, 0.14);
+          0 24px 50px -20px rgba(245, 158, 11, 0.42),
+          0 0 28px -10px rgba(251, 191, 36, 0.30),
+          inset 0 1px 0 rgba(255, 255, 255, 0.16);
       }
 
       .stat-card {
@@ -3276,7 +3265,7 @@
         left: 14px;
         right: 14px;
         height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.65), rgba(56, 189, 248, 0.65), transparent);
+        background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.65), rgba(245, 158, 11, 0.65), transparent);
         opacity: 0.45;
         transition: opacity 0.3s ease;
         pointer-events: none;
@@ -3288,22 +3277,22 @@
 
       .stat-icon,
       .card .ic {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.14));
-        border: 1px solid rgba(139, 92, 246, 0.35);
-        color: #c084fc;
-        box-shadow: 0 8px 22px -8px rgba(99, 102, 241, 0.45);
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.1));
+        border: 1px solid rgba(245, 158, 11, 0.32);
+        color: #fbbf24;
+        box-shadow: 0 8px 22px -8px rgba(245, 158, 11, 0.35);
         transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, color 0.3s ease;
       }
 
       .stat-card:hover .stat-icon,
       .card:hover .ic {
         transform: scale(1.08) rotate(-3deg);
-        color: #38bdf8;
-        box-shadow: 0 10px 26px -6px rgba(56, 189, 248, 0.55);
+        color: #fde047;
+        box-shadow: 0 10px 26px -6px rgba(245, 158, 11, 0.55);
       }
 
       .stat-value {
-        background: linear-gradient(135deg, #ffffff 15%, #e0e7ff 65%, #c084fc 100%);
+        background: linear-gradient(135deg, #ffffff 15%, #fef08a 65%, #f59e0b 100%);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -3311,14 +3300,14 @@
 
       /* Member Sidebar & Active Indicators */
       .dashboard-sidebar {
-        background: linear-gradient(180deg, rgba(9, 13, 36, 0.96) 0%, rgba(6, 8, 22, 0.98) 100%);
-        border-right: 1px solid rgba(139, 92, 246, 0.24);
+        background: linear-gradient(180deg, rgba(8, 11, 20, 0.98) 0%, rgba(4, 6, 12, 0.99) 100%);
+        border-right: 1px solid rgba(245, 158, 11, 0.22);
         backdrop-filter: blur(20px);
       }
 
       .sidebar-header {
-        background: rgba(9, 13, 36, 0.85);
-        border-bottom: 1px solid rgba(139, 92, 246, 0.24);
+        background: rgba(8, 11, 20, 0.9);
+        border-bottom: 1px solid rgba(245, 158, 11, 0.22);
       }
 
       .sidebar-item {
@@ -3328,16 +3317,16 @@
 
       .sidebar-item:hover {
         transform: translateX(4px);
-        background: rgba(139, 92, 246, 0.12);
-        border-color: rgba(139, 92, 246, 0.28);
-        color: #f8fafc;
+        background: rgba(245, 158, 11, 0.12);
+        border-color: rgba(245, 158, 11, 0.28);
+        color: #fef08a;
       }
 
       .sidebar-item.active {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.24), rgba(168, 85, 247, 0.18));
-        border-color: rgba(192, 132, 252, 0.48);
-        color: #ffffff;
-        box-shadow: 0 10px 26px -12px rgba(139, 92, 246, 0.65);
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(217, 119, 6, 0.16));
+        border-color: rgba(251, 191, 36, 0.45);
+        color: #ffd700;
+        box-shadow: 0 10px 26px -12px rgba(245, 158, 11, 0.55);
       }
 
       .sidebar-item.active::before {
@@ -3348,31 +3337,32 @@
         bottom: 8px;
         width: 3px;
         border-radius: 0 4px 4px 0;
-        background: linear-gradient(180deg, #38bdf8, #a855f7);
+        background: linear-gradient(180deg, #fde047, #f59e0b);
       }
 
       /* Tabs, Inputs & Tables */
       .tab-group {
-        background: rgba(6, 9, 24, 0.78);
-        border: 1px solid rgba(139, 92, 246, 0.28);
+        background: rgba(6, 8, 14, 0.85);
+        border: 1px solid rgba(245, 158, 11, 0.25);
         backdrop-filter: blur(12px);
       }
 
       .tab-btn.active {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        color: #ffffff;
-        box-shadow: 0 6px 18px -6px rgba(139, 92, 246, 0.75);
+        background: linear-gradient(135deg, #fde047, #f59e0b 60%, #d97706);
+        color: #030508;
+        font-weight: 800;
+        box-shadow: 0 6px 18px -6px rgba(245, 158, 11, 0.65);
       }
 
       .referral-input-group {
-        border: 1px solid rgba(139, 92, 246, 0.35);
-        background: rgba(6, 9, 24, 0.85);
+        border: 1px solid rgba(245, 158, 11, 0.32);
+        background: rgba(6, 8, 14, 0.9);
         transition: border-color 0.25s ease, box-shadow 0.25s ease;
       }
 
       .referral-input-group:focus-within {
-        border-color: rgba(56, 189, 248, 0.7);
-        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
+        border-color: rgba(251, 191, 36, 0.7);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18);
       }
 
       .activity-table tr,
@@ -3382,24 +3372,24 @@
 
       .activity-table tbody tr:hover,
       table tbody tr:hover {
-        background: rgba(139, 92, 246, 0.08);
+        background: rgba(245, 158, 11, 0.08);
       }
 
       /* Login / Register / Lookup Glass Glow */
       .glass-card-glow::before {
-        background: linear-gradient(135deg, rgba(56, 189, 248, 0.45), rgba(99, 102, 241, 0.2), rgba(192, 132, 252, 0.45));
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.35), rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.35));
       }
 
       .login-badge {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.14));
-        border-color: rgba(139, 92, 246, 0.4);
-        color: #c084fc;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(217, 119, 6, 0.12));
+        border-color: rgba(245, 158, 11, 0.35);
+        color: #fbbf24;
       }
 
       /* Footer Polish */
       footer {
-        background: linear-gradient(180deg, rgba(6, 8, 20, 0.6), rgba(4, 6, 16, 0.96));
-        border-top: 1px solid rgba(139, 92, 246, 0.22);
+        background: linear-gradient(180deg, rgba(5, 7, 12, 0.7), rgba(3, 4, 8, 0.98));
+        border-top: 1px solid rgba(245, 158, 11, 0.22);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -3460,8 +3450,8 @@
 
       .elzora-glass {
         position: relative;
-        background: linear-gradient(165deg, rgba(16, 19, 38, 0.86) 0%, rgba(11, 13, 27, 0.94) 100%);
-        border: 1px solid rgba(139, 92, 246, 0.28);
+        background: linear-gradient(165deg, rgba(14, 18, 28, 0.88) 0%, rgba(6, 8, 14, 0.96) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.24);
         border-radius: 20px;
         backdrop-filter: blur(18px) saturate(155%);
         box-shadow:
@@ -3478,17 +3468,17 @@
 
       .elzora-glass-hover:hover {
         transform: translateY(-6px);
-        border-color: rgba(192, 132, 252, 0.52);
+        border-color: rgba(251, 191, 36, 0.55);
         box-shadow:
-          0 28px 60px -24px rgba(139, 92, 246, 0.38),
-          0 0 28px -10px rgba(168, 85, 247, 0.28),
-          inset 0 1px 0 rgba(255, 255, 255, 0.14);
+          0 24px 50px -18px rgba(245, 158, 11, 0.42),
+          0 0 28px -8px rgba(251, 191, 36, 0.32),
+          inset 0 1px 0 rgba(255, 255, 255, 0.16);
       }
 
       .elzora-hero-title {
         font-family: 'Orbitron', 'Space Grotesk', sans-serif;
         font-weight: 900;
-        background: linear-gradient(135deg, #f8fafc 10%, #c084fc 52%, #ffd700 100%);
+        background: linear-gradient(135deg, #ffffff 15%, #fde047 50%, #f59e0b 82%, #d97706 100%);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -3554,15 +3544,15 @@
         align-items: center;
         justify-content: center;
         border-radius: 14px;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.22), rgba(168, 85, 247, 0.14));
-        border: 1px solid rgba(192, 132, 252, 0.35);
-        color: #c084fc;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(217, 119, 6, 0.12));
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        color: #fbbf24;
         transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
       }
 
       .elzora-glass-hover:hover .elzora-icon-badge {
         transform: scale(1.08) rotate(-3deg);
-        box-shadow: 0 8px 22px -6px rgba(139, 92, 246, 0.55);
+        box-shadow: 0 8px 22px -6px rgba(245, 158, 11, 0.55);
       }
 
       .elzora-particle-dot {
@@ -3573,7 +3563,7 @@
       }
 
       .elzora-skeleton {
-        background: linear-gradient(90deg, rgba(16, 19, 38, 0.8) 25%, rgba(139, 92, 246, 0.2) 50%, rgba(16, 19, 38, 0.8) 75%);
+        background: linear-gradient(90deg, rgba(14, 18, 28, 0.8) 25%, rgba(245, 158, 11, 0.2) 50%, rgba(14, 18, 28, 0.8) 75%);
         background-size: 200% 100%;
         animation: elzoraSkeletonSweep 1.6s infinite linear;
         border-radius: 12px;
@@ -3622,10 +3612,10 @@
 
       @keyframes elzoraCardClickPulse {
         0% {
-          box-shadow: 0 0 0 0 rgba(192, 132, 252, 0.6), 0 0 28px rgba(255, 215, 0, 0.35);
+          box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.6), 0 0 28px rgba(255, 215, 0, 0.35);
         }
         100% {
-          box-shadow: 0 0 0 18px rgba(192, 132, 252, 0), 0 28px 60px -24px rgba(139, 92, 246, 0.38);
+          box-shadow: 0 0 0 18px rgba(251, 191, 36, 0), 0 28px 60px -24px rgba(245, 158, 11, 0.38);
         }
       }
 
@@ -3659,7 +3649,7 @@
         opacity: 0;
         background: radial-gradient(
           circle,
-          rgba(139, 92, 246, 0.14) 0%,
+          rgba(245, 158, 11, 0.12) 0%,
           rgba(255, 215, 0, 0.05) 36%,
           transparent 70%
         );
@@ -3678,7 +3668,7 @@
       .elzora-click-ring {
         position: fixed;
         border-radius: 50%;
-        border: 1.5px solid rgba(192, 132, 252, 0.8);
+        border: 1.5px solid rgba(251, 191, 36, 0.8);
         box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
         transform: translate(-50%, -50%);
         animation: elzoraClickRing 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
@@ -3692,7 +3682,7 @@
         animation: elzoraClickStar 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       }
 
-      /* Card Hover: Crisp Violet-Gold Border Glow + Star-Burst Pulse (No Muddy Wash) */
+      /* Card Hover: Crisp Gold Border Glow + Star-Burst Pulse (Black & Gold Theme) */
       .elzora-glass-hover,
       .stat-card,
       .chart-card,
@@ -3700,8 +3690,8 @@
       .activity-card {
         position: relative;
         overflow: hidden;
-        background: linear-gradient(155deg, rgba(18, 22, 48, 0.86) 0%, rgba(11, 13, 27, 0.96) 100%);
-        border: 1px solid rgba(139, 92, 246, 0.28);
+        background: linear-gradient(155deg, rgba(14, 18, 28, 0.88) 0%, rgba(6, 8, 14, 0.98) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.24);
         transition:
           transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
           border-color 0.28s ease,
@@ -3722,10 +3712,10 @@
       .referral-card:hover,
       .activity-card:hover {
         transform: translateY(-4px);
-        border-color: rgba(192, 132, 252, 0.72);
+        border-color: rgba(251, 191, 36, 0.65);
         box-shadow:
-          0 18px 42px -16px rgba(139, 92, 246, 0.52),
-          0 0 24px -8px rgba(255, 215, 0, 0.28),
+          0 20px 45px -16px rgba(245, 158, 11, 0.48),
+          0 0 24px -8px rgba(255, 215, 0, 0.35),
           inset 0 1px 0 rgba(255, 255, 255, 0.16);
       }
 

@@ -144,24 +144,19 @@ export function PublicNavbar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             {isConnected && address ? (
               <div className="navbar-auth-group">
-                {/* 1. Wallet Address Pill */}
-                <div className="navbar-wallet-pill">
-                  {shortAddress}
-                </div>
-
-                {/* 2. Blockchain Details Pill */}
+                {/* 1. Blockchain Details Pill */}
                 <div className="navbar-chain-pill">
                   <span className="navbar-chain-dot" />
                   <span>{chainName}</span>
                 </div>
 
-                {/* 3. Short Address with Shield Icon */}
+                {/* 2. Connected Wallet Address in Short with Icon (Single Display) */}
                 <div className="navbar-account-pill">
-                  <ShieldCheck size={14} color="#ffd700" />
-                  <span>{miniAddress}</span>
+                  <ShieldCheck size={15} color="#ffd700" />
+                  <span>{shortAddress}</span>
                 </div>
 
-                {/* 4. Go to Dashboard Button */}
+                {/* 3. Go to Dashboard Button */}
                 <button
                   onClick={handleAction}
                   className="navbar-dashboard-btn"
