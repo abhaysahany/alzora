@@ -44,9 +44,8 @@ contract ElzoraMain is
 
     uint256 public constant PAIR_RATE_USD = 2; // $2 per matched binary pair
     uint256 public constant MAX_DAILY_PAIRS = 50; // Daily cap: 50 pairs = $100/day
-    // NOTE: Set to 3 for testing purposes; change back to 30 for production/mainnet deployment.
-    uint256 public constant CHAMPION_DIRECTS_REQUIRED = 3;
-    uint256 public constant WEEKLY_DIRECTS_REQUIRED = 3;
+    uint256 public constant CHAMPION_DIRECTS_REQUIRED = 30; // 30 directs required for Champion Pool (mainnet)
+    uint256 public constant WEEKLY_DIRECTS_REQUIRED = 3;   // 3 directs weekly required for Weekly Performance Pool
     uint256 public constant MAX_UPLINE_LEVELS = 20;
 
     // Time constants
@@ -73,6 +72,9 @@ contract ElzoraMain is
     mapping(address => IncomeBreakdown) private _incomes;
     mapping(address => address[]) private _directReferrals;
     mapping(address => bool) public isAuthorizedGateway;
+
+    // First 3 IDs Exemption Mapping (free from direct conditions & auto-qualified)
+    mapping(address => bool) public isExemptFromDirects;
 
     // Binary Daily Matching Tracking
     mapping(address => mapping(uint256 => uint256)) public userDailyPairs;
@@ -198,33 +200,19 @@ contract ElzoraMain is
     }
 
     function _initializeLifetimeMilestones() internal {
-        lifetimeMilestones[0] = LifetimeMilestone(5, 5, 25);
-        lifetimeMilestones[1] = LifetimeMilestone(20, 20, 75);
-        lifetimeMilestones[2] = LifetimeMilestone(50, 50, 150);
-        lifetimeMilestones[3] = LifetimeMilestone(100, 100, 300);
-        lifetimeMilestones[4] = LifetimeMilestone(250, 250, 750);
-        lifetimeMilestones[5] = LifetimeMilestone(500, 500, 1500);
-        lifetimeMilestones[6] = LifetimeMilestone(1000, 1000, 3000);
-        lifetimeMilestones[7] = LifetimeMilestone(2000, 2000, 6000);
-        lifetimeMilestones[8] = LifetimeMilestone(4000, 4000, 12000);
-        lifetimeMilestones[9] = LifetimeMilestone(8000, 8000, 25000);
-        lifetimeMilestones[10] = LifetimeMilestone(15000, 15000, 50000);
-        lifetimeMilestones[11] = LifetimeMilestone(30000, 30000, 100000);
-        lifetimeMilestones[12] = LifetimeMilestone(60000, 60000, 200000);
-        lifetimeMilestones[13] = LifetimeMilestone(120000, 120000, 400000);
-        lifetimeMilestones[14] = LifetimeMilestone(250000, 250000, 800000);
-        lifetimeMilestones[15] = LifetimeMilestone(500000, 500000, 1500000);
-        lifetimeMilestones[16] = LifetimeMilestone(1000000, 1000000, 3000000);
-        lifetimeMilestones[17] = LifetimeMilestone(1500000, 1500000, 4500000);
-        lifetimeMilestones[18] = LifetimeMilestone(2000000, 2000000, 6000000);
-        lifetimeMilestones[19] = LifetimeMilestone(2500000, 2500000, 7500000);
-        lifetimeMilestones[20] = LifetimeMilestone(3000000, 3000000, 9000000);
-        lifetimeMilestones[21] = LifetimeMilestone(3500000, 3500000, 10500000);
-        lifetimeMilestones[22] = LifetimeMilestone(4000000, 4000000, 12000000);
-        lifetimeMilestones[23] = LifetimeMilestone(4500000, 4500000, 13500000);
-        lifetimeMilestones[24] = LifetimeMilestone(5000000, 5000000, 15000000);
-        lifetimeMilestones[25] = LifetimeMilestone(6000000, 6000000, 18000000);
-        lifetimeMilestones[26] = LifetimeMilestone(7000000, 7000000, 21000000);
+        uint32[27] memory reqs = [
+            uint32(5), 20, 50, 100, 250, 500, 1000, 2000, 4000,
+            8000, 15000, 30000, 60000, 120000, 250000, 500000, 1000000, 1500000,
+            2000000, 2500000, 3000000, 3500000, 4000000, 4500000, 5000000, 6000000, 7000000
+        ];
+        uint32[27] memory rewards = [
+            uint32(25), 75, 150, 300, 750, 1500, 3000, 6000, 12000,
+            25000, 50000, 100000, 200000, 400000, 800000, 1500000, 3000000, 4500000,
+            6000000, 7500000, 9000000, 10500000, 12000000, 13500000, 15000000, 18000000, 21000000
+        ];
+        for (uint256 i = 0; i < 27; i++) {
+            lifetimeMilestones[i] = LifetimeMilestone(reqs[i], reqs[i], rewards[i]);
+        }
     }
 
     function _initializeRootMember(address root) internal {
@@ -236,6 +224,11 @@ contract ElzoraMain is
         u.currentRank = 1;
 
         totalUsers = 1;
+
+        // Initialize First 3 IDs exemption for root
+        isExemptFromDirects[root] = true;
+        isChampionMember[root] = true;
+        championMembers.push(root);
 
         emit UserRegistered(root, address(0), address(0), BinaryPosition.None, block.timestamp);
     }
@@ -323,6 +316,15 @@ contract ElzoraMain is
         if (_users[sponsor].directCount >= CHAMPION_DIRECTS_REQUIRED && !isChampionMember[sponsor]) {
             isChampionMember[sponsor] = true;
             championMembers.push(sponsor);
+        }
+
+        // Check First 3 IDs auto-exemption (ID #2 & ID #3)
+        if (totalUsers <= 3) {
+            isExemptFromDirects[user] = true;
+            if (!isChampionMember[user]) {
+                isChampionMember[user] = true;
+                championMembers.push(user);
+            }
         }
 
         // Update Binary Tree Placement Hierarchy (Cumulative Counts & Carry Volumes)
@@ -429,7 +431,7 @@ contract ElzoraMain is
             if (curr == address(0)) {
                 // If upline doesn't exist, remaining levels go to Treasury
                 uint256 missedAmt = (lvl <= 10) ? (40 * tokenUnit) / 100 : (30 * tokenUnit) / 100;
-                _sendMissedToTreasury(address(0), missedAmt, 2, "No upline level");
+                _sendMissedToTreasury(address(0), missedAmt, 2, "No upline");
                 continue;
             }
 
@@ -438,7 +440,7 @@ contract ElzoraMain is
                 _creditIncome(curr, levelAmount, 2);
                 emit AffiliateIncomePaid(curr, user, lvl, levelAmount);
             } else {
-                _sendMissedToTreasury(curr, levelAmount, 2, "Upline not active");
+                _sendMissedToTreasury(curr, levelAmount, 2, "Upline inactive");
             }
 
             curr = _users[curr].sponsor;
@@ -471,15 +473,15 @@ contract ElzoraMain is
 
             uint256 matchAmount = matchablePairs * PAIR_RATE_USD * tokenUnit;
 
-            // Condition: 1 Left direct sponsor and 1 Right direct sponsor
-            bool isQualified = (u.leftDirectCount >= 1 && u.rightDirectCount >= 1);
+            // Condition: 1 Left direct sponsor and 1 Right direct sponsor (Exempt for First 3 IDs)
+            bool isQualified = isExemptFromDirects[user] || (u.leftDirectCount >= 1 && u.rightDirectCount >= 1);
 
             if (isQualified) {
                 _creditIncome(user, matchAmount, 3);
                 emit MatchingIncomePaid(user, matchablePairs, matchAmount, u.leftCarryVolume, u.rightCarryVolume);
             } else {
                 // Missed Income goes directly to Treasury Wallet
-                _sendMissedToTreasury(user, matchAmount, 3, "Missing 1 Left & 1 Right direct");
+                _sendMissedToTreasury(user, matchAmount, 3, "Missing directs");
             }
         }
     }
@@ -512,7 +514,7 @@ contract ElzoraMain is
                 if (sponsor != address(0) && _users[sponsor].isRegistered) {
                     _creditIncome(sponsor, sponsorBonus, 4);
                 } else {
-                    _sendMissedToTreasury(sponsor, sponsorBonus, 4, "Club Sponsor not active");
+                    _sendMissedToTreasury(sponsor, sponsorBonus, 4, "Sponsor inactive");
                 }
             }
 
@@ -564,7 +566,7 @@ contract ElzoraMain is
             record.isSnapshotCreated = true;
             record.isFullyDistributed = true;
 
-            _sendMissedToTreasury(address(0), pool, 5, "No qualified Champion members for month");
+            _sendMissedToTreasury(address(0), pool, 5, "No Champion qualifiers");
             emit ChampionMonthlyPoolSnapshot(monthEpoch, pool, 0, 0);
             return;
         }
@@ -650,6 +652,9 @@ contract ElzoraMain is
         uint256 pool = weeklyPoolBalance[epoch];
         if (pool == 0) revert NothingToWithdraw();
 
+        // Ensure exempt members (First 3 IDs) are automatically included in weekly qualifiers
+        _ensureExemptWeeklyQualifiers(epoch);
+
         uint256 totalQualifiers = _weeklyQualifiers[epoch].length;
         if (totalQualifiers == 0) {
             // No qualified members this week: Pool goes directly to Treasury
@@ -661,7 +666,7 @@ contract ElzoraMain is
             record.isSnapshotCreated = true;
             record.isFullyDistributed = true;
 
-            _sendMissedToTreasury(address(0), pool, 6, "No qualified Weekly members for week");
+            _sendMissedToTreasury(address(0), pool, 6, "No Weekly qualifiers");
             emit WeeklyPoolSnapshot(epoch, pool, 0, 0);
             return;
         }
@@ -727,6 +732,28 @@ contract ElzoraMain is
         return _weeklyQualifiers[epoch].length;
     }
 
+    function _ensureExemptWeeklyQualifiers(uint256 epoch) internal {
+        // Automatically qualify root
+        if (rootAddress != address(0) && _users[rootAddress].isRegistered) {
+            _addWeeklyQualifierIfNotPresent(epoch, rootAddress);
+            address left1 = _users[rootAddress].leftChild;
+            if (left1 != address(0) && isExemptFromDirects[left1]) {
+                _addWeeklyQualifierIfNotPresent(epoch, left1);
+                address left2 = _users[left1].leftChild;
+                if (left2 != address(0) && isExemptFromDirects[left2]) {
+                    _addWeeklyQualifierIfNotPresent(epoch, left2);
+                }
+            }
+        }
+    }
+
+    function _addWeeklyQualifierIfNotPresent(uint256 epoch, address account) internal {
+        if (!isWeeklyQualifier[epoch][account]) {
+            isWeeklyQualifier[epoch][account] = true;
+            _weeklyQualifiers[epoch].push(account);
+        }
+    }
+
     // --- Lifetime Milestones Claims ---
 
     /**
@@ -760,7 +787,7 @@ contract ElzoraMain is
             }
 
             uint256 reqDirects = getRequiredDirectsForMilestone(i);
-            if (u.directCount < reqDirects) {
+            if (!isExemptFromDirects[user] && u.directCount < reqDirects) {
                 break; // Milestone waits safely without lapsing for direct referrals
             }
 
@@ -896,7 +923,7 @@ contract ElzoraMain is
         else if (category == 5) inc.championIncome += amount;
         else if (category == 6) inc.weeklyIncome += amount;
         else if (category == 7) inc.lifetimeIncome += amount;
-        else if (category == 8) inc.globalClubIncome += amount;
+        else inc.globalClubIncome += amount;
 
         // Instant direct transfer to user wallet
         IERC20(paymentToken).safeTransfer(user, amount);
@@ -951,6 +978,20 @@ contract ElzoraMain is
      */
     function cancelOwnershipTransfer() external onlyOwner {
         transferOwnership(address(0));
+    }
+
+    /**
+     * @notice Admin function to configure or update exempt IDs free from direct conditions.
+     */
+    function setExemptFromDirects(address account, bool status) external onlyOwner {
+        if (account == address(0)) revert ZeroAddress();
+        isExemptFromDirects[account] = status;
+        if (status) {
+            if (!isChampionMember[account]) {
+                isChampionMember[account] = true;
+                championMembers.push(account);
+            }
+        }
     }
 
     // --- View Functions ---

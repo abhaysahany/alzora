@@ -41,6 +41,8 @@ export function AdminControlsPage() {
   const acceptOwnership = aventra?.acceptOwnership || (async () => showToast('Ownership accepted'))
   const changeTreasuryWallet = aventra?.setTreasuryWallet || aventra?.changeTreasuryWallet || (async () => showToast('Treasury wallet updated'))
   const emergencyWithdrawToken = aventra?.emergencyTokenRescue || aventra?.emergencyWithdrawToken || (async () => showToast('Emergency rescue processed'))
+  const upgradeContractImplementation = aventra?.upgradeContractImplementation
+  const setExemptFromDirects = aventra?.setExemptFromDirects
   
   // Pool distribution methods
   const createChampionMonthlySnapshot = aventra?.createChampionMonthlySnapshot
@@ -59,6 +61,10 @@ export function AdminControlsPage() {
   const [newTreasury, setNewTreasury] = useState('')
   const [newCoinPrice, setNewCoinPrice] = useState('')
   const [newSwapFeePct, setNewSwapFeePct] = useState('10')
+  const [upgradeImplAddr, setUpgradeImplAddr] = useState('0x1a4b899a0D317e25128544882DB0c9f8F7f437Ce')
+  const [isUpgradingImpl, setIsUpgradingImpl] = useState(false)
+  const [exemptTargetAddr, setExemptTargetAddr] = useState('')
+  const [isUpdatingExempt, setIsUpdatingExempt] = useState(false)
 
   // Pool Distribution States (Epoch counting starts from 0)
   const currentMonthEpoch = Number(globalStats?.currentMonthEpoch ?? 0)
@@ -855,6 +861,131 @@ export function AdminControlsPage() {
               Update Treasury Wallet
             </button>
           </form>
+        </div>
+
+        {/* CARD 4: CONTRACT IMPLEMENTATION UPGRADE & FIRST 3 IDS EXEMPTIONS */}
+        <div className="glass-card" style={{ padding: 28, borderRadius: 24, border: '1px solid rgba(139, 92, 246, 0.35)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+            <Sliders size={24} color="#c084fc" />
+            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontWeight: 800 }}>
+              Upgrade Contract & Direct Exemptions
+            </h3>
+          </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.86rem', marginBottom: 18, lineHeight: 1.5 }}>
+            Upgrade the logic implementation to activate <b>First 3 IDs condition-free status</b> (ID #1 Root, ID #2, ID #3) across Binary Matching, 27 Milestones, Champion Club, and Weekly Pool.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                New ElzoraMain Implementation Address
+              </label>
+              <input
+                type="text"
+                value={upgradeImplAddr}
+                onChange={(e) => setUpgradeImplAddr(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px 14px',
+                  borderRadius: 12,
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(139, 92, 246, 0.4)',
+                  color: '#fff',
+                  fontFamily: 'monospace',
+                  fontSize: '0.86rem',
+                }}
+              />
+            </div>
+
+            <button
+              type="button"
+              disabled={isUpgradingImpl || loading}
+              onClick={async () => {
+                if (!upgradeImplAddr || !upgradeImplAddr.startsWith('0x') || upgradeImplAddr.length !== 42) {
+                  showToast('Please enter a valid 0x implementation contract address')
+                  return
+                }
+                try {
+                  setIsUpgradingImpl(true)
+                  showToast('Applying UUPS Upgrade on Proxy...')
+                  await upgradeContractImplementation(upgradeImplAddr.trim())
+                  showToast('🎉 Contract upgraded successfully! First 3 IDs exemptions are now active!')
+                } catch (err) {
+                  showToast(formatErrorMessage(err, 'Implementation upgrade failed.'))
+                } finally {
+                  setIsUpgradingImpl(false)
+                }
+              }}
+              className="btn btn-primary"
+              style={{
+                padding: '12px 20px',
+                borderRadius: 12,
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+                color: '#fff',
+                cursor: 'pointer',
+              }}
+            >
+              {isUpgradingImpl ? 'Upgrading Implementation...' : 'Apply Contract Upgrade Now'}
+            </button>
+
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 14 }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--muted)', marginBottom: 6, fontWeight: 700 }}>
+                Set / Confirm Specific Wallet as Direct-Condition Exempt
+              </label>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input
+                  type="text"
+                  placeholder="0x... member address"
+                  value={exemptTargetAddr}
+                  onChange={(e) => setExemptTargetAddr(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: '10px 12px',
+                    borderRadius: 12,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: '#fff',
+                    fontFamily: 'monospace',
+                    fontSize: '0.84rem',
+                  }}
+                />
+                <button
+                  type="button"
+                  disabled={isUpdatingExempt || loading}
+                  onClick={async () => {
+                    if (!exemptTargetAddr || !exemptTargetAddr.startsWith('0x') || exemptTargetAddr.length !== 42) {
+                      showToast('Please enter a valid 0x address')
+                      return
+                    }
+                    try {
+                      setIsUpdatingExempt(true)
+                      showToast(`Exempting ${exemptTargetAddr.slice(0, 6)}... from direct conditions...`)
+                      await setExemptFromDirects(exemptTargetAddr.trim(), true)
+                      showToast(`✅ ${exemptTargetAddr.slice(0, 6)}... is now permanently exempt from direct conditions!`)
+                      setExemptTargetAddr('')
+                    } catch (err) {
+                      showToast(formatErrorMessage(err, 'Failed to update exempt status.'))
+                    } finally {
+                      setIsUpdatingExempt(false)
+                    }
+                  }}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 12,
+                    background: 'rgba(0, 255, 136, 0.15)',
+                    border: '1px solid #00ff88',
+                    color: '#00ff88',
+                    fontWeight: 800,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {isUpdatingExempt ? 'Setting...' : 'Set Exempt'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* CARD 5: ELZORA PROTOCOL PARAMETERS */}

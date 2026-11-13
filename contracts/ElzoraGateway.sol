@@ -139,6 +139,7 @@ contract ElzoraGateway {
         uint256 currEpoch = elzoraMain.getCurrentWeeklyEpoch();
         uint256 weeklyCount = elzoraMain.weeklyDirectCount(currEpoch, user);
         bool champEligible = elzoraMain.isChampionMember(user);
+        bool isExempt = elzoraMain.isExemptFromDirects(user);
 
         uint256 pendingChamp = 0;
         uint256 currMonth = elzoraMain.getCurrentMonthEpoch();
@@ -163,7 +164,7 @@ contract ElzoraGateway {
             } else {
                 (uint256 reqL, uint256 reqR, ) = elzoraMain.lifetimeMilestones(i);
                 uint256 reqDirects = elzoraMain.getRequiredDirectsForMilestone(i);
-                if (prof.leftTeamCount >= reqL && prof.rightTeamCount >= reqR && prof.directCount >= reqDirects) {
+                if (prof.leftTeamCount >= reqL && prof.rightTeamCount >= reqR && (isExempt || prof.directCount >= reqDirects)) {
                     milestones[i] = 1; // Claimable
                 } else {
                     milestones[i] = 0; // Not reached
@@ -177,9 +178,9 @@ contract ElzoraGateway {
             profile: prof,
             income: inc,
             directReferrals: directs,
-            isChampionEligible: champEligible,
+            isChampionEligible: champEligible || isExempt,
             pendingChampionReward: pendingChamp,
-            isWeeklyEligibleCurrentEpoch: weeklyCount >= 3,
+            isWeeklyEligibleCurrentEpoch: isExempt || weeklyCount >= 3,
             currentWeeklyDirects: weeklyCount,
             currentWeeklyEpoch: currEpoch,
             todayMatchingPairs: todayPairs,
@@ -204,7 +205,7 @@ contract ElzoraGateway {
             rightTotalMembers: prof.rightTeamCount,
             leftCarryVolume: prof.leftCarryVolume,
             rightCarryVolume: prof.rightCarryVolume,
-            isMatchingQualified: prof.leftDirectCount >= 1 && prof.rightDirectCount >= 1
+            isMatchingQualified: elzoraMain.isExemptFromDirects(user) || (prof.leftDirectCount >= 1 && prof.rightDirectCount >= 1)
         });
     }
 

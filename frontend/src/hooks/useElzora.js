@@ -884,6 +884,58 @@ export function useElzora() {
     }
   }
 
+  const upgradeContractImplementation = async (newImplementationAddress) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'upgradeToAndCall',
+        args: [newImplementationAddress, '0x'],
+        chain: activeChain,
+      })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
+      await refreshAll()
+      setLoading(false)
+      return tx
+    } catch (err) {
+      console.error('Contract upgrade failed:', err)
+      const cleanMsg = decodeElzoraError(err, 'Contract implementation upgrade failed.')
+      setError(cleanMsg)
+      setLoading(false)
+      throw new Error(cleanMsg)
+    }
+  }
+
+  const setExemptFromDirects = async (account, status = true) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'setExemptFromDirects',
+        args: [account, status],
+        chain: activeChain,
+      })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
+      await refreshAll()
+      setLoading(false)
+      return tx
+    } catch (err) {
+      console.error('Set exempt from directs failed:', err)
+      const cleanMsg = decodeElzoraError(err, 'Failed to update exempt status.')
+      setError(cleanMsg)
+      setLoading(false)
+      throw new Error(cleanMsg)
+    }
+  }
+
   return {
     address,
     isConnected,
@@ -934,6 +986,8 @@ export function useElzora() {
     distributeChampionBatch,
     createWeeklyPoolSnapshot,
     distributeWeeklyBatch,
+    upgradeContractImplementation,
+    setExemptFromDirects,
     // Shorthands & Registration Flags
     isRegistered: isUserRegistered,
     active: isUserRegistered,
