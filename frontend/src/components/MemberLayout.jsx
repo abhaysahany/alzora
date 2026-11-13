@@ -4,6 +4,7 @@ import { useWalletAuth } from '../hooks/useWalletAuth'
 import { useAventraContracts } from '../hooks/useAventraContracts'
 import { ConnectWalletButton } from './ConnectWalletButton'
 import BackgroundCanvas from './BackgroundCanvas'
+import { formatErrorMessage } from '../utils/errorMessages'
 import {
   LayoutDashboard,
   DollarSign,
@@ -76,7 +77,7 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
       showToast('🎉 Ownership accepted! Redirecting to Admin Console...')
       navigate('/admin', { replace: true })
     } catch (err) {
-      showToast(`Accept failed: ${err.message}`)
+      showToast(formatErrorMessage(err, 'Unable to accept contract ownership.'))
     } finally {
       setIsAcceptingOwnership(false)
     }

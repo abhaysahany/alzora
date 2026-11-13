@@ -1,6 +1,7 @@
 import { createPublicClient, http, isAddress } from 'viem'
 import { bsc } from 'viem/chains'
 import { CONTRACT_ADDRESSES, AVENTRA_XMLM_ABI } from '../web3/contracts'
+import { formatErrorMessage } from './errorMessages'
 
 export const REFERRAL_STORAGE_KEY = 'aventrax_referral_sponsor'
 export const DEFAULT_ROOT_ADDRESS = import.meta.env.VITE_ROOT_ID || CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb'
@@ -219,7 +220,7 @@ export async function resolveSponsorOnChain(sponsorInput) {
       userId: null,
       isRegistered: false,
       isRoot: false,
-      error: err.shortMessage || err.message || 'Failed to verify sponsor on blockchain.',
+      error: formatErrorMessage(err, 'Unable to verify sponsor right now.'),
     }
   }
 }

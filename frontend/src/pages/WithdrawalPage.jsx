@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { MemberLayout } from '../components/MemberLayout'
 import { useTetherStream } from '../hooks/useTetherStream'
 import { useWalletAuth } from '../hooks/useWalletAuth'
+import { formatErrorMessage } from '../utils/errorMessages'
 import {
   Wallet,
   ArrowUpRight,
@@ -62,7 +63,7 @@ export function WithdrawalPage() {
       setTimeout(() => setTxSuccess(null), 6000)
     } catch (err) {
       console.error('Withdrawal error:', err)
-      setErrorMsg(err?.shortMessage || err?.message || 'Transaction failed or was rejected.')
+      setErrorMsg(formatErrorMessage(err, 'Withdrawal failed. Please try again.'))
       setTimeout(() => setErrorMsg(null), 5000)
     } finally {
       setWithdrawing(false)

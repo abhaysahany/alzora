@@ -3,6 +3,7 @@ import { useChainId } from 'wagmi'
 import { createPublicClient, http as viemHttp, formatUnits, parseAbiItem, isAddress } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
 import { getContractAddresses, getRpcUrl, ELZORA_GATEWAY_ABI, ELZORA_MAIN_ABI } from '../web3/contracts'
+import { formatErrorMessage } from '../utils/errorMessages'
 
 const RANK_NAMES = {
   1: 'Starter',
@@ -321,7 +322,7 @@ export function useAdminMembers() {
       })
     } catch (err) {
       console.error('Error fetching admin members:', err)
-      setError(err?.message || 'Failed to load member records')
+      setError(formatErrorMessage(err, 'Unable to load member records.'))
     } finally {
       setLoading(false)
       setRefreshing(false)

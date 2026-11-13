@@ -230,16 +230,18 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: 12,
             padding: '0 32px',
             position: 'sticky',
             top: 0,
             zIndex: 80,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div className="admin-topbar-left" style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0, flex: 1 }}>
             <button
               onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
               className="admin-burger-btn"
+              aria-label="Toggle admin menu"
               style={{
                 padding: 8,
                 background: 'rgba(139, 92, 246, 0.12)',
@@ -248,24 +250,39 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
                 color: 'var(--purple-light)',
                 cursor: 'pointer',
                 display: 'none',
+                flexShrink: 0,
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
             >
               {mobileDrawerOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            <div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--purple-light)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="admin-console-label" style={{ fontSize: '0.72rem', color: 'var(--purple-light)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5, whiteSpace: 'nowrap' }}>
                 ADMIN CONSOLE
               </div>
-              <h2 style={{ margin: 0, fontSize: '1.28rem', fontWeight: 900, color: '#fff' }}>
+              <h2
+                className="admin-page-title"
+                style={{
+                  margin: 0,
+                  fontSize: '1.28rem',
+                  fontWeight: 900,
+                  color: '#fff',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 {pageTitle}
               </h2>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            {/* Live Network Badge */}
+          <div className="admin-topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+            {/* Live Network Badge (desktop) */}
             <div
+              className="admin-network-badge"
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -277,6 +294,7 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
                 fontSize: '0.8rem',
                 color: '#fff',
                 fontWeight: 700,
+                whiteSpace: 'nowrap',
               }}
             >
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80' }} />
@@ -285,25 +303,27 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
 
             {contractPaused && (
               <div
+                className="admin-paused-badge"
                 style={{
                   background: 'rgba(239, 68, 68, 0.15)',
                   border: '1px solid #ef4444',
                   color: '#f87171',
-                  padding: '6px 14px',
+                  padding: '6px 12px',
                   borderRadius: 20,
-                  fontSize: '0.8rem',
+                  fontSize: '0.78rem',
                   fontWeight: 800,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 6,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 <ShieldAlert size={14} />
-                <span>PROTOCOL PAUSED</span>
+                <span className="admin-paused-text">PROTOCOL PAUSED</span>
               </div>
             )}
 
-            <ConnectWalletButton />
+            <ConnectWalletButton size="small" />
           </div>
         </header>
 

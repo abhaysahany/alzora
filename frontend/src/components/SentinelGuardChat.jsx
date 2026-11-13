@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Bot, X, Send, Volume2, Sparkles } from 'lucide-react'
 import { askSentinelGuard, formatSafeReplyHtml } from '../utils/aiEngine'
 import { PLAN_DOC_UPDATED_EVENT } from '../utils/elzoraKnowledge'
+import { formatErrorMessage } from '../utils/errorMessages'
 import './ai-widgets.css'
 
 const SUGGESTION_CHIPS = [
@@ -127,7 +128,7 @@ Ask any A-to-Z question in **English** or **Hindi/Hinglish**, grounded strictly 
         {
           id: `err_${Date.now()}`,
           role: 'assistant',
-          text: err?.message || 'Unable to process your question right now.',
+          text: formatErrorMessage(err, 'Unable to process your question right now.'),
           isError: true,
         },
       ])

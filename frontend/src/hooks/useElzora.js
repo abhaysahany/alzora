@@ -9,6 +9,7 @@ import {
   ELZORA_MAIN_ABI,
   ERC20_ABI,
 } from '../web3/contracts'
+import { formatErrorMessage } from '../utils/errorMessages'
 
 const RANK_NAMES = [
   'None',
@@ -22,33 +23,8 @@ const RANK_NAMES = [
   'Legend',
 ]
 
-function decodeElzoraError(err) {
-  const raw = err?.shortMessage || err?.message || String(err || 'Transaction failed')
-  if (raw.includes('0x3a81d6fc') || raw.includes('AlreadyRegistered')) {
-    return 'This wallet address is already registered in ELZORA.'
-  }
-  if (raw.includes('SponsorNotRegistered')) {
-    return 'The Sponsor wallet address is not registered yet in ELZORA.'
-  }
-  if (raw.includes('ParentNotRegistered')) {
-    return 'The Binary Parent wallet address is not registered yet.'
-  }
-  if (raw.includes('PositionOccupied') || raw.includes('PositionAlreadyOccupied')) {
-    return 'The selected Left/Right binary position under this parent is already occupied.'
-  }
-  if (raw.includes('0x118cdaa7') || raw.includes('OwnableUnauthorizedAccount')) {
-    return 'Your connected wallet is not authorized (not the current pending owner or owner).'
-  }
-  if (raw.includes('insufficient funds for gas')) {
-    return 'Wallet RPC reported insufficient BNB for gas. Please ensure your wallet is switched to BNB Smart Chain Testnet (Chain ID 97) and your selected account matches the connected address.'
-  }
-  if (raw.includes('ERC20InsufficientAllowance')) {
-    return 'Insufficient USDT allowance. Please click Approve USDT first before registering.'
-  }
-  if (raw.includes('ERC20InsufficientBalance')) {
-    return 'Insufficient USDT balance ($50 USDT required).'
-  }
-  return raw
+function decodeElzoraError(err, fallback = 'Transaction failed. Please try again.') {
+  return formatErrorMessage(err, fallback)
 }
 
 export function useElzora() {
@@ -413,9 +389,10 @@ export function useElzora() {
       return txHash
     } catch (err) {
       console.error('Approve failed:', err)
-      setError(err.message || 'Approval failed')
+      const cleanMsg = decodeElzoraError(err, 'USDT approval failed. Please try again.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -485,9 +462,10 @@ export function useElzora() {
       return txHash
     } catch (err) {
       console.error('Join Global Club failed:', err)
-      setError(err.message || 'Join Global Club failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to join Global Club. Please try again.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -506,9 +484,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Withdraw income failed:', err)
-      setError(err.message || 'Withdrawal failed')
+      const cleanMsg = decodeElzoraError(err, 'Withdrawal failed. Please try again.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -527,9 +506,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Claim champion reward failed:', err)
-      setError(err.message || 'Claim champion reward failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to claim Champion reward.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -549,9 +529,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Claim weekly reward failed:', err)
-      setError(err.message || 'Claim weekly reward failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to claim Weekly reward.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -575,9 +556,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Check & award milestone failed:', err)
-      setError(err.message || 'Check & award milestone failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to process lifetime milestone.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -600,9 +582,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Pause failed:', err)
-      setError(err.message || 'Pause failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to pause contract.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -621,9 +604,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Unpause failed:', err)
-      setError(err.message || 'Unpause failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to unpause contract.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -643,9 +627,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Set gateway failed:', err)
-      setError(err.message || 'Set gateway failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to update gateway contract.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -665,9 +650,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Set treasury failed:', err)
-      setError(err.message || 'Set treasury failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to update treasury wallet.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -688,9 +674,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Emergency rescue failed:', err)
-      setError(err.message || 'Emergency rescue failed')
+      const cleanMsg = decodeElzoraError(err, 'Emergency token rescue failed.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -714,9 +701,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Transfer ownership failed:', err)
-      setError(err.message || 'Transfer ownership failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to propose ownership transfer.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -739,9 +727,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Cancel ownership transfer failed:', err)
-      setError(err.message || 'Cancel ownership transfer failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to cancel ownership transfer.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -810,9 +799,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Create Champion snapshot failed:', err)
-      setError(err.message || 'Create Champion snapshot failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to create Champion Pool snapshot.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -835,9 +825,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Distribute Champion batch failed:', err)
-      setError(err.message || 'Distribute Champion batch failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to distribute Champion batch.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -860,9 +851,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Create Weekly snapshot failed:', err)
-      setError(err.message || 'Create Weekly snapshot failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to create Weekly Pool snapshot.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 
@@ -885,9 +877,10 @@ export function useElzora() {
       return tx
     } catch (err) {
       console.error('Distribute Weekly batch failed:', err)
-      setError(err.message || 'Distribute Weekly batch failed')
+      const cleanMsg = decodeElzoraError(err, 'Unable to distribute Weekly batch.')
+      setError(cleanMsg)
       setLoading(false)
-      throw err
+      throw new Error(cleanMsg)
     }
   }
 

@@ -6,6 +6,7 @@ import { ConnectWalletButton } from '../components/ConnectWalletButton'
 import { useWalletAuth, closeWeb3Modal } from '../hooks/useWalletAuth'
 import { useAventraContracts } from '../hooks/useAventraContracts'
 import { getStoredReferral } from '../utils/referral'
+import { formatErrorMessage } from '../utils/errorMessages'
 import { Shield, Lock, Cpu, CheckCircle, Loader2, Search, ArrowRight, Crown, ShieldCheck } from 'lucide-react'
 
 export function LoginPage() {
@@ -105,7 +106,7 @@ export function LoginPage() {
       if (syncFn) await syncFn()
       navigate('/admin', { replace: true })
     } catch (err) {
-      setAcceptError(err?.message || 'Failed to accept contract ownership.')
+      setAcceptError(formatErrorMessage(err, 'Unable to accept contract ownership.'))
     } finally {
       setIsAccepting(false)
     }

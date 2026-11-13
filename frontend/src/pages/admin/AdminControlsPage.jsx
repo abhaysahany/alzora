@@ -5,6 +5,7 @@ import { AdminLayout } from '../../components/AdminLayout'
 import { useAventraContracts } from '../../hooks/useAventraContracts'
 import { getContractAddresses, CONTRACT_ADDRESSES, ELZORA_MAIN_ABI } from '../../web3/contracts'
 import { useWalletAuth } from '../../hooks/useWalletAuth'
+import { formatErrorMessage } from '../../utils/errorMessages'
 import {
   Sliders,
   PauseCircle,
@@ -211,7 +212,7 @@ export function AdminControlsPage() {
                   await acceptOwnership()
                   showToast('🎉 Congratulations! You are now the official Smart Contract Owner!')
                 } catch (err) {
-                  showToast(`Accept failed: ${err.message}`)
+                  showToast(formatErrorMessage(err, 'Unable to accept ownership.'))
                 }
               }}
               disabled={loading}
@@ -368,7 +369,7 @@ export function AdminControlsPage() {
                     await Promise.all([refetchChampCount(), refetchChampRecord()])
                     showToast(`✅ Champion Pool snapshot created! Qualifiers: ${champCount}`)
                   } catch (err) {
-                    showToast(`Snapshot error: ${err.message}`)
+                    showToast(formatErrorMessage(err, 'Unable to create Champion snapshot.'))
                   } finally {
                     setIsProcessingChampionSnapshot(false)
                   }
@@ -398,7 +399,7 @@ export function AdminControlsPage() {
                     await Promise.all([refetchChampCount(), refetchChampRecord()])
                     showToast('🎉 Champion batch distributed to qualifiers on-chain!')
                   } catch (err) {
-                    showToast(`Distribution error: ${err.message}`)
+                    showToast(formatErrorMessage(err, 'Unable to distribute Champion batch.'))
                   } finally {
                     setIsProcessingChampionBatch(false)
                   }
@@ -553,7 +554,7 @@ export function AdminControlsPage() {
                     await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord()])
                     showToast(`✅ Weekly Pool snapshot created! Qualifiers: ${weeklyCount}`)
                   } catch (err) {
-                    showToast(`Snapshot error: ${err.message}`)
+                    showToast(formatErrorMessage(err, 'Unable to create Weekly snapshot.'))
                   } finally {
                     setIsProcessingWeeklySnapshot(false)
                   }
@@ -583,7 +584,7 @@ export function AdminControlsPage() {
                     await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord()])
                     showToast('🎉 Weekly batch distributed to qualifiers on-chain!')
                   } catch (err) {
-                    showToast(`Distribution error: ${err.message}`)
+                    showToast(formatErrorMessage(err, 'Unable to distribute Weekly batch.'))
                   } finally {
                     setIsProcessingWeeklyBatch(false)
                   }
@@ -649,7 +650,7 @@ export function AdminControlsPage() {
                     await unpauseContract()
                     showToast('Contract unpaused successfully!')
                   } catch (err) {
-                    showToast(`Unpause failed: ${err.message}`)
+                    showToast(formatErrorMessage(err, 'Unable to unpause contract.'))
                   }
                 }}
                 disabled={loading}
@@ -666,7 +667,7 @@ export function AdminControlsPage() {
                     await pauseContract()
                     showToast('Contract paused successfully!')
                   } catch (err) {
-                    showToast(`Pause failed: ${err.message}`)
+                    showToast(formatErrorMessage(err, 'Unable to pause contract.'))
                   }
                 }}
                 disabled={loading}
@@ -730,7 +731,7 @@ export function AdminControlsPage() {
                 showToast(`Successfully nominated ${newAdmin}! Ownership will transfer when they accept.`)
                 setNewAdmin('')
               } catch (err) {
-                showToast(`Nomination failed: ${err.message}`)
+                showToast(formatErrorMessage(err, 'Unable to propose ownership transfer.'))
               }
             }}
             style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
@@ -775,7 +776,7 @@ export function AdminControlsPage() {
                       await cancelOwnershipTransfer()
                       showToast('Pending ownership transfer cancelled!')
                     } catch (err) {
-                      showToast(`Cancel failed: ${err.message}`)
+                      showToast(formatErrorMessage(err, 'Unable to cancel ownership request.'))
                     }
                   }}
                   style={{
@@ -820,7 +821,7 @@ export function AdminControlsPage() {
                 showToast('Treasury Wallet updated successfully!')
                 setNewTreasury('')
               } catch (err) {
-                showToast(`Change treasury failed: ${err.message}`)
+                showToast(formatErrorMessage(err, 'Unable to update treasury wallet.'))
               }
             }}
             style={{ display: 'flex', flexDirection: 'column', gap: 14 }}
@@ -930,7 +931,7 @@ export function AdminControlsPage() {
                 await emergencyWithdrawToken(emToken, emRecipient, emAmount)
                 showToast('Emergency withdrawal successful!')
               } catch (err) {
-                showToast(`Emergency withdraw failed: ${err.message}`)
+                showToast(formatErrorMessage(err, 'Emergency withdrawal failed.'))
               }
             }}
             style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16, alignItems: 'end' }}
