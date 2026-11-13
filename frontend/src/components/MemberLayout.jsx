@@ -112,17 +112,18 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
       {/* TOAST NOTIFICATION */}
       {toastMessage && (
         <div
+          className="elzora-glass"
           style={{
             position: 'fixed',
             bottom: 24,
             right: 24,
             zIndex: 9999,
-            background: '#0e1626',
-            border: '1px solid var(--cyan)',
-            color: 'var(--cyan)',
-            padding: '14px 28px',
-            borderRadius: 12,
-            boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
+            background: 'linear-gradient(135deg, rgba(16, 19, 38, 0.96), rgba(11, 13, 27, 0.98))',
+            border: '1px solid rgba(192, 132, 252, 0.5)',
+            color: '#f8fafc',
+            padding: '14px 24px',
+            borderRadius: 14,
+            boxShadow: '0 14px 36px rgba(0,0,0,0.85), 0 0 24px -6px rgba(139, 92, 246, 0.45)',
             fontFamily: 'Space Grotesk, sans-serif',
             fontWeight: 700,
           }}
@@ -328,7 +329,9 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
             </div>
           )}
 
-          {typeof children === 'function' ? children({ showToast }) : children}
+          <div className="elzora-page-enter">
+            {typeof children === 'function' ? children({ showToast }) : children}
+          </div>
         </div>
       </main>
     </div>

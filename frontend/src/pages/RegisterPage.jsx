@@ -7,6 +7,7 @@ import { useWalletAuth } from '../hooks/useWalletAuth'
 import { useTetherStream } from '../hooks/useTetherStream'
 import { ConnectWalletButton } from '../components/ConnectWalletButton'
 import BackgroundCanvas from '../components/BackgroundCanvas'
+import { PageTransitionShell, FloatingParticles } from '../components/MotionPrimitives'
 import { getRpcUrl, ELZORA_GATEWAY_ABI } from '../web3/contracts'
 import { getStoredReferral } from '../utils/referral'
 import {
@@ -177,18 +178,19 @@ export function RegisterPage() {
   }
 
   return (
-    <div
+    <PageTransitionShell
       style={{
         position: 'relative',
         overflow: 'hidden',
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: 'radial-gradient(ellipse at 50% 10%, #1e1145 0%, #060814 80%)',
+        background: 'radial-gradient(ellipse at 50% 10%, rgba(139, 92, 246, 0.22) 0%, #050611 75%)',
         color: '#f8fafc',
         fontFamily: "'Space Grotesk', sans-serif",
       }}
     >
+      <FloatingParticles />
       <BackgroundCanvas />
 
       {/* TOP HEADER */}
@@ -591,7 +593,7 @@ export function RegisterPage() {
           </form>
         </div>
       </main>
-    </div>
+    </PageTransitionShell>
   )
 }
 
