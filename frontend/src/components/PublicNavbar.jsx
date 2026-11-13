@@ -13,12 +13,13 @@ import {
   Sparkles,
   Layers,
   RefreshCw,
+  ShieldCheck,
 } from 'lucide-react'
 
 export function PublicNavbar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isConnected, address } = useWalletAuth()
+  const { isConnected, address, chain } = useWalletAuth()
   const { profile } = useTetherStream()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -46,6 +47,14 @@ export function PublicNavbar() {
     return location.pathname === path
   }
 
+  const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''
+  const miniAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : ''
+  const chainName = chain?.id === 56 
+    ? 'BNB SMART CHAIN' 
+    : chain?.id === 97 
+      ? 'BNB SMART CHAIN TESTNET' 
+      : (chain?.name || 'BNB SMART CHAIN TESTNET').toUpperCase()
+
   return (
     <>
       <nav
@@ -69,39 +78,20 @@ export function PublicNavbar() {
             alignItems: 'center',
           }}
         >
-          {/* Logo & Network Badge */}
+          {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
               <img
                 src="/logo.png"
                 alt="ELZORA"
                 style={{
-                  height: 36,
+                  height: 38,
                   width: 'auto',
                   objectFit: 'contain',
                   filter: 'drop-shadow(0 2px 10px rgba(245, 158, 11, 0.35))',
                 }}
               />
             </Link>
-
-            <div
-              className="landing-network-badge"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '4px 10px',
-                borderRadius: 20,
-                background: 'rgba(234, 179, 8, 0.12)',
-                border: '1px solid rgba(234, 179, 8, 0.3)',
-                color: '#facc15',
-                fontSize: '0.72rem',
-                fontWeight: 800,
-              }}
-            >
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#facc15', boxShadow: '0 0 8px #facc15' }} />
-              BSC Testnet (97)
-            </div>
           </div>
 
           {/* Desktop Nav Links */}
@@ -122,12 +112,12 @@ export function PublicNavbar() {
                   key={link.path}
                   to={link.path}
                   style={{
-                    color: active ? '#c084fc' : '#cbd5e1',
+                    color: active ? '#fbbf24' : '#cbd5e1',
                     textDecoration: 'none',
                     padding: '6px 12px',
                     borderRadius: 10,
-                    background: active ? 'rgba(139, 92, 246, 0.15)' : 'transparent',
-                    border: active ? '1px solid rgba(139, 92, 246, 0.3)' : '1px solid transparent',
+                    background: active ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
+                    border: active ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid transparent',
                     transition: 'all 0.2s',
                   }}
                 >
@@ -150,48 +140,40 @@ export function PublicNavbar() {
             })}
           </div>
 
-          {/* Wallet & Auth Action Buttons */}
+          {/* Right-Side Wallet, Blockchain & Dashboard Actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {isConnected ? (
-              <button
-                onClick={handleAction}
-                className="elzora-shimmer-btn"
-                style={{
-                  padding: '10px 18px',
-                  borderRadius: 12,
-                  border: '1px solid rgba(192, 132, 252, 0.45)',
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: '0.86rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 6px 20px rgba(139, 92, 246, 0.45)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
-              >
-                <span>{isRegistered ? 'Dashboard' : 'Register Now'}</span>
-                <ArrowRight size={15} />
-              </button>
+            {isConnected && address ? (
+              <div className="navbar-auth-group">
+                {/* 1. Wallet Address Pill */}
+                <div className="navbar-wallet-pill">
+                  {shortAddress}
+                </div>
+
+                {/* 2. Blockchain Details Pill */}
+                <div className="navbar-chain-pill">
+                  <span className="navbar-chain-dot" />
+                  <span>{chainName}</span>
+                </div>
+
+                {/* 3. Short Address with Shield Icon */}
+                <div className="navbar-account-pill">
+                  <ShieldCheck size={14} color="#ffd700" />
+                  <span>{miniAddress}</span>
+                </div>
+
+                {/* 4. Go to Dashboard Button */}
+                <button
+                  onClick={handleAction}
+                  className="navbar-dashboard-btn"
+                >
+                  <span>{isRegistered ? 'Go to Dashboard' : 'Register Now'}</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
             ) : (
               <button
                 onClick={() => navigate('/login')}
-                className="elzora-shimmer-btn"
-                style={{
-                  padding: '10px 18px',
-                  borderRadius: 12,
-                  border: '1px solid rgba(192, 132, 252, 0.45)',
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)',
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: '0.86rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 6px 20px rgba(139, 92, 246, 0.45)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
+                className="navbar-connect-btn"
               >
                 <Wallet size={15} />
                 <span>Connect Wallet</span>
@@ -218,7 +200,7 @@ export function PublicNavbar() {
             style={{
               position: 'fixed',
               inset: 0,
-              background: 'rgba(6, 8, 20, 0.85)',
+              background: 'rgba(3, 5, 8, 0.88)',
               backdropFilter: 'blur(8px)',
               zIndex: 198,
             }}
@@ -230,8 +212,8 @@ export function PublicNavbar() {
               right: 0,
               bottom: 0,
               width: 'min(85vw, 320px)',
-              background: 'linear-gradient(180deg, #0e1438 0%, #060814 100%)',
-              borderLeft: '1px solid rgba(139, 92, 246, 0.35)',
+              background: 'linear-gradient(180deg, #070b12 0%, #030508 100%)',
+              borderLeft: '1px solid rgba(245, 158, 11, 0.28)',
               padding: '24px 20px',
               zIndex: 199,
               display: 'flex',
@@ -248,7 +230,7 @@ export function PublicNavbar() {
                   alignItems: 'center',
                   marginBottom: 24,
                   paddingBottom: 16,
-                  borderBottom: '1px solid rgba(139, 92, 246, 0.2)',
+                  borderBottom: '1px solid rgba(245, 158, 11, 0.2)',
                 }}
               >
                 <img
@@ -263,11 +245,24 @@ export function PublicNavbar() {
                 />
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  style={{ background: 'transparent', border: 'none', color: '#c084fc', cursor: 'pointer', padding: 4 }}
+                  style={{ background: 'transparent', border: 'none', color: '#fbbf24', cursor: 'pointer', padding: 4 }}
                 >
                   <X size={22} />
                 </button>
               </div>
+
+              {isConnected && address && (
+                <div style={{ marginBottom: 20, padding: 12, borderRadius: 12, background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: '#34d399', marginBottom: 6, fontWeight: 700 }}>
+                    <span className="navbar-chain-dot" />
+                    <span>{chainName}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', color: '#ffd700', fontFamily: 'monospace', fontWeight: 800 }}>
+                    <ShieldCheck size={14} color="#ffd700" />
+                    <span>{shortAddress}</span>
+                  </div>
+                </div>
+              )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: '0.95rem', fontWeight: 700 }}>
                 {navLinks.map((link) =>
@@ -277,11 +272,11 @@ export function PublicNavbar() {
                       to={link.path}
                       onClick={() => setMobileMenuOpen(false)}
                       style={{
-                        color: isActive(link.path) ? '#c084fc' : '#cbd5e1',
+                        color: isActive(link.path) ? '#fbbf24' : '#cbd5e1',
                         textDecoration: 'none',
                         padding: '8px 12px',
                         borderRadius: 8,
-                        background: isActive(link.path) ? 'rgba(139, 92, 246, 0.15)' : 'transparent',
+                        background: isActive(link.path) ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
                       }}
                     >
                       {link.label}
@@ -300,7 +295,7 @@ export function PublicNavbar() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 20, borderTop: '1px solid rgba(139, 92, 246, 0.2)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 20, borderTop: '1px solid rgba(245, 158, 11, 0.2)' }}>
               <button
                 onClick={() => {
                   setMobileMenuOpen(false)
@@ -309,7 +304,7 @@ export function PublicNavbar() {
                 className="btn btn-primary"
                 style={{ width: '100%', padding: '12px', fontWeight: 800, borderRadius: 12 }}
               >
-                {isConnected ? (isRegistered ? 'Go to Dashboard' : 'Complete Registration') : 'Connect Wallet'}
+                {isConnected ? (isRegistered ? 'Go to Dashboard →' : 'Complete Registration →') : 'Connect Wallet'}
               </button>
             </div>
           </div>

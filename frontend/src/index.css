@@ -2878,6 +2878,117 @@
         display: none !important;
       }
 
+      .navbar-auth-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .navbar-wallet-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 13px;
+        border-radius: 999px;
+        background: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.32);
+        color: #fef08a;
+        font-family: 'Space Grotesk', monospace;
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+      }
+      .navbar-chain-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 13px;
+        border-radius: 999px;
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        color: #34d399;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.74rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+      }
+      .navbar-chain-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 10px #10b981;
+        display: inline-block;
+        animation: pulseDot 2s infinite ease-in-out;
+      }
+      @keyframes pulseDot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.55; transform: scale(0.85); }
+      }
+      .navbar-account-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.38);
+        color: #ffd700;
+        font-family: 'Space Grotesk', monospace;
+        font-size: 0.76rem;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      .navbar-dashboard-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 18px;
+        border-radius: 999px;
+        background: transparent;
+        border: 1px solid rgba(245, 158, 11, 0.55);
+        color: #fef08a;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 800;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        box-shadow: 0 0 14px -3px rgba(245, 158, 11, 0.35);
+        white-space: nowrap;
+      }
+      .navbar-dashboard-btn:hover {
+        background: linear-gradient(135deg, #fde047 0%, #f59e0b 55%, #d97706 100%);
+        color: #030508;
+        border-color: transparent;
+        box-shadow: 0 0 24px -2px rgba(245, 158, 11, 0.75);
+        transform: translateY(-1px);
+      }
+      .navbar-connect-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #fde047 0%, #f59e0b 55%, #d97706 100%);
+        color: #030508;
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 800;
+        font-size: 0.84rem;
+        border: 1px solid rgba(254, 240, 138, 0.6);
+        cursor: pointer;
+        box-shadow: 0 8px 24px -6px rgba(245, 158, 11, 0.65);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .navbar-connect-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 30px -6px rgba(245, 158, 11, 0.85);
+      }
+
+      @media (max-width: 1200px) {
+        .navbar-wallet-pill {
+          display: none !important;
+        }
+      }
       @media (max-width: 960px) {
         .desktop-nav {
           display: none !important;
@@ -2887,11 +2998,28 @@
           align-items: center;
           justify-content: center;
           padding: 8px 10px;
-          background: rgba(139, 92, 246, 0.15);
-          border: 1px solid rgba(139, 92, 246, 0.35);
+          background: rgba(245, 158, 11, 0.15);
+          border: 1px solid rgba(245, 158, 11, 0.35);
           border-radius: 10px;
-          color: #c084fc;
+          color: #fbbf24;
           cursor: pointer;
+        }
+      }
+      @media (max-width: 768px) {
+        .navbar-chain-pill {
+          display: none !important;
+        }
+      }
+      @media (max-width: 500px) {
+        .navbar-account-pill span {
+          display: none;
+        }
+        .navbar-account-pill {
+          padding: 6px 8px;
+        }
+        .navbar-dashboard-btn {
+          padding: 6px 12px;
+          font-size: 0.78rem;
         }
       }
 
