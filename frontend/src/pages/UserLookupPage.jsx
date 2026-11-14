@@ -4,7 +4,7 @@ import { useChainId } from 'wagmi'
 import { createPublicClient, http, formatUnits, isAddress } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
 import BackgroundCanvas from '../components/BackgroundCanvas'
-import { getContractAddresses, getRpcUrl, ELZORA_GATEWAY_ABI } from '../web3/contracts'
+import { getContractAddresses, getRpcUrl, getTokenDecimals, ELZORA_GATEWAY_ABI } from '../web3/contracts'
 import { useWalletAuth } from '../hooks/useWalletAuth'
 import {
   Search,
@@ -73,6 +73,7 @@ export function UserLookupPage() {
   const CONTRACT_ADDRESSES = getContractAddresses(chainId)
   const rpcUrl = getRpcUrl(chainId)
   const activeChain = Number(chainId) === 97 ? bscTestnet : bsc
+  const tokenDecimals = getTokenDecimals(chainId)
 
   const [searchInput, setSearchInput] = useState(initialSearch)
   const [loading, setLoading] = useState(false)
@@ -108,13 +109,12 @@ export function UserLookupPage() {
 
         if (isAddress(cleanQuery)) {
           targetAddr = cleanQuery
+        } else if (connectedAddress && cleanQuery.toLowerCase() === 'me') {
+          targetAddr = connectedAddress
         } else {
-          // Special quick aliases
-          if (connectedAddress && (cleanQuery.toLowerCase() === 'me' || cleanQuery === '1')) {
-            targetAddr = connectedAddress
-          } else {
-            targetAddr = CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb'
-          }
+          setError('Please enter a valid BSC wallet address (0x...).')
+          setLoading(false)
+          return
         }
 
         // 1. Fetch user dashboard from Gateway router
@@ -152,23 +152,23 @@ export function UserLookupPage() {
           leftCarryVolume: Number(prof.leftCarryVolume || 0n),
           rightCarryVolume: Number(prof.rightCarryVolume || 0n),
           isRegistered: Boolean(prof.isRegistered),
-          totalIncomeEarned: formatUnits(prof.totalIncomeEarned || 0n, 6),
+          totalIncomeEarned: formatUnits(prof.totalIncomeEarned || 0n, tokenDecimals),
           withdrawableBalance: '0.00',
           totalWithdrawn: '0.00',
           completedLifetimeMilestones: Number(prof.completedLifetimeMilestones || 0n),
           incomeBreakdown: {
-            directIncome: formatUnits(inc.directIncome || 0n, 6),
-            affiliateIncome: formatUnits(inc.affiliateIncome || 0n, 6),
-            clubIncome: formatUnits(inc.clubIncome || 0n, 6),
-            matchingIncome: formatUnits(inc.matchingIncome || 0n, 6),
-            championIncome: formatUnits(inc.championIncome || 0n, 6),
-            weeklyIncome: formatUnits(inc.weeklyIncome || 0n, 6),
-            lifetimeIncome: formatUnits(inc.lifetimeIncome || 0n, 6),
-            globalClubIncome: formatUnits(inc.globalClubIncome || 0n, 6),
+            directIncome: formatUnits(inc.directIncome || 0n, tokenDecimals),
+            affiliateIncome: formatUnits(inc.affiliateIncome || 0n, tokenDecimals),
+            clubIncome: formatUnits(inc.clubIncome || 0n, tokenDecimals),
+            matchingIncome: formatUnits(inc.matchingIncome || 0n, tokenDecimals),
+            championIncome: formatUnits(inc.championIncome || 0n, tokenDecimals),
+            weeklyIncome: formatUnits(inc.weeklyIncome || 0n, tokenDecimals),
+            lifetimeIncome: formatUnits(inc.lifetimeIncome || 0n, tokenDecimals),
+            globalClubIncome: formatUnits(inc.globalClubIncome || 0n, tokenDecimals),
           },
           directReferrals: directs,
           isChampionEligible: Boolean(rawDashboard.isChampionEligible),
-          pendingChampionReward: formatUnits(rawDashboard.pendingChampionReward || 0n, 6),
+          pendingChampionReward: formatUnits(rawDashboard.pendingChampionReward || 0n, tokenDecimals),
           isWeeklyEligibleCurrentEpoch: Boolean(rawDashboard.isWeeklyEligibleCurrentEpoch),
           currentWeeklyDirects: Number(rawDashboard.currentWeeklyDirects || 0n),
           currentWeeklyEpoch: Number(rawDashboard.currentWeeklyEpoch || 0n),
@@ -197,7 +197,7 @@ export function UserLookupPage() {
               isRegistered: Boolean(d.profile.isRegistered),
               directCount: Number(d.profile.directCount || 0n),
               teamVolume: Number(d.profile.leftTeamCount || 0n) + Number(d.profile.rightTeamCount || 0n),
-              totalEarned: formatUnits(d.profile.totalIncomeEarned || 0n, 6),
+              totalEarned: formatUnits(d.profile.totalIncomeEarned || 0n, tokenDecimals),
             }))
             setDirectsDossiers(parsedDirects)
           } catch (e) {
@@ -231,7 +231,7 @@ export function UserLookupPage() {
                 leftTeamCount: Number(cd.profile.leftTeamCount || 0n),
                 rightTeamCount: Number(cd.profile.rightTeamCount || 0n),
                 directCount: Number(cd.profile.directCount || 0n),
-                totalEarned: formatUnits(cd.profile.totalIncomeEarned || 0n, 6),
+                totalEarned: formatUnits(cd.profile.totalIncomeEarned || 0n, tokenDecimals),
                 isRegistered: Boolean(cd.profile.isRegistered),
               }
             })
@@ -251,19 +251,19 @@ export function UserLookupPage() {
         setLoading(false)
       }
     },
-    [activeChain, connectedAddress, CONTRACT_ADDRESSES.GATEWAY, CONTRACT_ADDRESSES.ROOT_ID, rpcUrl]
+    [activeChain, connectedAddress, CONTRACT_ADDRESSES.GATEWAY, rpcUrl]
   )
 
   useEffect(() => {
     if (initialSearch) {
+      setSearchInput(initialSearch)
       fetchMemberDossier(initialSearch)
     } else {
-      // Default to root ID on landing
-      const defaultAddr = CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb'
-      setSearchInput(defaultAddr)
-      fetchMemberDossier(defaultAddr)
+      setSearchInput('')
+      setDashboard(null)
+      setError(null)
     }
-  }, [initialSearch, fetchMemberDossier, CONTRACT_ADDRESSES.ROOT_ID])
+  }, [initialSearch, fetchMemberDossier])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
@@ -600,6 +600,44 @@ export function UserLookupPage() {
             <div style={{ fontSize: '0.85rem', color: 'var(--muted)', marginTop: 6 }}>
               Querying ElzoraGateway router, binary matrices, 8 income streams, and direct referrals from BSC Testnet
             </div>
+          </div>
+        )}
+
+        {/* EMPTY STATE (NO SEARCH PERFORMED YET) */}
+        {!loading && !dashboard && !error && (
+          <div
+            className="glass-card"
+            style={{
+              padding: '60px 24px',
+              textAlign: 'center',
+              borderRadius: 24,
+              border: '1px dashed rgba(139, 92, 246, 0.25)',
+              background: 'rgba(15, 12, 35, 0.4)',
+              maxWidth: 860,
+              margin: '0 auto',
+            }}
+          >
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                background: 'rgba(139, 92, 246, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+                color: '#a78bfa',
+              }}
+            >
+              <Search size={28} />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#fff', margin: '0 0 8px' }}>
+              Search Any ELZORA Account
+            </h3>
+            <p style={{ color: 'var(--muted)', fontSize: '0.88rem', maxWidth: 480, margin: '0 auto' }}>
+              Enter any BSC wallet address above to inspect real-time metrics, binary tree, rank progression, and income streams.
+            </p>
           </div>
         )}
 
@@ -1094,13 +1132,13 @@ export function UserLookupPage() {
                 <div style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 14, border: '1px solid rgba(255,255,255,0.06)', marginBottom: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: 6 }}>
                     <span style={{ color: 'var(--muted)' }}>Direct Referrals Requirement:</span>
-                    <b style={{ color: '#fff' }}>{dashboard.directCount} / 3 Directs</b>
+                    <b style={{ color: '#fff' }}>{dashboard.directCount} / 30 Directs</b>
                   </div>
                   {/* Progress Bar */}
                   <div style={{ width: '100%', height: 6, borderRadius: 4, background: 'rgba(255,255,255,0.1)', overflow: 'hidden' }}>
                     <div
                       style={{
-                        width: `${Math.min(100, (dashboard.directCount / 3) * 100)}%`,
+                        width: `${Math.min(100, (dashboard.directCount / 30) * 100)}%`,
                         height: '100%',
                         background: 'linear-gradient(90deg, #fbbf24, #f59e0b)',
                         borderRadius: 4,

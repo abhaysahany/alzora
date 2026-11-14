@@ -4,7 +4,7 @@ import { AdminLayout } from '../../components/AdminLayout'
 import { useWalletAuth } from '../../hooks/useWalletAuth'
 import { useAdminMembers } from '../../hooks/useAdminMembers'
 import { useTetherStream } from '../../hooks/useTetherStream'
-import { getContractAddresses, getRpcUrl, ELZORA_MAIN_ABI } from '../../web3/contracts'
+import { getContractAddresses, getRpcUrl, getTokenDecimals, ELZORA_MAIN_ABI } from '../../web3/contracts'
 import { createPublicClient, http, formatUnits, parseAbiItem } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
 import {
@@ -29,6 +29,7 @@ export function AdminWithdrawalsPage() {
   const CONTRACT_ADDRESSES = getContractAddresses(chainId)
   const rpcUrl = getRpcUrl(chainId)
   const activeChain = Number(chainId) === 97 ? bscTestnet : bsc
+  const tokenDecimals = getTokenDecimals(chainId)
 
   const [searchTerm, setSearchTerm] = useState('')
   const [withdrawalLogs, setWithdrawalLogs] = useState([])
@@ -54,7 +55,7 @@ export function AdminWithdrawalsPage() {
           txHash: l.transactionHash,
           user: l.args?.user,
           recipient: l.args?.recipient,
-          amount: Number(formatUnits(l.args?.amount || 0n, 6)),
+          amount: Number(formatUnits(l.args?.amount || 0n, tokenDecimals)),
           date: 'Confirmed On-Chain',
         }))
 

@@ -2,13 +2,14 @@ export const CHAIN_CONTRACTS = {
   // BSC Mainnet (Chain ID 56)
   56: {
     USDT: import.meta.env.VITE_USDT_CONTRACT_ADDRESS || '0x55d398326f99059fF775485246999027B3197955',
-    ELZORA: import.meta.env.VITE_ELZORA_ADDRESS || '0x3290Fe9b7FF7C801FC1351957F81C974eC560Ec2',
-    TETHER_STREAM: import.meta.env.VITE_ELZORA_ADDRESS || '0x3290Fe9b7FF7C801FC1351957F81C974eC560Ec2',
-    XMLM: import.meta.env.VITE_ELZORA_ADDRESS || '0x3290Fe9b7FF7C801FC1351957F81C974eC560Ec2',
+    ELZORA: import.meta.env.VITE_ELZORA_ADDRESS || '0xAA449d6f4Dad92C1F2D08f7115f9d32B2647Cd2C',
+    TETHER_STREAM: import.meta.env.VITE_ELZORA_ADDRESS || '0xAA449d6f4Dad92C1F2D08f7115f9d32B2647Cd2C',
+    XMLM: import.meta.env.VITE_ELZORA_ADDRESS || '0xAA449d6f4Dad92C1F2D08f7115f9d32B2647Cd2C',
     AVX: import.meta.env.VITE_USDT_CONTRACT_ADDRESS || '0x55d398326f99059fF775485246999027B3197955',
-    GATEWAY: import.meta.env.VITE_ELZORA_GATEWAY_ADDRESS || '0xE1f52AEE54AE7D25A841bA787E59bbcA956c1c80',
-    TREASURY: import.meta.env.VITE_TREASURY_WALLET || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
-    ROOT_ID: import.meta.env.VITE_ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
+    GATEWAY: import.meta.env.VITE_ELZORA_GATEWAY_ADDRESS || '0x83Dbde1504Bdc545E419dB1ff7431ba90Cee55d5',
+    TREASURY: import.meta.env.VITE_TREASURY_WALLET || '0x067c2aa4C1576388F835C160E79Db88ebE02Ee92',
+    ROOT_ID: import.meta.env.VITE_ROOT_ID || '0xE60746348b128D3D99546d78E646946599a0311e',
+    OWNER_ADDRESS: import.meta.env.VITE_OWNER_ADDRESS || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
   },
   // BSC Testnet (Chain ID 97)
   97: {
@@ -39,7 +40,16 @@ export function getContractAddresses(chainId) {
   return CHAIN_CONTRACTS[56]
 }
 
-export const CONTRACT_ADDRESSES = CHAIN_CONTRACTS[97]
+export function getTokenDecimals(chainId) {
+  if (import.meta.env.VITE_USDT_DECIMALS) {
+    return Number(import.meta.env.VITE_USDT_DECIMALS)
+  }
+  const num = Number(chainId)
+  if (num === 56) return 18 // BSC Mainnet Binance-Peg USDT has 18 decimals
+  return 6 // BSC Testnet mock USDT has 6 decimals
+}
+
+export const CONTRACT_ADDRESSES = CHAIN_CONTRACTS[56]
 
 export const ERC20_ABI = [
   {
@@ -250,6 +260,240 @@ export const ELZORA_GATEWAY_ABI = [
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "AFFILIATE_INCOME_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "CHAMPION_DIRECTS_REQUIRED",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "CHAMPION_POOL_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "CLUB_INCOME_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DIRECT_INCOME_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "GLOBAL_CLUB_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "LIFETIME_POOL_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MATCHING_INCOME_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_DAILY_PAIRS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_UPLINE_LEVELS",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "PAIR_RATE_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "REGISTRATION_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SECONDS_PER_DAY",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SECONDS_PER_WEEK",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "WEEKLY_DIRECTS_REQUIRED",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "WEEKLY_POOL_USD",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "WEEK_EPOCH_ANCHOR",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "championPoolBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -276,13 +520,57 @@ export const ELZORA_GATEWAY_ABI = [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "elzoraMain",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "clubRanks",
     "outputs": [
       {
-        "internalType": "contract ElzoraMain",
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredMembers",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "grossIncome",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "upgradeFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sponsorIncome",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "netProfit",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contractTokenBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -361,6 +649,32 @@ export const ELZORA_GATEWAY_ABI = [
   },
   {
     "inputs": [],
+    "name": "getChampionMembers",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getChampionMembersCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getCurrentMonthEpoch",
     "outputs": [
       {
@@ -399,6 +713,83 @@ export const ELZORA_GATEWAY_ABI = [
         "internalType": "address[]",
         "name": "",
         "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getGlobalClubEntriesCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "entryId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getGlobalClubEntry",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "entryId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "isReentry",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "originalEntryId",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isCompleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint256",
+            "name": "cycleTimestamp",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IElzora.GlobalClubEntryInfo",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getGlobalMatrixUsersCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -677,6 +1068,29 @@ export const ELZORA_GATEWAY_ABI = [
   },
   {
     "inputs": [],
+    "name": "getNextGlobalMatrixPlacement",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "parent",
+        "type": "address"
+      },
+      {
+        "internalType": "enum IElzora.BinaryPosition",
+        "name": "position",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextId",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "getProtocolOverview",
     "outputs": [
       {
@@ -770,6 +1184,115 @@ export const ELZORA_GATEWAY_ABI = [
         "internalType": "struct ElzoraGateway.ProtocolOverview",
         "name": "overview",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getProtocolStats",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "elzoraMain",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "paymentToken",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "treasuryWallet",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "rootAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalUsers",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalRegistrationVolume",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalIncomeDistributed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalLiabilities",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "contractTokenBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "globalClubTotalEntries",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "championPoolBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "weeklyPoolBalance",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentWeeklyEpoch",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "currentMonthEpoch",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "isPaused",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct IElzora.ProtocolStats",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "milestoneIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "getRequiredDirectsForMilestone",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1097,6 +1620,25 @@ export const ELZORA_GATEWAY_ABI = [
         "internalType": "address",
         "name": "user",
         "type": "address"
+      }
+    ],
+    "name": "getUserGlobalClubEntries",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
       },
       {
         "internalType": "uint256",
@@ -1177,10 +1719,246 @@ export const ELZORA_GATEWAY_ABI = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "epoch",
+        "type": "uint256"
+      }
+    ],
+    "name": "getWeeklyQualifiersCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "globalClubEntries",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "entryId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "isReentry",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "originalEntryId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isCompleted",
+        "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "cycleTimestamp",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "globalClubQueueHead",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "id",
+        "type": "uint256"
+      }
+    ],
+    "name": "globalMatrixUsers",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "hasClaimedMilestone",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "isChampionMember",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "isExemptFromDirects",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isPaused",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isSolvent",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "epoch",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "isWeeklyQualifier",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "joinGlobalClub",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "lifetimeMilestones",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "requiredLeft",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredRight",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewardAmount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1193,7 +1971,7 @@ export const ELZORA_GATEWAY_ABI = [
         "type": "address"
       }
     ],
-    "stateMutability": "view",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -1219,7 +1997,7 @@ export const ELZORA_GATEWAY_ABI = [
         "type": "address"
       }
     ],
-    "stateMutability": "view",
+    "stateMutability": "pure",
     "type": "function"
   },
   {
@@ -1257,6 +2035,250 @@ export const ELZORA_GATEWAY_ABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "systemStartTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "tokenUnit",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalIncomeDistributed",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalLiabilities",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalRegistrationVolume",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalUsers",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treasuryWallet",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rankIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "userClubProgress",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "day",
+        "type": "uint256"
+      }
+    ],
+    "name": "userDailyPairs",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "userGlobalClubTotalCycles",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "userGlobalMatrixId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rankIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "userRankCompleted",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "epoch",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "weeklyDirectCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "epoch",
+        "type": "uint256"
+      }
+    ],
+    "name": "weeklyPoolBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ]
 
@@ -1275,6 +2297,11 @@ export const ELZORA_MAIN_ABI = [
       }
     ],
     "name": "AddressEmptyCode",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "AlreadyInitialized",
     "type": "error"
   },
   {
@@ -1807,6 +2834,19 @@ export const ELZORA_MAIN_ABI = [
       }
     ],
     "name": "GlobalClubEntered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalUsersCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "GlobalMatrixInitialized",
     "type": "event"
   },
   {
@@ -2808,6 +3848,19 @@ export const ELZORA_MAIN_ABI = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getGlobalMatrixUsersCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -2863,6 +3916,29 @@ export const ELZORA_MAIN_ABI = [
         "internalType": "struct IElzora.IncomeBreakdown",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getNextGlobalMatrixPlacement",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "parent",
+        "type": "address"
+      },
+      {
+        "internalType": "enum IElzora.BinaryPosition",
+        "name": "position",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextId",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -3224,6 +4300,25 @@ export const ELZORA_MAIN_ABI = [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "globalMatrixUsers",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "",
         "type": "address"
@@ -3317,6 +4412,19 @@ export const ELZORA_MAIN_ABI = [
       }
     ],
     "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "initialUsers",
+        "type": "address[]"
+      }
+    ],
+    "name": "initializeGlobalMatrix",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -3615,6 +4723,49 @@ export const ELZORA_MAIN_ABI = [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredMembers",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "grossIncome",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "upgradeFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sponsorIncome",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "netProfit",
+        "type": "uint256"
+      }
+    ],
+    "name": "setClubRank",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -3883,6 +5034,25 @@ export const ELZORA_MAIN_ABI = [
       }
     ],
     "name": "userGlobalClubTotalCycles",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "userGlobalMatrixId",
     "outputs": [
       {
         "internalType": "uint256",

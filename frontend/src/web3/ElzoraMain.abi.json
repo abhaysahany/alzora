@@ -17,6 +17,11 @@
   },
   {
     "inputs": [],
+    "name": "AlreadyInitialized",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "AlreadyRegistered",
     "type": "error"
   },
@@ -545,6 +550,19 @@
       }
     ],
     "name": "GlobalClubEntered",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalUsersCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "GlobalMatrixInitialized",
     "type": "event"
   },
   {
@@ -1546,6 +1564,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getGlobalMatrixUsersCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -1601,6 +1632,29 @@
         "internalType": "struct IElzora.IncomeBreakdown",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getNextGlobalMatrixPlacement",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "parent",
+        "type": "address"
+      },
+      {
+        "internalType": "enum IElzora.BinaryPosition",
+        "name": "position",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextId",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1962,6 +2016,25 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "globalMatrixUsers",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "",
         "type": "address"
@@ -2055,6 +2128,19 @@
       }
     ],
     "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "initialUsers",
+        "type": "address[]"
+      }
+    ],
+    "name": "initializeGlobalMatrix",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2353,6 +2439,49 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredMembers",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "grossIncome",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "upgradeFee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "sponsorIncome",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "netProfit",
+        "type": "uint256"
+      }
+    ],
+    "name": "setClubRank",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "account",
         "type": "address"
@@ -2621,6 +2750,25 @@
       }
     ],
     "name": "userGlobalClubTotalCycles",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "userGlobalMatrixId",
     "outputs": [
       {
         "internalType": "uint256",

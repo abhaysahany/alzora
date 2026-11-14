@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useChainId } from 'wagmi'
 import { createPublicClient, http as viemHttp, formatUnits, parseAbiItem, isAddress } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
-import { getContractAddresses, getRpcUrl, ELZORA_GATEWAY_ABI, ELZORA_MAIN_ABI } from '../web3/contracts'
+import { getContractAddresses, getRpcUrl, getTokenDecimals, ELZORA_GATEWAY_ABI, ELZORA_MAIN_ABI } from '../web3/contracts'
 import { formatErrorMessage } from '../utils/errorMessages'
 
 const RANK_NAMES = {
@@ -70,6 +70,7 @@ export function useAdminMembers() {
   const contractAddresses = getContractAddresses(chainId)
   const rpcUrl = getRpcUrl(chainId)
   const activeChain = Number(chainId) === 97 ? bscTestnet : bsc
+  const tokenDecimals = getTokenDecimals(chainId)
 
   const [members, setMembers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -198,9 +199,9 @@ export function useAdminMembers() {
             const rightTeam = Number(prof.rightTeamCount || 0n)
             const leftCarry = Number(prof.leftCarryVolume || 0n)
             const rightCarry = Number(prof.rightCarryVolume || 0n)
-            const totalEarned = Number(formatUnits(prof.totalIncomeEarned || 0n, 6))
-            const withdrawable = Number(formatUnits(prof.withdrawableBalance || 0n, 6))
-            const withdrawn = Number(formatUnits(prof.totalWithdrawn || 0n, 6))
+            const totalEarned = Number(formatUnits(prof.totalIncomeEarned || 0n, tokenDecimals))
+            const withdrawable = Number(formatUnits(prof.withdrawableBalance || 0n, tokenDecimals))
+            const withdrawn = Number(formatUnits(prof.totalWithdrawn || 0n, tokenDecimals))
 
             return {
               id: index + 1,
@@ -232,14 +233,14 @@ export function useAdminMembers() {
               withdrawableBalance: withdrawable,
               totalWithdrawn: withdrawn,
               remainingCap: 0,
-              directIncome: Number(formatUnits(inc.directIncome || 0n, 6)),
-              affiliateIncome: Number(formatUnits(inc.affiliateIncome || 0n, 6)),
-              clubIncome: Number(formatUnits(inc.clubIncome || 0n, 6)),
-              matchingIncome: Number(formatUnits(inc.matchingIncome || 0n, 6)),
-              championIncome: Number(formatUnits(inc.championIncome || 0n, 6)),
-              weeklyIncome: Number(formatUnits(inc.weeklyIncome || 0n, 6)),
-              lifetimeIncome: Number(formatUnits(inc.lifetimeIncome || 0n, 6)),
-              globalClubIncome: Number(formatUnits(inc.globalClubIncome || 0n, 6)),
+              directIncome: Number(formatUnits(inc.directIncome || 0n, tokenDecimals)),
+              affiliateIncome: Number(formatUnits(inc.affiliateIncome || 0n, tokenDecimals)),
+              clubIncome: Number(formatUnits(inc.clubIncome || 0n, tokenDecimals)),
+              matchingIncome: Number(formatUnits(inc.matchingIncome || 0n, tokenDecimals)),
+              championIncome: Number(formatUnits(inc.championIncome || 0n, tokenDecimals)),
+              weeklyIncome: Number(formatUnits(inc.weeklyIncome || 0n, tokenDecimals)),
+              lifetimeIncome: Number(formatUnits(inc.lifetimeIncome || 0n, tokenDecimals)),
+              globalClubIncome: Number(formatUnits(inc.globalClubIncome || 0n, tokenDecimals)),
               directReferrals: dash.directReferrals || [],
               isChampionEligible: Boolean(dash.isChampionEligible),
             }

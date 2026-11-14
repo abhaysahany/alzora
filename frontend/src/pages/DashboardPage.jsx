@@ -558,12 +558,12 @@ export function DashboardPage() {
               <div style={{ background: 'rgba(6, 8, 20, 0.6)', padding: '12px 14px', borderRadius: 14, border: '1px solid rgba(255, 255, 255, 0.05)', marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: 5 }}>
                   <span style={{ color: '#cbd5e1' }}>Direct Referrals Requirement:</span>
-                  <strong style={{ color: '#fbbf24' }}>{profile?.directCount || 0} / 3 Directs</strong>
+                  <strong style={{ color: '#fbbf24' }}>{profile?.directCount || 0} / 30 Directs</strong>
                 </div>
                 <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.08)', overflow: 'hidden', marginBottom: 6 }}>
                   <div
                     style={{
-                      width: `${Math.min(100, Math.round(((profile?.directCount || 0) / 3) * 100))}%`,
+                      width: `${Math.min(100, Math.round(((profile?.directCount || 0) / 30) * 100))}%`,
                       background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
                       height: '100%',
                       transition: 'width 0.3s',
@@ -573,7 +573,7 @@ export function DashboardPage() {
                 <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
                   {champion.isEligible
                     ? '🎉 You have achieved Champion Club qualification! You receive an equal share of the monthly pool in batches directly to your wallet.'
-                    : `Achieve 3 directs to lock your lifetime qualification in the monthly turnover royalty pool.`}
+                    : `Achieve 30 directs to lock your lifetime qualification in the monthly turnover royalty pool.`}
                 </span>
               </div>
 

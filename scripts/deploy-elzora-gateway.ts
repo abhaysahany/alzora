@@ -29,12 +29,13 @@ async function main() {
 
   console.log("\nTarget ElzoraMain Proxy Address:", mainProxyAddress);
 
-  // Determine BSC gas price (min 3 gwei required on BSC testnet)
+  // Determine BSC gas price (1.1 gwei on Mainnet; 3 gwei on testnet)
+  const net = await ethers.provider.getNetwork();
   const feeData = await ethers.provider.getFeeData();
+  const minGwei = Number(net.chainId) === 56 ? "1.1" : "3.0";
+  const minGasPrice = ethers.parseUnits(minGwei, "gwei");
   const gasPrice =
-    feeData.gasPrice && feeData.gasPrice > ethers.parseUnits("3", "gwei")
-      ? feeData.gasPrice
-      : ethers.parseUnits("3", "gwei");
+    feeData.gasPrice && feeData.gasPrice > minGasPrice ? feeData.gasPrice : minGasPrice;
 
   console.log("Using Gas Price:", ethers.formatUnits(gasPrice, "gwei"), "gwei");
 
@@ -77,12 +78,23 @@ main().catch((error) => {
   console.error("Gateway deployment failed:", error);
   process.exitCode = 1;
 });
-
+//Testnet
 // ====================================================
 // 🎉 ELZORA GATEWAY DEPLOYMENT COMPLETE:
 // ====================================================
 // Gateway Address:                0xE1f52AEE54AE7D25A841bA787E59bbcA956c1c80
 // Linked ElzoraMain Proxy:        0x3290Fe9b7FF7C801FC1351957F81C974eC560Ec2
 // Payment Token:                  0x90a1De2cC063786fC7e6C69514988cBb03E6665e
+// Solvency Status:                SOLVENT ✅
+// ====================================================\
+
+
+// Mainnet Data
+// ====================================================
+// 🎉 ELZORA GATEWAY DEPLOYMENT COMPLETE:
+// ====================================================
+// Gateway Address:                0x17dbc114377A5EFDe9A0ae9465a07160BEA78C3D
+// Linked ElzoraMain Proxy:        0xAA449d6f4Dad92C1F2D08f7115f9d32B2647Cd2C
+// Payment Token:                  0x55d398326f99059fF775485246999027B3197955
 // Solvency Status:                SOLVENT ✅
 // ====================================================

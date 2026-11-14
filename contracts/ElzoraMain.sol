@@ -130,6 +130,10 @@ contract ElzoraMain is
     mapping(address => uint256[]) private _userGlobalClubEntries;
     mapping(address => uint256) public userGlobalClubTotalCycles;
 
+    // Global 2xN Auto-Matrix Storage (Model C)
+    address[] public globalMatrixUsers; // 1-indexed (index 0 is address(0))
+    mapping(address => uint256) public userGlobalMatrixId;
+
     // --- Modifiers ---
     modifier onlyAuthorized() {
         if (msg.sender != owner() && msg.sender != gatewayContract && !isAuthorizedGateway[msg.sender]) {
@@ -180,40 +184,9 @@ contract ElzoraMain is
         tokenUnit = 10 ** dec;
     }
 
-    function _initializeClubRanks() internal {
-        // Rank 1: Starter (2 members, gross $24, upgrade $14, sponsor $0, net $10)
-        clubRanks[0] = ClubRankConfig("Starter", 2, 24, 14, 0, 10);
-        // Rank 2: Leader (4 members, gross $56, upgrade $30, sponsor $0, net $26)
-        clubRanks[1] = ClubRankConfig("Leader", 4, 56, 30, 0, 26);
-        // Rank 3: Achiever (8 members, gross $240, upgrade $96, sponsor $24, net $120)
-        clubRanks[2] = ClubRankConfig("Achiever", 8, 240, 96, 24, 120);
-        // Rank 4: Mentor (16 members, gross $1,536, upgrade $500, sponsor $125, net $911)
-        clubRanks[3] = ClubRankConfig("Mentor", 16, 1536, 500, 125, 911);
-        // Rank 5: Director (32 members, gross $16,000, upgrade $5,000, sponsor $1,250, net $9,750)
-        clubRanks[4] = ClubRankConfig("Director", 32, 16000, 5000, 1250, 9750);
-        // Rank 6: Elite (64 members, gross $320,000, upgrade $15,000, sponsor $3,750, net $301,250)
-        clubRanks[5] = ClubRankConfig("Elite", 64, 320000, 15000, 3750, 301250);
-        // Rank 7: Crown (128 members, gross $1,920,000, upgrade $30,000, sponsor $7,500, net $1,882,500)
-        clubRanks[6] = ClubRankConfig("Crown", 128, 1920000, 30000, 7500, 1882500);
-        // Rank 8: Legend (256 members, gross $7,680,000, upgrade 0, sponsor 0, net $7,680,000)
-        clubRanks[7] = ClubRankConfig("Legend", 256, 7680000, 0, 0, 7680000);
-    }
+    function _initializeClubRanks() internal {}
 
-    function _initializeLifetimeMilestones() internal {
-        uint32[27] memory reqs = [
-            uint32(5), 20, 50, 100, 250, 500, 1000, 2000, 4000,
-            8000, 15000, 30000, 60000, 120000, 250000, 500000, 1000000, 1500000,
-            2000000, 2500000, 3000000, 3500000, 4000000, 4500000, 5000000, 6000000, 7000000
-        ];
-        uint32[27] memory rewards = [
-            uint32(25), 75, 150, 300, 750, 1500, 3000, 6000, 12000,
-            25000, 50000, 100000, 200000, 400000, 800000, 1500000, 3000000, 4500000,
-            6000000, 7500000, 9000000, 10500000, 12000000, 13500000, 15000000, 18000000, 21000000
-        ];
-        for (uint256 i = 0; i < 27; i++) {
-            lifetimeMilestones[i] = LifetimeMilestone(reqs[i], reqs[i], rewards[i]);
-        }
-    }
+    function _initializeLifetimeMilestones() internal {}
 
     function _initializeRootMember(address root) internal {
         UserProfile storage u = _users[root];
@@ -230,10 +203,72 @@ contract ElzoraMain is
         isChampionMember[root] = true;
         championMembers.push(root);
 
+        // Initialize Global 2xN Auto-Matrix with root as ID 1
+        globalMatrixUsers.push(address(0));
+        globalMatrixUsers.push(root);
+        userGlobalMatrixId[root] = 1;
+
         emit UserRegistered(root, address(0), address(0), BinaryPosition.None, block.timestamp);
     }
 
     // --- External Registration Functions ---
+
+    /**
+     * @notice Initializes the Global 2xN Auto-Matrix with existing users.
+     * @dev Only callable once by owner. Synchronizes binary tree pointers and level teams.
+     */
+    function initializeGlobalMatrix(address[] calldata initialUsers) external onlyOwner {
+        if (globalMatrixUsers.length > 0) revert AlreadyInitialized();
+        if (initialUsers.length == 0) revert ZeroAddress();
+
+        globalMatrixUsers.push(address(0)); // 1-based indexing (0 is dummy)
+
+        for (uint256 i = 0; i < initialUsers.length; i++) {
+            address u = initialUsers[i];
+            if (u == address(0)) revert ZeroAddress();
+            globalMatrixUsers.push(u);
+            userGlobalMatrixId[u] = i + 1;
+        }
+
+        // Link parent-child pointers for complete 2xN binary tree
+        for (uint256 i = 1; i <= initialUsers.length; i++) {
+            address pAddr = initialUsers[i - 1];
+            uint256 leftIdx = 2 * i;
+            uint256 rightIdx = 2 * i + 1;
+
+            if (leftIdx <= initialUsers.length) {
+                address lAddr = initialUsers[leftIdx - 1];
+                _users[pAddr].leftChild = lAddr;
+                _users[lAddr].parent = pAddr;
+                _users[lAddr].position = BinaryPosition.Left;
+            } else {
+                _users[pAddr].leftChild = address(0);
+            }
+
+            if (rightIdx <= initialUsers.length) {
+                address rAddr = initialUsers[rightIdx - 1];
+                _users[pAddr].rightChild = rAddr;
+                _users[rAddr].parent = pAddr;
+                _users[rAddr].position = BinaryPosition.Right;
+            } else {
+                _users[pAddr].rightChild = address(0);
+            }
+        }
+
+        _users[initialUsers[0]].parent = address(0);
+        _users[initialUsers[0]].position = BinaryPosition.None;
+
+        // Calculate exact team counts from bottom to top
+        for (uint256 i = initialUsers.length; i >= 1; i--) {
+            address u = initialUsers[i - 1];
+            address l = _users[u].leftChild;
+            address r = _users[u].rightChild;
+            _users[u].leftTeamCount = (l == address(0)) ? 0 : 1 + _users[l].leftTeamCount + _users[l].rightTeamCount;
+            _users[u].rightTeamCount = (r == address(0)) ? 0 : 1 + _users[r].leftTeamCount + _users[r].rightTeamCount;
+        }
+
+        emit GlobalMatrixInitialized(initialUsers.length);
+    }
 
     function register(
         address sponsor,
@@ -259,12 +294,17 @@ contract ElzoraMain is
         address parent,
         BinaryPosition position
     ) internal {
-        if (user == address(0) || sponsor == address(0) || parent == address(0)) revert ZeroAddress();
+        if (user == address(0) || sponsor == address(0)) revert ZeroAddress();
         if (_users[user].isRegistered) revert AlreadyRegistered();
-        if (sponsor == user || parent == user) revert CannotSponsorSelf();
+        if (sponsor == user) revert CannotSponsorSelf();
         if (!_users[sponsor].isRegistered) revert SponsorNotActive();
-        if (!_users[parent].isRegistered) revert ParentNotActive();
-        if (position != BinaryPosition.Left && position != BinaryPosition.Right) revert InvalidPosition();
+
+        // Model C: Global 2xN Auto-Matrix Placement
+        uint256 newId = globalMatrixUsers.length;
+        parent = globalMatrixUsers[newId / 2];
+        position = (newId % 2 == 0) ? BinaryPosition.Left : BinaryPosition.Right;
+        globalMatrixUsers.push(user);
+        userGlobalMatrixId[user] = newId;
 
         UserProfile storage pNode = _users[parent];
         if (position == BinaryPosition.Left) {
@@ -298,10 +338,18 @@ contract ElzoraMain is
         _directReferrals[sponsor].push(user);
 
         // Check placement relative to sponsor to increment left/right direct counts
-        if (_isUserInSubtree(user, _users[sponsor].leftChild)) {
+        BinaryPosition directSide = _determineDirectSide(user, sponsor);
+        if (directSide == BinaryPosition.Left) {
             _users[sponsor].leftDirectCount++;
-        } else {
+        } else if (directSide == BinaryPosition.Right) {
             _users[sponsor].rightDirectCount++;
+        } else {
+            // User placed outside direct subtree due to global auto-matrix
+            if (_users[sponsor].leftDirectCount <= _users[sponsor].rightDirectCount) {
+                _users[sponsor].leftDirectCount++;
+            } else {
+                _users[sponsor].rightDirectCount++;
+            }
         }
 
         // Update Weekly Referral Counter
@@ -373,17 +421,17 @@ contract ElzoraMain is
         }
     }
 
-    function _isUserInSubtree(address target, address rootNode) internal view returns (bool) {
-        if (rootNode == address(0)) return false;
-        if (target == rootNode) return true;
-
-        address curr = _users[target].parent;
+    function _determineDirectSide(address target, address sponsor) internal view returns (BinaryPosition) {
+        address curr = target;
         for (uint256 i = 0; i < 50; i++) {
             if (curr == address(0)) break;
-            if (curr == rootNode) return true;
-            curr = _users[curr].parent;
+            address p = _users[curr].parent;
+            if (p == sponsor) {
+                return _users[curr].position;
+            }
+            curr = p;
         }
-        return false;
+        return BinaryPosition.None;
     }
 
     function _checkCircularReferral(address user, address sponsor) internal view {
@@ -426,24 +474,27 @@ contract ElzoraMain is
     }
 
     function _distributeAffiliateIncome(address user) internal {
-        address curr = _users[user].sponsor;
+        uint256 currId = userGlobalMatrixId[user];
+        uint256 ancestorId = currId / 2;
+
         for (uint8 lvl = 1; lvl <= MAX_UPLINE_LEVELS; lvl++) {
-            if (curr == address(0)) {
-                // If upline doesn't exist, remaining levels go to Treasury
-                uint256 missedAmt = (lvl <= 10) ? (40 * tokenUnit) / 100 : (30 * tokenUnit) / 100;
-                _sendMissedToTreasury(address(0), missedAmt, 2, "No upline");
-                continue;
-            }
-
+            // Levels 1 to 10: $0.40 USDT (40% of $1)
+            // Levels 11 to 20: $0.30 USDT (30% of $1)
             uint256 levelAmount = (lvl <= 10) ? (40 * tokenUnit) / 100 : (30 * tokenUnit) / 100;
-            if (_users[curr].isRegistered) {
-                _creditIncome(curr, levelAmount, 2);
-                emit AffiliateIncomePaid(curr, user, lvl, levelAmount);
-            } else {
-                _sendMissedToTreasury(curr, levelAmount, 2, "Upline inactive");
-            }
 
-            curr = _users[curr].sponsor;
+            if (ancestorId == 0) {
+                // If upline doesn't exist in global matrix (above Root ID 1), send to Treasury
+                _sendMissedToTreasury(address(0), levelAmount, 2, "No upline");
+            } else {
+                address ancestorAddr = globalMatrixUsers[ancestorId];
+                if (_users[ancestorAddr].isRegistered) {
+                    _creditIncome(ancestorAddr, levelAmount, 2);
+                    emit AffiliateIncomePaid(ancestorAddr, user, lvl, levelAmount);
+                } else {
+                    _sendMissedToTreasury(ancestorAddr, levelAmount, 2, "Upline inactive");
+                }
+                ancestorId = ancestorId / 2;
+            }
         }
     }
 
@@ -958,6 +1009,19 @@ contract ElzoraMain is
         lifetimeMilestones[index] = LifetimeMilestone(requiredLeft, requiredRight, rewardAmount);
     }
 
+    function setClubRank(
+        uint256 index,
+        string calldata name,
+        uint256 requiredMembers,
+        uint256 grossIncome,
+        uint256 upgradeFee,
+        uint256 sponsorIncome,
+        uint256 netProfit
+    ) external onlyOwner {
+        if (index >= 8) revert InvalidParameters();
+        clubRanks[index] = ClubRankConfig(name, requiredMembers, grossIncome, upgradeFee, sponsorIncome, netProfit);
+    }
+
     function pause() external onlyOwner {
         _pause();
     }
@@ -1057,5 +1121,21 @@ contract ElzoraMain is
             currentMonthEpoch: getCurrentMonthEpoch(),
             isPaused: paused()
         });
+    }
+
+    function getGlobalMatrixUsersCount() external view returns (uint256) {
+        return globalMatrixUsers.length > 0 ? globalMatrixUsers.length - 1 : 0;
+    }
+
+    function getNextGlobalMatrixPlacement()
+        external
+        view
+        returns (address parent, BinaryPosition position, uint256 nextId)
+    {
+        if (globalMatrixUsers.length == 0) return (address(0), BinaryPosition.None, 1);
+        nextId = globalMatrixUsers.length;
+        uint256 parentId = nextId / 2;
+        parent = globalMatrixUsers[parentId];
+        position = (nextId % 2 == 0) ? BinaryPosition.Left : BinaryPosition.Right;
     }
 }

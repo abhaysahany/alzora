@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useChainId } from 'wagmi'
 import { AdminLayout } from '../../components/AdminLayout'
 import { useWalletAuth } from '../../hooks/useWalletAuth'
-import { getContractAddresses, getRpcUrl } from '../../web3/contracts'
+import { getContractAddresses, getRpcUrl, getTokenDecimals } from '../../web3/contracts'
 import { createPublicClient, http, formatUnits, parseAbiItem } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
 import {
@@ -28,6 +28,7 @@ export function AdminTransactionsPage() {
   const CONTRACT_ADDRESSES = getContractAddresses(chainId)
   const rpcUrl = getRpcUrl(chainId)
   const isMainnet = Number(chainId) === 56
+  const tokenDecimals = getTokenDecimals(chainId)
   const activeChain = isMainnet ? bsc : bscTestnet
   const explorerUrl = isMainnet ? 'https://bscscan.com' : 'https://testnet.bscscan.com'
 
@@ -142,7 +143,7 @@ export function AdminTransactionsPage() {
       directLogs.forEach((l, idx) => {
         const recip = l.args?.recipient || '0x0000000000000000000000000000000000000000'
         const fromU = l.args?.fromUser || '0x0000000000000000000000000000000000000000'
-        const amt = Number(formatUnits(l.args?.amount || 0n, 6))
+        const amt = Number(formatUnits(l.args?.amount || 0n, tokenDecimals))
         allEvents.push({
           id: `dir-${l.transactionHash}-${idx}`,
           hash: l.transactionHash,
@@ -165,7 +166,7 @@ export function AdminTransactionsPage() {
         const recip = l.args?.recipient || '0x0000000000000000000000000000000000000000'
         const fromU = l.args?.fromUser || '0x0000000000000000000000000000000000000000'
         const lvl = Number(l.args?.level || 1)
-        const amt = Number(formatUnits(l.args?.amount || 0n, 6))
+        const amt = Number(formatUnits(l.args?.amount || 0n, tokenDecimals))
         allEvents.push({
           id: `aff-${l.transactionHash}-${idx}`,
           hash: l.transactionHash,
@@ -187,7 +188,7 @@ export function AdminTransactionsPage() {
       matchingLogs.forEach((l, idx) => {
         const recip = l.args?.recipient || '0x0000000000000000000000000000000000000000'
         const pairs = Number(l.args?.matchedPairs || 0n)
-        const amt = Number(formatUnits(l.args?.amount || 0n, 6))
+        const amt = Number(formatUnits(l.args?.amount || 0n, tokenDecimals))
         allEvents.push({
           id: `match-${l.transactionHash}-${idx}`,
           hash: l.transactionHash,
@@ -231,7 +232,7 @@ export function AdminTransactionsPage() {
       gcCycleLogs.forEach((l, idx) => {
         const u = l.args?.user || '0x0000000000000000000000000000000000000000'
         const eId = Number(l.args?.entryId || 0n)
-        const amt = Number(formatUnits(l.args?.rewardAmount || 0n, 6))
+        const amt = Number(formatUnits(l.args?.rewardAmount || 0n, tokenDecimals))
         const reId = Number(l.args?.newReentryId || 0n)
         allEvents.push({
           id: `gcc-${l.transactionHash}-${idx}`,
@@ -254,7 +255,7 @@ export function AdminTransactionsPage() {
       rankLogs.forEach((l, idx) => {
         const u = l.args?.user || '0x0000000000000000000000000000000000000000'
         const rank = Number(l.args?.rank || 0n)
-        const profit = Number(formatUnits(l.args?.netProfit || 0n, 6))
+        const profit = Number(formatUnits(l.args?.netProfit || 0n, tokenDecimals))
         allEvents.push({
           id: `rank-${l.transactionHash}-${idx}`,
           hash: l.transactionHash,
@@ -276,7 +277,7 @@ export function AdminTransactionsPage() {
       milestoneLogs.forEach((l, idx) => {
         const u = l.args?.user || '0x0000000000000000000000000000000000000000'
         const mIdx = Number(l.args?.milestoneIndex || 0n) + 1
-        const amt = Number(formatUnits(l.args?.amount || 0n, 6))
+        const amt = Number(formatUnits(l.args?.amount || 0n, tokenDecimals))
         allEvents.push({
           id: `ms-${l.transactionHash}-${idx}`,
           hash: l.transactionHash,
@@ -298,7 +299,7 @@ export function AdminTransactionsPage() {
       champLogs.forEach((l, idx) => {
         const month = Number(l.args?.monthEpoch || 0n)
         const members = Number(l.args?.membersPaid || 0n)
-        const amt = Number(formatUnits(l.args?.totalBatchAmount || 0n, 6))
+        const amt = Number(formatUnits(l.args?.totalBatchAmount || 0n, tokenDecimals))
         allEvents.push({
           id: `champ-${l.transactionHash}-${idx}`,
           hash: l.transactionHash,
@@ -320,7 +321,7 @@ export function AdminTransactionsPage() {
       weeklyLogs.forEach((l, idx) => {
         const week = Number(l.args?.weekEpoch || 0n)
         const members = Number(l.args?.membersPaid || 0n)
-        const amt = Number(formatUnits(l.args?.totalBatchAmount || 0n, 6))
+        const amt = Number(formatUnits(l.args?.totalBatchAmount || 0n, tokenDecimals))
         allEvents.push({
           id: `week-${l.transactionHash}-${idx}`,
           hash: l.transactionHash,

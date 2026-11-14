@@ -5,6 +5,7 @@ import { bsc, bscTestnet } from 'viem/chains'
 import { useWalletAuth } from './useWalletAuth'
 import {
   getContractAddresses,
+  getTokenDecimals,
   ELZORA_GATEWAY_ABI,
   ELZORA_MAIN_ABI,
   ERC20_ABI,
@@ -31,6 +32,7 @@ export function useElzora() {
   const { address, isConnected } = useWalletAuth()
   const chainId = useChainId()
   const CONTRACT_ADDRESSES = getContractAddresses(chainId)
+  const tokenDecimals = getTokenDecimals(chainId)
   const activeChain = Number(chainId) === 97 ? bscTestnet : bsc
 
   const [loading, setLoading] = useState(false)
@@ -257,14 +259,14 @@ export function useElzora() {
         leftCarryVolume: Number(rawProfile.leftCarryVolume || 0n),
         rightCarryVolume: Number(rawProfile.rightCarryVolume || 0n),
         hasMatchedFirstPair: Boolean(rawProfile.hasMatchedFirstPair),
-        totalIncomeEarned: formatUnits(effectiveTotalIncomeEarned, 6),
-        withdrawableBalance: formatUnits(rawProfile.withdrawableBalance || 0n, 6),
-        totalWithdrawn: formatUnits(rawProfile.totalWithdrawn || 0n, 6),
+        totalIncomeEarned: formatUnits(effectiveTotalIncomeEarned, tokenDecimals),
+        withdrawableBalance: formatUnits(rawProfile.withdrawableBalance || 0n, tokenDecimals),
+        totalWithdrawn: formatUnits(rawProfile.totalWithdrawn || 0n, tokenDecimals),
         completedLifetimeMilestones: Number(rawProfile.completedLifetimeMilestones || 0n),
         // Compatibility fields
         packageId: 1,
         packagePrice: '50.00',
-        totalEarned: formatUnits(effectiveTotalIncomeEarned, 6),
+        totalEarned: formatUnits(effectiveTotalIncomeEarned, tokenDecimals),
       }
     : {
         isRegistered: isRoot,
@@ -274,22 +276,22 @@ export function useElzora() {
         directCount: directRefs.length,
         leftTeamCount: 0,
         rightTeamCount: 0,
-        totalIncomeEarned: formatUnits(computedTotalIncome, 6),
+        totalIncomeEarned: formatUnits(computedTotalIncome, tokenDecimals),
         withdrawableBalance: '0.00',
         totalWithdrawn: '0.00',
-        totalEarned: formatUnits(computedTotalIncome, 6),
+        totalEarned: formatUnits(computedTotalIncome, tokenDecimals),
       }
 
   const incomeBreakdown = rawIncome
     ? {
-        directIncome: formatUnits(rawIncome.directIncome || 0n, 6),
-        affiliateIncome: formatUnits(rawIncome.affiliateIncome || 0n, 6),
-        clubIncome: formatUnits(rawIncome.clubIncome || 0n, 6),
-        matchingIncome: formatUnits(rawIncome.matchingIncome || 0n, 6),
-        championIncome: formatUnits(rawIncome.championIncome || 0n, 6),
-        weeklyIncome: formatUnits(rawIncome.weeklyIncome || 0n, 6),
-        lifetimeIncome: formatUnits(rawIncome.lifetimeIncome || 0n, 6),
-        globalClubIncome: formatUnits(rawIncome.globalClubIncome || 0n, 6),
+        directIncome: formatUnits(rawIncome.directIncome || 0n, tokenDecimals),
+        affiliateIncome: formatUnits(rawIncome.affiliateIncome || 0n, tokenDecimals),
+        clubIncome: formatUnits(rawIncome.clubIncome || 0n, tokenDecimals),
+        matchingIncome: formatUnits(rawIncome.matchingIncome || 0n, tokenDecimals),
+        championIncome: formatUnits(rawIncome.championIncome || 0n, tokenDecimals),
+        weeklyIncome: formatUnits(rawIncome.weeklyIncome || 0n, tokenDecimals),
+        lifetimeIncome: formatUnits(rawIncome.lifetimeIncome || 0n, tokenDecimals),
+        globalClubIncome: formatUnits(rawIncome.globalClubIncome || 0n, tokenDecimals),
       }
     : {
         directIncome: '0.00',
@@ -304,7 +306,7 @@ export function useElzora() {
 
   const champion = {
     isEligible: Boolean(dashData?.isChampionEligible),
-    pendingReward: formatUnits(dashData?.pendingChampionReward || 0n, 6),
+    pendingReward: formatUnits(dashData?.pendingChampionReward || 0n, tokenDecimals),
   }
 
   const weekly = {
@@ -327,13 +329,13 @@ export function useElzora() {
   const overview = overviewData
     ? {
         totalUsers: Number(overviewData.totalUsers || 0n),
-        totalRegistrationVolume: formatUnits(overviewData.totalRegistrationVolume || 0n, 6),
-        totalIncomeDistributed: formatUnits(overviewData.totalIncomeDistributed || 0n, 6),
-        totalLiabilities: formatUnits(overviewData.totalLiabilities || 0n, 6),
-        contractTokenBalance: formatUnits(overviewData.contractTokenBalance || 0n, 6),
+        totalRegistrationVolume: formatUnits(overviewData.totalRegistrationVolume || 0n, tokenDecimals),
+        totalIncomeDistributed: formatUnits(overviewData.totalIncomeDistributed || 0n, tokenDecimals),
+        totalLiabilities: formatUnits(overviewData.totalLiabilities || 0n, tokenDecimals),
+        contractTokenBalance: formatUnits(overviewData.contractTokenBalance || 0n, tokenDecimals),
         isSolvent: Boolean(overviewData.isSolvent),
-        championPoolBalance: formatUnits(overviewData.championPoolBalance || 0n, 6),
-        weeklyPoolBalance: formatUnits(overviewData.weeklyPoolBalance || 0n, 6),
+        championPoolBalance: formatUnits(overviewData.championPoolBalance || 0n, tokenDecimals),
+        weeklyPoolBalance: formatUnits(overviewData.weeklyPoolBalance || 0n, tokenDecimals),
         currentWeeklyEpoch: Number(overviewData.currentWeeklyEpoch || 0n),
         currentMonthEpoch: Number(overviewData.currentMonthEpoch || 0n),
         globalClubTotalEntries: Number(overviewData.globalClubTotalEntries || 0n),
@@ -347,8 +349,8 @@ export function useElzora() {
         isSolvent: true,
       }
 
-  const usdtBalance = usdtBalData ? formatUnits(usdtBalData, 6) : '0'
-  const usdtAllowance = usdtAllowanceData ? formatUnits(usdtAllowanceData, 6) : '0'
+  const usdtBalance = usdtBalData ? formatUnits(usdtBalData, tokenDecimals) : '0'
+  const usdtAllowance = usdtAllowanceData ? formatUnits(usdtAllowanceData, tokenDecimals) : '0'
 
   const refreshAll = useCallback(() => {
     refetchDash()
@@ -365,7 +367,7 @@ export function useElzora() {
     setLoading(true)
     setError(null)
     try {
-      const parsedAmount = parseUnits(amount.toString(), 6)
+      const parsedAmount = parseUnits(amount.toString(), tokenDecimals)
       const txHash = await writeContractAsync({
         address: CONTRACT_ADDRESSES.USDT,
         abi: ERC20_ABI,
@@ -661,7 +663,7 @@ export function useElzora() {
     setLoading(true)
     setError(null)
     try {
-      const parsedAmount = parseUnits(amount.toString(), 6)
+      const parsedAmount = parseUnits(amount.toString(), tokenDecimals)
       const tx = await writeContractAsync({
         address: CONTRACT_ADDRESSES.TETHER_STREAM,
         abi: ELZORA_MAIN_ABI,

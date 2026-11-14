@@ -103,7 +103,7 @@ export function IncomeHistoryPage() {
       title: 'Champion Club Royalty Pool',
       amountUsd: Number(incomeBreakdown?.championIncome || 0),
       desc: '6% monthly pool distributed by Admin in batches to qualifiers',
-      details: `${profile?.directCount || 0} Directs achieved (Requirement: 3 directs for testing)`,
+      details: `${profile?.directCount || 0} / 30 Directs achieved (Requirement: 30 directs)`,
       color: '#fbbf24',
       tag: '6% Monthly Turnover',
       status: 'Batched Direct to BSC Wallet',

@@ -299,7 +299,7 @@ export function TeamPage() {
               <li>To earn Binary Matching bonuses, you must sponsor at least <b>1 Left Direct</b> and <b>1 Right Direct</b>.</li>
               <li>Current Left Directs: <b style={{ color: (profile?.leftDirectCount || 0) >= 1 ? '#4ade80' : '#facc15' }}>{profile?.leftDirectCount || 0} / 1</b></li>
               <li>Current Right Directs: <b style={{ color: (profile?.rightDirectCount || 0) >= 1 ? '#4ade80' : '#facc15' }}>{profile?.rightDirectCount || 0} / 1</b></li>
-              <li>Sponsor 3 directs to qualify for <b>Champion Club</b> & <b>Weekly Reward</b>.</li>
+              <li>Sponsor <b>30 directs</b> to qualify for <b>Champion Club</b> & <b>3 directs weekly</b> for <b>Weekly Reward</b>.</li>
             </ul>
           </div>
 

@@ -88,6 +88,7 @@ interface IElzora {
     // --- Custom Errors ---
     error ZeroAddress();
     error AlreadyRegistered();
+    error AlreadyInitialized();
     error NotRegistered();
     error CannotSponsorSelf();
     error SponsorNotActive();
@@ -228,6 +229,7 @@ interface IElzora {
     );
 
     event TreasuryWalletUpdated(address indexed oldWallet, address indexed newWallet);
+    event GlobalMatrixInitialized(uint256 totalUsersCount);
     event EmergencyRescued(address indexed token, address indexed recipient, uint256 amount);
 }
 

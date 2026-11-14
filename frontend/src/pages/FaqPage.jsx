@@ -82,7 +82,7 @@ export function FaqPage() {
       category: 'ROYALTY',
       question: 'What is the Champion Club Royalty and Weekly Performance Pool?',
       answer:
-        'The Champion Club accumulates 6% of the entire protocol turnover every month and distributes it as a lifetime royalty dividend in batches among qualified leaders who have sponsored direct active referrals (testing: 3 directs, live standard: 30 directs). The Weekly Performance Pool takes 6% weekly protocol turnover and distributes it every Sunday to active top sponsors of the week.',
+        'The Champion Club accumulates 6% of the entire protocol turnover every month and distributes it as a lifetime royalty dividend in batches among qualified leaders who have sponsored 30 direct active referrals. The Weekly Performance Pool takes 6% weekly protocol turnover and distributes it every Sunday to active top sponsors of the week.',
     },
     {
       id: 9,

@@ -28,21 +28,37 @@ async function main() {
   console.log("Configured Treasury Wallet:     ", treasuryWallet);
   console.log("Configured Root Referral Wallet: ", rootAddress);
 
-  // Determine BSC gas price (min 3 gwei required on BSC testnet)
+  // Determine BSC gas price (1.1 gwei on Mainnet to minimize fees; 3 gwei on testnet)
+  const net = await ethers.provider.getNetwork();
   const feeData = await ethers.provider.getFeeData();
+  const minGwei = Number(net.chainId) === 56 ? "1.1" : "3.0";
+  const minGasPrice = ethers.parseUnits(minGwei, "gwei");
   const gasPrice =
-    feeData.gasPrice && feeData.gasPrice > ethers.parseUnits("3", "gwei")
-      ? feeData.gasPrice
-      : ethers.parseUnits("3", "gwei");
+    feeData.gasPrice && feeData.gasPrice > minGasPrice ? feeData.gasPrice : minGasPrice;
 
   console.log("Using Gas Price:", ethers.formatUnits(gasPrice, "gwei"), "gwei");
 
-  // 1. Deploy Implementation
-  console.log("\nDeploying ElzoraMain Implementation Contract...");
-  const impl = await ethers.deployContract("ElzoraMain", [], { gasPrice });
-  await impl.waitForDeployment();
-  const implAddress = await impl.getAddress();
-  console.log(">> Implementation Deployed at:", implAddress);
+  // 1. Implementation Contract (Reuse if already deployed)
+  let implAddress =
+    process.env.IMPLEMENTATION_ADDRESS ||
+    (Number(net.chainId) === 56 ? "0xa1FAd427a37Ed13ab8D99cA02c5f0fAb91EFF070" : "");
+
+  let impl: any = null;
+  if (implAddress && implAddress !== "" && implAddress !== ethers.ZeroAddress) {
+    const code = await ethers.provider.getCode(implAddress);
+    if (code && code !== "0x") {
+      console.log("\nReusing ALREADY DEPLOYED ElzoraMain Implementation at:", implAddress);
+      impl = await ethers.getContractAt("ElzoraMain", implAddress);
+    }
+  }
+
+  if (!impl) {
+    console.log("\nDeploying ElzoraMain Implementation Contract...");
+    impl = await ethers.deployContract("ElzoraMain", [], { gasPrice });
+    await impl.waitForDeployment();
+    implAddress = await impl.getAddress();
+    console.log(">> Implementation Deployed at:", implAddress);
+  }
 
   // 2. Deploy Proxy and Initialize
   console.log("\nDeploying ElzoraProxy (ERC1967 Proxy) & Initializing...");
@@ -93,5 +109,16 @@ main().catch((error) => {
 // Payment Token:                  0x90a1De2cC063786fC7e6C69514988cBb03E6665e
 // Treasury Wallet:                0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5
 // Root Address:                   0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5
+// Total Users Initialized:        1
+// ====================================================
+
+// Mainnet Data
+// 🎉 ELZORA MAIN (PROXY) DEPLOYMENT COMPLETE:
+// ====================================================
+// Proxy Address (ElzoraMain):     0xAA449d6f4Dad92C1F2D08f7115f9d32B2647Cd2C
+// Implementation Address:         0xa1FAd427a37Ed13ab8D99cA02c5f0fAb91EFF070
+// Payment Token:                  0x55d398326f99059fF775485246999027B3197955
+// Treasury Wallet:                0x067c2aa4C1576388F835C160E79Db88ebE02Ee92
+// Root Address:                   0xE60746348b128D3D99546d78E646946599a0311e
 // Total Users Initialized:        1
 // ====================================================

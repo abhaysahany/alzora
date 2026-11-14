@@ -3,7 +3,7 @@ import { useChainId, useReadContract } from 'wagmi'
 import { formatUnits } from 'viem'
 import { AdminLayout } from '../../components/AdminLayout'
 import { useAventraContracts } from '../../hooks/useAventraContracts'
-import { getContractAddresses, CONTRACT_ADDRESSES, ELZORA_MAIN_ABI } from '../../web3/contracts'
+import { getContractAddresses, getTokenDecimals, CONTRACT_ADDRESSES, ELZORA_MAIN_ABI } from '../../web3/contracts'
 import { useWalletAuth } from '../../hooks/useWalletAuth'
 import { formatErrorMessage } from '../../utils/errorMessages'
 import {
@@ -27,6 +27,7 @@ export function AdminControlsPage() {
   const chainId = useChainId()
   const contractAddresses = getContractAddresses(chainId)
   const isMainnet = Number(chainId) === 56
+  const tokenDecimals = getTokenDecimals(chainId)
   const networkLabel = isMainnet ? 'BSC Mainnet (Chain ID: 56)' : 'BSC Testnet (Chain ID: 97)'
   const aventra = useAventraContracts()
   const contractPaused = aventra?.contractPaused ?? false
@@ -126,9 +127,9 @@ export function AdminControlsPage() {
   const champCount = Number(rawChampCount || 0n)
   const champRecord = rawChampRecord
     ? {
-        totalPool: formatUnits(rawChampRecord[0] || 0n, 6),
+        totalPool: formatUnits(rawChampRecord[0] || 0n, tokenDecimals),
         totalMembers: Number(rawChampRecord[1] || 0n),
-        rewardPerMember: formatUnits(rawChampRecord[2] || 0n, 6),
+        rewardPerMember: formatUnits(rawChampRecord[2] || 0n, tokenDecimals),
         distributedMembersCount: Number(rawChampRecord[3] || 0n),
         isSnapshotCreated: Boolean(rawChampRecord[4]),
         isFullyDistributed: Boolean(rawChampRecord[5]),
@@ -138,9 +139,9 @@ export function AdminControlsPage() {
   const weeklyCount = Number(rawWeeklyCount || 0n)
   const weeklyRecord = rawWeeklyRecord
     ? {
-        totalPool: formatUnits(rawWeeklyRecord[0] || 0n, 6),
+        totalPool: formatUnits(rawWeeklyRecord[0] || 0n, tokenDecimals),
         totalQualifiers: Number(rawWeeklyRecord[1] || 0n),
-        rewardPerQualifier: formatUnits(rawWeeklyRecord[2] || 0n, 6),
+        rewardPerQualifier: formatUnits(rawWeeklyRecord[2] || 0n, tokenDecimals),
         distributedMembersCount: Number(rawWeeklyRecord[3] || 0n),
         isSnapshotCreated: Boolean(rawWeeklyRecord[4]),
         isFullyDistributed: Boolean(rawWeeklyRecord[5]),
