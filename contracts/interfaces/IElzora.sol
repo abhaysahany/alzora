@@ -85,6 +85,28 @@ interface IElzora {
         bool isPaused;
     }
 
+    struct BinaryAdjustment {
+        address user;
+        address parent;
+        address leftChild;
+        address rightChild;
+        BinaryPosition position;
+        uint256 leftCarry;
+        uint256 rightCarry;
+        uint256 leftTeam;
+        uint256 rightTeam;
+    }
+
+    struct ClubAdjustment {
+        address user;
+        uint256 currentRank;
+        uint256 starterProgress;
+        bool starterCompleted;
+        uint256 leaderProgress;
+        bool leaderCompleted;
+        uint256 backlogNetProfit;
+    }
+
     // --- Custom Errors ---
     error ZeroAddress();
     error AlreadyRegistered();
@@ -121,6 +143,8 @@ interface IElzora {
     error MonthNotClosed();
     error WeekNotClosed();
     error WeekAlreadyDistributed();
+    error InvalidAmount();
+    error UserNotRegistered();
 
     // --- Events ---
     event UserRegistered(
@@ -156,7 +180,7 @@ interface IElzora {
         address indexed intendedUser,
         uint256 amount,
         uint8 category,
-        string reason
+        bytes32 reason
     );
 
     event ClubRankAdvanced(
@@ -231,5 +255,12 @@ interface IElzora {
     event TreasuryWalletUpdated(address indexed oldWallet, address indexed newWallet);
     event GlobalMatrixInitialized(uint256 totalUsersCount);
     event EmergencyRescued(address indexed token, address indexed recipient, uint256 amount);
+    event MemberIdAssigned(address indexed user, uint256 memberId);
+    event PendingDeductionSet(address indexed user, uint256 amount);
+    event IncomeDeducted(address indexed user, uint256 deductedAmount, uint256 remainingDeduction, uint8 category);
+    event BacklogBinaryIncomeIssued(address indexed user, uint256 pairs, uint256 amount);
+    event BacklogAffiliateIncomeIssued(address indexed user, uint256 amount);
+    event BinaryVolumeAdjusted(address indexed user, uint256 leftCarry, uint256 rightCarry, uint256 leftTeam, uint256 rightTeam);
+    event BinaryTreePointersUpdated(address indexed user, address parent, address leftChild, address rightChild, BinaryPosition position);
 }
 

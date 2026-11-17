@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { ConnectButton, useAccountModal, useChainModal, useConnectModal } from '@rainbow-me/rainbowkit'
 import { useWalletAuth } from '../hooks/useWalletAuth'
 import { ShieldCheck, Wallet, Copy, Check, ExternalLink, LogOut, X, Globe, Zap } from 'lucide-react'
+import { WalletDisconnectModal } from './WalletDisconnectModal'
 
 export function ConnectWalletButton({ className = '', size = 'medium', onClick }) {
   const navigate = useNavigate()
@@ -30,18 +31,14 @@ export function ConnectWalletButton({ className = '', size = 'medium', onClick }
         const displayAddress =
           account?.displayName ||
           (activeAddress ? `${activeAddress.substring(0, 6)}...${activeAddress.substring(activeAddress.length - 4)}` : '')
-        const displayChainName = chain?.name || authChain?.name || 'BNB Chain Testnet'
+        const activeChainId = Number(chain?.id || authChain?.id || 56)
+        const isMainnet = activeChainId === 56
+        const displayChainName = chain?.name || authChain?.name || (isMainnet ? 'BNB Smart Chain' : 'BNB Chain Testnet')
         const isUnsupported = chain?.unsupported || authChain?.unsupported
 
         const handleAccountClick = (e) => {
           if (e && typeof e.stopPropagation === 'function') e.stopPropagation()
-          if (customOpenAccountModal) {
-            customOpenAccountModal()
-          } else if (hookOpenAccountModal) {
-            hookOpenAccountModal()
-          } else {
-            setShowAccountModal(true)
-          }
+          setShowAccountModal(true)
         }
 
         const handleChainClick = (e) => {
@@ -204,34 +201,12 @@ export function ConnectWalletButton({ className = '', size = 'medium', onClick }
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                     <button
-                      onClick={() => handleSwitchChain('0x61')} // BSC Testnet
-                      style={{
-                        padding: '14px 18px',
-                        borderRadius: 16,
-                        background: 'rgba(0, 229, 255, 0.12)',
-                        border: '1px solid #00e5ff',
-                        color: '#fff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        cursor: 'pointer',
-                        fontWeight: 700,
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 8px #00ff88' }}></span>
-                        <span>BNB Smart Chain Testnet (Chain ID: 97)</span>
-                      </div>
-                      <span style={{ fontSize: '0.78rem', color: '#00ff88', fontWeight: 800 }}>ACTIVE</span>
-                    </button>
-
-                    <button
                       onClick={() => handleSwitchChain('0x38')} // BSC Mainnet
                       style={{
                         padding: '14px 18px',
                         borderRadius: 16,
-                        background: 'rgba(255, 255, 255, 0.04)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        background: isMainnet ? 'rgba(34, 197, 94, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                        border: isMainnet ? '1px solid #22c55e' : '1px solid rgba(255, 255, 255, 0.1)',
                         color: '#fff',
                         display: 'flex',
                         alignItems: 'center',
@@ -241,143 +216,43 @@ export function ConnectWalletButton({ className = '', size = 'medium', onClick }
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffd700' }}></span>
+                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', boxShadow: isMainnet ? '0 0 8px #22c55e' : 'none' }}></span>
                         <span>BNB Smart Chain Mainnet (Chain ID: 56)</span>
                       </div>
+                      {isMainnet && <span style={{ fontSize: '0.78rem', color: '#22c55e', fontWeight: 800 }}>ACTIVE</span>}
                     </button>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* CUSTOM ACCOUNT & DISCONNECT MODAL */}
-            {showAccountModal && (
-              <div
-                style={{
-                  position: 'fixed',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'rgba(5, 7, 14, 0.85)',
-                  backdropFilter: 'blur(8px)',
-                  zIndex: 99999,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: 20,
-                }}
-                onClick={() => setShowAccountModal(false)}
-              >
-                <div
-                  className="glass-card"
-                  style={{
-                    width: '100%',
-                    maxWidth: 420,
-                    padding: 28,
-                    borderRadius: 24,
-                    background: '#0a101e',
-                    border: '1px solid rgba(0, 229, 255, 0.3)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <ShieldCheck size={20} color="#ffd700" />
-                      <span>Connected Wallet</span>
-                    </h3>
                     <button
-                      onClick={() => setShowAccountModal(false)}
-                      style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: 4 }}
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-
-                  <div style={{ background: 'rgba(255,255,255,0.04)', padding: 18, borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)', marginBottom: 20 }}>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: 4 }}>Account Address</div>
-                    <div style={{ fontFamily: 'monospace', fontWeight: 800, color: '#00e5ff', wordBreak: 'break-all', fontSize: '0.92rem' }}>
-                      {activeAddress}
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-                    <button
-                      onClick={handleCopy}
+                      onClick={() => handleSwitchChain('0x61')} // BSC Testnet
                       style={{
-                        flex: 1,
-                        padding: '12px 14px',
-                        borderRadius: 12,
-                        background: 'rgba(0, 229, 255, 0.12)',
-                        border: '1px solid rgba(0, 229, 255, 0.3)',
-                        color: '#00e5ff',
-                        fontWeight: 700,
-                        fontSize: '0.85rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 8,
-                      }}
-                    >
-                      {copied ? <Check size={16} color="#00ff88" /> : <Copy size={16} />}
-                      <span>{copied ? 'Copied!' : 'Copy Address'}</span>
-                    </button>
-
-                    <a
-                      href={`https://testnet.bscscan.com/address/${activeAddress}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        flex: 1,
-                        padding: '12px 14px',
-                        borderRadius: 12,
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
+                        padding: '14px 18px',
+                        borderRadius: 16,
+                        background: !isMainnet ? 'rgba(245, 158, 11, 0.12)' : 'rgba(255, 255, 255, 0.04)',
+                        border: !isMainnet ? '1px solid #f59e0b' : '1px solid rgba(255, 255, 255, 0.1)',
                         color: '#fff',
-                        fontWeight: 700,
-                        fontSize: '0.85rem',
-                        textDecoration: 'none',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 8,
+                        justifyContent: 'space-between',
+                        cursor: 'pointer',
+                        fontWeight: 700,
                       }}
                     >
-                      <ExternalLink size={16} />
-                      <span>BscScan</span>
-                    </a>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b', boxShadow: !isMainnet ? '0 0 8px #f59e0b' : 'none' }}></span>
+                        <span>BNB Smart Chain Testnet (Chain ID: 97)</span>
+                      </div>
+                      {!isMainnet && <span style={{ fontSize: '0.78rem', color: '#f59e0b', fontWeight: 800 }}>ACTIVE</span>}
+                    </button>
                   </div>
-
-                  <button
-                    onClick={() => {
-                      setShowAccountModal(false)
-                      logout()
-                      navigate('/login', { replace: true })
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '14px 20px',
-                      borderRadius: 14,
-                      background: 'rgba(255, 77, 77, 0.15)',
-                      border: '1px solid #ff4d4d',
-                      color: '#ff4d4d',
-                      fontWeight: 800,
-                      fontSize: '0.95rem',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 10,
-                    }}
-                  >
-                    <LogOut size={18} />
-                    <span>Disconnect Wallet</span>
-                  </button>
                 </div>
               </div>
             )}
+
+            {/* UNIFIED DISCONNECT & ACCOUNT MODAL */}
+            <WalletDisconnectModal
+              isOpen={showAccountModal}
+              onClose={() => setShowAccountModal(false)}
+            />
           </>
         )
       }}

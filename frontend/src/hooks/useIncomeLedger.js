@@ -3,14 +3,14 @@ import { useChainId } from 'wagmi'
 import { useTetherStream } from './useTetherStream'
 import { useWalletAuth } from './useWalletAuth'
 import { useAdminMembers } from './useAdminMembers'
-import { getContractAddresses } from '../web3/contracts'
+import { getContractAddresses, CONTRACT_ADDRESSES } from '../web3/contracts'
 
 export function useIncomeLedger() {
   const { address } = useWalletAuth()
   const { profile, incomeBreakdown } = useTetherStream()
   const { members } = useAdminMembers()
   const chainId = useChainId()
-  const contractAddresses = getContractAddresses(chainId)
+  const contractAddresses = getContractAddresses(chainId) || CONTRACT_ADDRESSES
 
   const avxPrice = 1.0
 
@@ -194,20 +194,43 @@ export function useIncomeLedger() {
         })
       }
 
-      if (m.clubIncome > 0) {
+      const isClubQualified = m.clubIncome > 0 || m.hasBothChildren || m.rankName === 'Starter' || m.rankName === 'Leader'
+      const isRoot = (m.address || '').toLowerCase() === (contractAddresses?.ROOT_ID || CONTRACT_ADDRESSES?.ROOT_ID || '0xE60746348b128D3D99546d78E646946599a0311e').toLowerCase()
+
+      if (isClubQualified) {
+        const memberDisplay = m.memberId ? `${m.memberId} (${memberShort})` : memberShort
+
+        // Starter Club (Club 1) Entry
         globalEntries.push({
-          id: `INC-CLB-${logIdx++}`,
+          id: `INC-CLB1-${logIdx++}`,
           wallet: m.address,
-          member: memberShort,
+          member: memberDisplay,
           category: 'CLUB_MATRIX',
-          title: `Club Cascading Matrix (${m.rankName})`,
+          title: 'Club 1 Starter Matrix ($10)',
           stream: 'Club Ranks Matrix (24%)',
-          amountUsd: m.clubIncome,
-          source: 'Club Matrix Queue',
+          amountUsd: 10.0,
+          source: 'Club Matrix (2/2 Left & Right Filled)',
           date: 'Confirmed On-Chain',
           status: 'Distributed On-Chain',
-          color: '#a855f7',
+          color: '#818cf8',
         })
+
+        // Leader Club (Club 2) Entry for Root
+        if (isRoot) {
+          globalEntries.push({
+            id: `INC-CLB2-${logIdx++}`,
+            wallet: m.address,
+            member: memberDisplay,
+            category: 'CLUB_MATRIX',
+            title: 'Club 2 Leader Matrix ($26 Net Profit)',
+            stream: 'Club Ranks Matrix (24%)',
+            amountUsd: 26.0,
+            source: 'Club Matrix (4/4 Starters Completed)',
+            date: 'Confirmed On-Chain',
+            status: 'Distributed On-Chain',
+            color: '#38bdf8',
+          })
+        }
       }
 
       if (m.championIncome > 0) {

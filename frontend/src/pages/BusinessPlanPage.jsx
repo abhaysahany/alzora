@@ -106,13 +106,13 @@ export function BusinessPlanPage() {
 
   const clubRanks = [
     { rank: 1, name: 'Starter', entry: '$12.00', profit: '$10.00', upgrade: '$14.00' },
-    { rank: 2, name: 'Bronze Club', entry: '$14.00', profit: '$12.00', upgrade: '$16.00' },
-    { rank: 3, name: 'Silver Club', entry: '$16.00', profit: '$16.00', upgrade: '$16.00' },
-    { rank: 4, name: 'Gold Club', entry: '$16.00', profit: '$16.00', upgrade: '$16.00' },
-    { rank: 5, name: 'Platinum Club', entry: '$16.00', profit: '$16.00', upgrade: '$16.00' },
-    { rank: 6, name: 'Diamond Club', entry: '$16.00', profit: '$16.00', upgrade: '$16.00' },
-    { rank: 7, name: 'Crown Diamond', entry: '$16.00', profit: '$16.00', upgrade: '$16.00' },
-    { rank: 8, name: 'Legend', entry: '$16.00', profit: '$32.00 (Max)', upgrade: 'Max Rank' },
+    { rank: 2, name: 'Leader', entry: '$14.00', profit: '$26.00', upgrade: '$30.00' },
+    { rank: 3, name: 'Achiever', entry: '$30.00', profit: '$120.00', upgrade: '$96.00' },
+    { rank: 4, name: 'Mentor', entry: '$96.00', profit: '$911.00', upgrade: '$500.00' },
+    { rank: 5, name: 'Director', entry: '$500.00', profit: '$9,750.00', upgrade: '$5,000.00' },
+    { rank: 6, name: 'Elite', entry: '$5,000.00', profit: '$301,250.00', upgrade: '$15,000.00' },
+    { rank: 7, name: 'Crown', entry: '$15,000.00', profit: '$1,882,500.00', upgrade: '$30,000.00' },
+    { rank: 8, name: 'Legend', entry: '$30,000.00', profit: '$7,680,000.00', upgrade: 'Max Rank' },
   ]
 
   return (

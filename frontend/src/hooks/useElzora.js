@@ -112,6 +112,38 @@ export function useElzora() {
     },
   })
 
+  // 1e. Member ID read (Gateway getMemberId)
+  const {
+    data: memberIdData,
+    refetch: refetchMemberId,
+  } = useReadContract({
+    address: CONTRACT_ADDRESSES.GATEWAY,
+    abi: ELZORA_GATEWAY_ABI,
+    functionName: 'getMemberId',
+    args: [address],
+    query: {
+      enabled: Boolean(address && isConnected),
+      staleTime: 60_000,
+      refetchInterval: 30_000,
+    },
+  })
+
+  // 1f. Pending Income Deduction read (Main contract pendingIncomeDeduction)
+  const {
+    data: pendingDeductionData,
+    refetch: refetchPendingDeduction,
+  } = useReadContract({
+    address: CONTRACT_ADDRESSES.ELZORA,
+    abi: ELZORA_MAIN_ABI,
+    functionName: 'pendingIncomeDeduction',
+    args: [address],
+    query: {
+      enabled: Boolean(address && isConnected),
+      staleTime: 10_000,
+      refetchInterval: 15_000,
+    },
+  })
+
   // 2. Fetch Protocol Overview via ElzoraGateway
   const {
     data: overviewData,
@@ -239,6 +271,9 @@ export function useElzora() {
     ? Number(rawProfile.directCount)
     : directRefs.length
 
+  const memberIdRaw = memberIdData ? Number(memberIdData) : 0
+  const formattedMemberId = memberIdRaw > 0 ? `ELZ${memberIdRaw}` : ''
+
   const profile = rawProfile
     ? {
         userAddress: rawProfile.userAddress || address,
@@ -249,6 +284,8 @@ export function useElzora() {
         position: Number(rawProfile.position || 0), // 1 = Left, 2 = Right
         isRegistered: isUserRegistered,
         active: isUserRegistered,
+        memberId: formattedMemberId,
+        memberIdRaw,
         currentRank: Number(rawProfile.currentRank || 1),
         rankName: RANK_NAMES[Number(rawProfile.currentRank || 1)] || 'Starter',
         directCount: effectiveDirectCount,
@@ -271,6 +308,8 @@ export function useElzora() {
     : {
         isRegistered: isRoot,
         active: isRoot,
+        memberId: formattedMemberId,
+        memberIdRaw,
         currentRank: 1,
         rankName: 'Starter',
         directCount: directRefs.length,
@@ -354,12 +393,13 @@ export function useElzora() {
 
   const refreshAll = useCallback(() => {
     refetchDash()
+    refetchMemberId()
     refetchOverview()
     refetchUsdtBal()
     refetchUsdtAllowance()
     refetchOwner()
     refetchPendingOwner()
-  }, [refetchDash, refetchOverview, refetchUsdtBal, refetchUsdtAllowance, refetchOwner, refetchPendingOwner])
+  }, [refetchDash, refetchMemberId, refetchOverview, refetchUsdtBal, refetchUsdtAllowance, refetchOwner, refetchPendingOwner])
 
   // --- Actions ---
 
@@ -943,6 +983,9 @@ export function useElzora() {
     isConnected,
     CONTRACT_ADDRESSES,
     profile,
+    memberId: formattedMemberId,
+    memberIdRaw,
+    refetchMemberId,
     incomeBreakdown,
     directReferrals: directRefs,
     champion,
@@ -950,6 +993,8 @@ export function useElzora() {
     matching,
     milestoneStatus,
     globalClub,
+    pendingDeduction: pendingDeductionData ? formatUnits(pendingDeductionData, tokenDecimals) : '0.00',
+    refetchPendingDeduction,
     overview,
     contractPaused: Boolean(overview?.isPaused),
     usdtBalance,

@@ -35,10 +35,14 @@ import {
   FolderPlus,
   FolderMinus,
   Filter,
+  Trophy,
 } from 'lucide-react'
+import { TreeZoomControls } from '../components/TreeZoomControls'
+import { CascadingClubMatrixView } from '../components/CascadingClubMatrixView'
+import { AffiliateMatrixGenealogy } from '../components/AffiliateMatrixGenealogy'
 
 const CLUB_RANKS = [
-  'None',
+  'Member',
   'Starter',
   'Leader',
   'Achiever',
@@ -51,6 +55,7 @@ const CLUB_RANKS = [
 
 const RANK_BADGE_COLORS = {
   None: { bg: 'rgba(148, 163, 184, 0.15)', border: 'rgba(148, 163, 184, 0.3)', text: '#94a3b8' },
+  Member: { bg: 'rgba(148, 163, 184, 0.15)', border: 'rgba(148, 163, 184, 0.3)', text: '#94a3b8' },
   Starter: { bg: 'rgba(99, 102, 241, 0.2)', border: 'rgba(99, 102, 241, 0.4)', text: '#818cf8' },
   Leader: { bg: 'rgba(56, 189, 248, 0.2)', border: 'rgba(56, 189, 248, 0.4)', text: '#38bdf8' },
   Achiever: { bg: 'rgba(168, 85, 247, 0.2)', border: 'rgba(168, 85, 247, 0.4)', text: '#c084fc' },
@@ -80,7 +85,9 @@ export function TreePage() {
   const [loading, setLoading] = useState(false)
   const [maxDepth, setMaxDepth] = useState(4) // default 4 levels
   const [expandedNodes, setExpandedNodes] = useState({}) // set of expanded user addresses in tree
-  const [activeTab, setActiveTab] = useState('binary') // 'binary', 'tree', or 'table'
+  const [activeTab, setActiveTab] = useState('binary') // 'binary', 'tree', 'table', or 'club'
+  const [binaryZoom, setBinaryZoom] = useState(1)
+  const [treeZoom, setTreeZoom] = useState(1)
   const [selectedLevelFilter, setSelectedLevelFilter] = useState('all')
   const [accessError, setAccessError] = useState(null)
   const [isVerifyingSearch, setIsVerifyingSearch] = useState(false)
@@ -132,22 +139,32 @@ export function TreePage() {
       })
 
       const rankNum = Number(userProfile.currentRank || 0)
-      const rankName = CLUB_RANKS[rankNum] || 'Starter'
+      const leftChild =
+        userProfile.leftChild &&
+        userProfile.leftChild !== '0x0000000000000000000000000000000000000000'
+          ? userProfile.leftChild
+          : null
+      const rightChild =
+        userProfile.rightChild &&
+        userProfile.rightChild !== '0x0000000000000000000000000000000000000000'
+          ? userProfile.rightChild
+          : null
+      const hasBothChildren = Boolean(leftChild && rightChild)
+
+      // For Starter status, member needs to have filled both Left and Right IDs in binary tree
+      let rankName = 'Member'
+      if (rankNum >= 3) {
+        rankName = CLUB_RANKS[rankNum] || 'Achiever'
+      } else if (hasBothChildren) {
+        rankName = 'Starter'
+      }
 
       return {
         address: userAddr,
         sponsor: userProfile.sponsor,
         parent: userProfile.parent,
-        leftChild:
-          userProfile.leftChild &&
-          userProfile.leftChild !== '0x0000000000000000000000000000000000000000'
-            ? userProfile.leftChild
-            : null,
-        rightChild:
-          userProfile.rightChild &&
-          userProfile.rightChild !== '0x0000000000000000000000000000000000000000'
-            ? userProfile.rightChild
-            : null,
+        leftChild,
+        rightChild,
         position: Number(userProfile.position || 0), // 1 = Left, 2 = Right
         isRegistered: Boolean(userProfile.isRegistered),
         directCount: Number(userProfile.directCount || 0n),
@@ -158,7 +175,7 @@ export function TreePage() {
         leftCarryVolume: Number(userProfile.leftCarryVolume || 0n),
         rightCarryVolume: Number(userProfile.rightCarryVolume || 0n),
         rank: rankNum,
-        rankName: rankName === 'None' ? 'Starter' : rankName,
+        rankName,
         totalIncomeEarned: Number(userProfile.totalIncomeEarned || 0n) / 1e6,
       }
     } catch (err) {
@@ -550,22 +567,40 @@ export function TreePage() {
   // Recursive Binary Tree Node Renderer (scoped strictly to user's own binary tree & downline)
   const renderBinaryNode = (addr, positionLabel = 'ROOT', depth = 0) => {
     if (!addr) {
+      const posColor = positionLabel === 'LEFT' ? '#38bdf8' : positionLabel === 'RIGHT' ? '#a855f7' : '#ffd700'
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.45, margin: '8px 12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 6px' }}>
           <div
             style={{
-              padding: '10px 18px',
-              borderRadius: 14,
-              border: '1px dashed rgba(255, 255, 255, 0.18)',
+              minWidth: 200,
+              maxWidth: 240,
+              width: 220,
+              padding: '16px 14px',
+              borderRadius: 16,
+              border: `1px dashed ${posColor}55`,
               background: 'rgba(255, 255, 255, 0.02)',
-              fontSize: '0.75rem',
-              color: 'var(--muted)',
               textAlign: 'center',
-              minWidth: 150,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 6,
+              opacity: 0.55,
             }}
           >
-            <span style={{ fontWeight: 800 }}>{positionLabel}</span>
-            <div style={{ fontSize: '0.7rem', marginTop: 2 }}>[ Vacant Spot ]</div>
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 900,
+                color: posColor,
+                background: `${posColor}18`,
+                padding: '2px 8px',
+                borderRadius: 10,
+              }}
+            >
+              {positionLabel}
+            </span>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--muted)' }}>[ Vacant {positionLabel} ]</div>
+            <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)' }}>Available for placement</div>
           </div>
         </div>
       )
@@ -579,9 +614,10 @@ export function TreePage() {
     const hasChildren = node && (node.leftChild || node.rightChild)
 
     const posColor = positionLabel === 'LEFT' ? '#38bdf8' : positionLabel === 'RIGHT' ? '#a855f7' : '#ffd700'
+    const rankStyle = RANK_BADGE_COLORS[node?.rankName] || RANK_BADGE_COLORS.Starter
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 10px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 6px' }}>
         <div
           className="glass-card"
           onClick={() => handleBinaryDrillDown(addr)}
@@ -614,9 +650,37 @@ export function TreePage() {
             >
               {isSelf ? '⭐ YOU (ROOT)' : positionLabel}
             </span>
-            <span style={{ fontSize: '0.72rem', color: '#ffd700', fontWeight: 800 }}>
-              {node?.rankName || 'Starter'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  color: rankStyle.text,
+                  background: rankStyle.bg,
+                  border: `1px solid ${rankStyle.border}`,
+                  padding: '2px 8px',
+                  borderRadius: 8,
+                }}
+              >
+                {node?.rankName || 'Starter'}
+              </span>
+              {node && (Number(node.currentRank || 0) >= 2 || node.rankName === 'Starter') && (
+                <span
+                  title={Number(node.directCount || 0) >= 2 ? 'Directly Qualified Starter' : 'Achieved Starter via Team Spillover'}
+                  style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 800,
+                    padding: '2px 6px',
+                    borderRadius: 6,
+                    background: Number(node.directCount || 0) >= 2 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                    color: Number(node.directCount || 0) >= 2 ? '#4ade80' : '#c084fc',
+                    border: `1px solid ${Number(node.directCount || 0) >= 2 ? 'rgba(34, 197, 94, 0.4)' : 'rgba(168, 85, 247, 0.4)'}`,
+                  }}
+                >
+                  {Number(node.directCount || 0) >= 2 ? '⭐ Direct' : '⚡ Spillover'}
+                </span>
+              )}
+            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 8 }}>
@@ -680,22 +744,47 @@ export function TreePage() {
           )}
         </div>
 
+        {/* Binary Children: Left & Right Symmetrical Matrix Branches */}
         {hasChildren && isExpanded && depth < maxDepth && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-            <div style={{ width: 2, height: 16, background: 'rgba(139, 92, 246, 0.4)' }} />
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 24, position: 'relative' }}>
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: '25%',
-                  right: '25%',
-                  height: 2,
-                  background: 'rgba(139, 92, 246, 0.4)',
-                }}
-              />
-              {renderBinaryNode(node.leftChild, 'LEFT', depth + 1)}
-              {renderBinaryNode(node.rightChild, 'RIGHT', depth + 1)}
+            {/* Vertical stem from parent */}
+            <div style={{ width: 2, height: 18, background: 'rgba(139, 92, 246, 0.5)' }} />
+
+            {/* Matrix Dual-Branch Row */}
+            <div style={{ display: 'flex', width: '100%', minWidth: 'max-content' }}>
+              {/* LEFT BRANCH (50% width) */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 4px' }}>
+                <div style={{ width: '100%', display: 'flex', height: 16 }}>
+                  <div style={{ flex: 1 }} />
+                  <div
+                    style={{
+                      width: '50%',
+                      borderTop: '2px solid rgba(139, 92, 246, 0.5)',
+                      borderLeft: '2px solid rgba(139, 92, 246, 0.5)',
+                      height: '100%',
+                      borderTopLeftRadius: 6,
+                    }}
+                  />
+                </div>
+                {renderBinaryNode(node.leftChild, 'LEFT', depth + 1)}
+              </div>
+
+              {/* RIGHT BRANCH (50% width) */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 4px' }}>
+                <div style={{ width: '100%', display: 'flex', height: 16 }}>
+                  <div
+                    style={{
+                      width: '50%',
+                      borderTop: '2px solid rgba(139, 92, 246, 0.5)',
+                      borderRight: '2px solid rgba(139, 92, 246, 0.5)',
+                      height: '100%',
+                      borderTopRightRadius: 6,
+                    }}
+                  />
+                  <div style={{ flex: 1 }} />
+                </div>
+                {renderBinaryNode(node.rightChild, 'RIGHT', depth + 1)}
+              </div>
             </div>
           </div>
         )}
@@ -712,7 +801,7 @@ export function TreePage() {
     const node = nodesMap[key] || (currentLvl === 0 ? {
       address: addr,
       sponsor: liveProfile?.sponsor || '0x0000000000000000000000000000000000000000',
-      rankName: liveProfile?.rankName || 'Starter',
+      rankName: liveProfile?.rankName || 'Member',
       directCount: liveProfile?.directCount || 0,
       leftTeamCount: liveProfile?.leftTeamCount || 0,
       rightTeamCount: liveProfile?.rightTeamCount || 0,
@@ -723,7 +812,7 @@ export function TreePage() {
     const children = childrenMap[key] || []
     const isExpanded = Boolean(expandedNodes[key])
     const hasChildren = children.length > 0
-    const badgeStyle = RANK_BADGE_COLORS[node.rankName] || RANK_BADGE_COLORS.Starter
+    const badgeStyle = RANK_BADGE_COLORS[node.rankName] || RANK_BADGE_COLORS.Member || RANK_BADGE_COLORS.None
     const isSelfNode = currentLvl === 0
 
     return (
@@ -1235,6 +1324,28 @@ export function TreePage() {
                 <button
                   onClick={() => {
                     setAccessError(null)
+                    setActiveTab('affiliate')
+                  }}
+                  style={{
+                    padding: '4px 12px',
+                    borderRadius: 8,
+                    background: activeTab === 'affiliate' ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : 'transparent',
+                    border: 'none',
+                    color: activeTab === 'affiliate' ? '#fff' : '#94a3b8',
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                  }}
+                >
+                  <Network size={13} />
+                  <span>Affiliate Matrix (20L)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setAccessError(null)
                     setActiveTab('tree')
                   }}
                   style={{
@@ -1267,6 +1378,28 @@ export function TreePage() {
                   }}
                 >
                   Downline Table ({allDownlineMembers.length})
+                </button>
+                <button
+                  onClick={() => {
+                    setAccessError(null)
+                    setActiveTab('club')
+                  }}
+                  style={{
+                    padding: '4px 12px',
+                    borderRadius: 8,
+                    background: activeTab === 'club' ? 'linear-gradient(135deg, #f59e0b, #d946ef)' : 'transparent',
+                    border: 'none',
+                    color: activeTab === 'club' ? '#fff' : '#94a3b8',
+                    fontSize: '0.74rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                  }}
+                >
+                  <Trophy size={13} />
+                  <span>8 Club Matrices</span>
                 </button>
               </div>
             </div>
@@ -1340,22 +1473,88 @@ export function TreePage() {
               background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
               border: '1px solid rgba(139, 92, 246, 0.35)',
               borderRadius: 20,
-              padding: '28px 20px',
+              padding: '24px 20px',
               boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
               minHeight: 520,
               overflowX: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              overflowY: 'auto',
+              position: 'relative',
             }}
           >
+            {/* Floating Zoom Controls & Depth Toolbar */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 12,
+                marginBottom: 16,
+                position: 'sticky',
+                top: 0,
+                zIndex: 20,
+                background: 'rgba(11, 15, 36, 0.92)',
+                padding: '10px 16px',
+                borderRadius: 16,
+                border: '1px solid rgba(255,255,255,0.08)',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 700 }}>Depth:</span>
+                {[2, 3, 4, 5].map((lvl) => (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setMaxDepth(lvl)}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: 8,
+                      fontSize: '0.76rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: maxDepth === lvl ? '1px solid #7c3aed' : '1px solid rgba(255,255,255,0.1)',
+                      background: maxDepth === lvl ? 'rgba(124, 58, 237, 0.3)' : 'rgba(255,255,255,0.04)',
+                      color: maxDepth === lvl ? '#fff' : 'var(--muted)',
+                    }}
+                  >
+                    {lvl} Levels
+                  </button>
+                ))}
+              </div>
+
+              <TreeZoomControls zoom={binaryZoom} setZoom={setBinaryZoom} min={0.3} max={1.6} step={0.1} />
+            </div>
+
             {binaryLoading && !binaryNodesMap[binaryFocusAddress?.toLowerCase()] ? (
               <div style={{ padding: 60, textAlign: 'center', color: 'var(--muted)' }}>
                 <RefreshCw size={28} className="spin" style={{ marginBottom: 12, color: '#c084fc' }} />
                 <div>Loading your binary genealogy tree...</div>
               </div>
             ) : binaryFocusAddress ? (
-              renderBinaryNode(binaryFocusAddress, 'ROOT', 0)
+              <div
+                style={{
+                  width: '100%',
+                  overflowX: 'auto',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  padding: '10px 20px 40px',
+                }}
+              >
+                <div
+                  style={{
+                    transform: `scale(${binaryZoom})`,
+                    transformOrigin: 'top center',
+                    transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    minWidth: 'max-content',
+                    display: 'inline-flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  {renderBinaryNode(binaryFocusAddress, 'ROOT', 0)}
+                </div>
+              </div>
             ) : (
               <div style={{ padding: 60, textAlign: 'center', color: 'var(--muted)' }}>
                 Connect your wallet to view your binary tree.
@@ -1371,15 +1570,21 @@ export function TreePage() {
               background: 'linear-gradient(135deg, rgba(16, 23, 60, 0.85) 0%, rgba(10, 14, 38, 0.95) 100%)',
               border: '1px solid rgba(139, 92, 246, 0.35)',
               borderRadius: 20,
-              padding: '28px 20px',
+              padding: '24px 20px',
               boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
               minHeight: 520,
               overflowX: 'auto',
+              position: 'relative',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
             }}
           >
+            {/* Floating Zoom Controls */}
+            <div style={{ position: 'sticky', top: 0, alignSelf: 'flex-end', zIndex: 20, marginBottom: 12 }}>
+              <TreeZoomControls zoom={treeZoom} setZoom={setTreeZoom} min={0.3} max={1.6} step={0.1} />
+            </div>
+
             {loading && !nodesMap[focusAddress?.toLowerCase()] ? (
               <div style={{ padding: 60, textAlign: 'center', color: '#c084fc', fontWeight: 700, fontSize: '0.95rem' }}>
                 <RefreshCw size={28} className="spin" style={{ margin: '0 auto 12px' }} />
@@ -1388,7 +1593,17 @@ export function TreePage() {
             ) : !focusAddress ? (
               <div style={{ padding: 60, color: '#94a3b8' }}>Connect wallet or enter address to view sponsor tree.</div>
             ) : (
-              <div style={{ padding: '10px 20px 40px', minWidth: 'fit-content' }}>
+              <div
+                style={{
+                  transform: `scale(${treeZoom})`,
+                  transformOrigin: 'top center',
+                  transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  minWidth: 'fit-content',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  padding: '10px 20px 40px',
+                }}
+              >
                 {renderTreeNode(focusAddress, 0)}
               </div>
             )}
@@ -1640,6 +1855,28 @@ export function TreePage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* TAB: AFFILIATE 20-LEVEL AUTO-MATRIX */}
+        {activeTab === 'affiliate' && (
+          <div style={{ marginTop: 10 }}>
+            <AffiliateMatrixGenealogy
+              userAddress={connectedAddress}
+              isAdmin={false}
+              embedded={true}
+            />
+          </div>
+        )}
+
+        {/* TAB 3: 8 CASCADING CLUB MATRICES GENEALOGY */}
+        {activeTab === 'club' && (
+          <CascadingClubMatrixView
+            targetAddress={binaryFocusAddress || focusAddress || connectedAddress}
+            onSelectMember={(addr) => {
+              setBinaryFocusAddress(addr)
+              setActiveTab('binary')
+            }}
+          />
         )}
 
       </div>

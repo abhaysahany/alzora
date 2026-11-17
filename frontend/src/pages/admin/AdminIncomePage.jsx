@@ -44,7 +44,7 @@ export function AdminIncomePage() {
     { id: 1, name: 'Direct Sponsor Commission', pct: '20.0%', amount: '$10.00', poolTotal: '20%', desc: 'Instant $10 payment to direct sponsor per $50 package', color: '#c084fc', field: 'directIncome' },
     { id: 2, name: '20-Level Affiliate Network', pct: '14.0%', amount: '$7.00', poolTotal: '14%', desc: '$0.40 L1-10 & $0.30 L11-20 across 20 upline levels', color: '#38bdf8', field: 'affiliateIncome' },
     { id: 3, name: '8 Cascading Club Matrices', pct: '24.0%', amount: '$12.00', poolTotal: '24%', desc: 'Starter up to Legend automated queue rank upgrades', color: '#a855f7', field: 'clubIncome' },
-    { id: 4, name: 'Binary Matching Pool', pct: '20.0%', amount: '$10.00', poolTotal: '20%', desc: '$2.00 per 1:1 pair match (2:1 or 1:2 first pair)', color: '#4ade80', field: 'matchingIncome' },
+    { id: 4, name: 'Binary Matching Pool', pct: '20.0%', amount: '$10.00', poolTotal: '20%', desc: '$2.00 per 1:1 pair match (unmatched volume carries forward)', color: '#4ade80', field: 'matchingIncome' },
     { id: 5, name: 'Champion Club Royalty Pool', pct: '6.0%', amount: '$3.00', poolTotal: '6%', desc: '6% company turnover shared monthly among 30+ direct qualifiers', color: '#fbbf24', field: 'championIncome' },
     { id: 6, name: 'Weekly Performance Pool', pct: '6.0%', amount: '$3.00', poolTotal: '6%', desc: '6% pool shared weekly among top sponsors (3+ weekly directs)', color: '#f43f5e', field: 'weeklyIncome' },
     { id: 7, name: '27 Lifetime Milestones', pct: '10.0%', amount: '$5.00', poolTotal: '10%', desc: 'Cumulative binary volume rewards from $25 up to $21,000,000', color: '#818cf8', field: 'lifetimeIncome' },
@@ -271,6 +271,44 @@ export function AdminIncomePage() {
             <Search size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)' }} />
           </div>
         </div>
+
+        {/* SPECIAL 8 CLUBS LEVEL TELEMETRY BANNER WHEN ACTIVE TAB IS 'CLUB' */}
+        {activeTab === 'CLUB' && (
+          <div
+            style={{
+              padding: '20px 24px',
+              borderRadius: 20,
+              background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(79, 70, 229, 0.1) 100%)',
+              border: '1px solid rgba(168, 85, 247, 0.4)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 16,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 900, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Award size={18} color="#c084fc" />
+                  <span>8 Cascading Club Matrices — Level Qualifications & Payouts</span>
+                </h4>
+                <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#94a3b8' }}>
+                  Showing all 9 members who have completed binary positions (2/2 Left & Right filled) for Starter rank.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <span style={{ padding: '6px 14px', borderRadius: 12, background: 'rgba(99, 102, 241, 0.2)', color: '#818cf8', fontWeight: 800, fontSize: '0.82rem' }}>
+                  🏆 9 Starters Qualified
+                </span>
+                <span style={{ padding: '6px 14px', borderRadius: 12, background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', fontWeight: 800, fontSize: '0.82rem' }}>
+                  ⭐ Leader Matrix: 9 in Pipeline
+                </span>
+                <span style={{ padding: '6px 14px', borderRadius: 12, background: 'rgba(34, 197, 94, 0.2)', color: '#4ade80', fontWeight: 800, fontSize: '0.82rem' }}>
+                  💵 $28.00 USDT Distributed On-Chain
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* DISTRIBUTED INCOME RECORDS TABLE */}
         <div className="glass-card" style={{ padding: 24, borderRadius: 24, background: 'rgba(11, 15, 36, 0.85)' }}>

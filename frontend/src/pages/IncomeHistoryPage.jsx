@@ -21,11 +21,12 @@ import {
   RefreshCw,
   ArrowRight,
   Coins,
+  AlertTriangle,
 } from 'lucide-react'
 
 export function IncomeHistoryPage() {
   const { address } = useWalletAuth()
-  const { profile, incomeBreakdown, globalClub, refreshAll, loading } = useTetherStream()
+  const { profile, incomeBreakdown, globalClub, pendingDeduction, refreshAll, loading } = useTetherStream()
 
   const [activeTab, setActiveTab] = useState('ALL')
   const [searchTerm, setSearchTerm] = useState('')
@@ -273,6 +274,69 @@ export function IncomeHistoryPage() {
             </div>
           </div>
         </div>
+
+        {/* PENDING DEDUCTION / ADVANCE PAYMENT RECOVERY ALERT CARD */}
+        {Number(pendingDeduction || 0) > 0 && (
+          <div
+            style={{
+              padding: '18px 24px',
+              borderRadius: 18,
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(245, 158, 11, 0.12) 100%)',
+              border: '1.5px solid rgba(239, 68, 68, 0.45)',
+              boxShadow: '0 8px 24px rgba(239, 68, 68, 0.12)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    background: 'rgba(239, 68, 68, 0.25)',
+                    border: '1px solid rgba(239, 68, 68, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <AlertTriangle size={24} color="#ef4444" />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.98rem', fontWeight: 900, color: '#fecaca', letterSpacing: '0.01em' }}>
+                      Advance Payment Adjustment Active (अग्रिम भुगतान रिकवरी सक्रिय)
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        padding: '2px 7px',
+                        borderRadius: 6,
+                        background: 'rgba(239, 68, 68, 0.3)',
+                        border: '1px solid rgba(239, 68, 68, 0.5)',
+                        color: '#fca5a5',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      Auto-Deduction in Progress
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: 4, maxWidth: 680, lineHeight: 1.5 }}>
+                    आपके खाते में <strong>${Number(pendingDeduction).toFixed(2)} USDT</strong> की अतिरिक्त/अग्रिम राशि दर्ज है। आगामी कमाई (बाइनरी, अफिलिएट या क्लब) से यह बकाया स्वतः कटकर कम होता जाएगा। जब तक यह बकाया <strong>$0.00</strong> नहीं हो जाता, नई आय सीधे वॉलेट में जाने के बजाय इस बकाये को घटाएगी।
+                  </div>
+                </div>
+              </div>
+              <div style={{ textAlign: 'right', background: 'rgba(0,0,0,0.35)', padding: '10px 18px', borderRadius: 12, border: '1px solid rgba(239, 68, 68, 0.35)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#fca5a5', textTransform: 'uppercase', fontWeight: 800 }}>शेष अग्रिम राशि (Remaining Advance)</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ef4444', marginTop: 2 }}>
+                  ${Number(pendingDeduction).toFixed(2)} <span style={{ fontSize: '0.85rem' }}>USDT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* METRICS ROW CARDS */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 14 }}>

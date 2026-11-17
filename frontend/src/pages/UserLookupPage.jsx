@@ -4,8 +4,10 @@ import { useChainId } from 'wagmi'
 import { createPublicClient, http, formatUnits, isAddress } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
 import BackgroundCanvas from '../components/BackgroundCanvas'
-import { getContractAddresses, getRpcUrl, getTokenDecimals, ELZORA_GATEWAY_ABI } from '../web3/contracts'
+import { getContractAddresses, getRpcUrl, getTokenDecimals, ELZORA_GATEWAY_ABI, ELZORA_MAIN_ABI } from '../web3/contracts'
 import { useWalletAuth } from '../hooks/useWalletAuth'
+import { TreeZoomControls } from '../components/TreeZoomControls'
+import { AffiliateMatrixGenealogy } from '../components/AffiliateMatrixGenealogy'
 import {
   Search,
   User,
@@ -26,6 +28,7 @@ import {
   Check,
   Split,
   AlertCircle,
+  AlertTriangle,
   Network,
   Award,
   ExternalLink,
@@ -51,6 +54,7 @@ const RANK_CONFIGS = [
 ]
 
 const RANK_NAMES = {
+  0: 'Member',
   1: 'Starter',
   2: 'Leader',
   3: 'Achiever',
@@ -82,8 +86,11 @@ export function UserLookupPage() {
   const [directsDossiers, setDirectsDossiers] = useState([])
   const [binaryChildrenDossiers, setBinaryChildrenDossiers] = useState({ left: null, right: null })
   const [copiedText, setCopiedText] = useState(null)
-  const [activeTreeTab, setActiveTreeTab] = useState('directs') // 'directs' | 'binary'
+  const [activeTreeTab, setActiveTreeTab] = useState('directs') // 'directs' | 'binary' | 'affiliate' | 'single_leg'
+  const [treeZoom, setTreeZoom] = useState(1)
   const [activeSection, setActiveSection] = useState('all') // 'all' | 'income' | 'tree' | 'ranks'
+  const [singleLegData, setSingleLegData] = useState({ entries: [], totalCycles: 0, queueHead: 0, totalEntries: 0 })
+  const [singleLegLoading, setSingleLegLoading] = useState(false)
 
   const copyToClipboard = (text) => {
     if (!text) return
@@ -111,10 +118,66 @@ export function UserLookupPage() {
           targetAddr = cleanQuery
         } else if (connectedAddress && cleanQuery.toLowerCase() === 'me') {
           targetAddr = connectedAddress
+        } else if (
+          cleanQuery.toLowerCase() === 'root' ||
+          cleanQuery.toLowerCase() === 'root id' ||
+          cleanQuery === '1' ||
+          cleanQuery.toLowerCase() === 'id 1'
+        ) {
+          targetAddr = CONTRACT_ADDRESSES.ROOT_ID || '0xE60746348b128D3D99546d78E646946599a0311e'
         } else {
-          setError('Please enter a valid BSC wallet address (0x...).')
-          setLoading(false)
-          return
+          // Resolve Member ID (e.g., ELZ12457 or 12457 or Matrix ID e.g. 2)
+          let numericId = null
+          const upper = cleanQuery.toUpperCase()
+          if (upper.startsWith('ELZ')) {
+            numericId = parseInt(upper.replace('ELZ', ''), 10)
+          } else if (/^\d+$/.test(cleanQuery)) {
+            numericId = parseInt(cleanQuery, 10)
+          }
+
+          if (numericId && !isNaN(numericId)) {
+            if (numericId === 1) {
+              targetAddr = CONTRACT_ADDRESSES.ROOT_ID || '0xE60746348b128D3D99546d78E646946599a0311e'
+            } else {
+              // 1. Check Gateway getAddressByMemberId
+              try {
+                const resolvedAddr = await publicClient.readContract({
+                  address: CONTRACT_ADDRESSES.GATEWAY,
+                  abi: ELZORA_GATEWAY_ABI,
+                  functionName: 'getAddressByMemberId',
+                  args: [BigInt(numericId)],
+                })
+                if (resolvedAddr && resolvedAddr !== '0x0000000000000000000000000000000000000000') {
+                  targetAddr = resolvedAddr
+                }
+              } catch (err) {
+                console.warn('Member ID resolution failed:', err)
+              }
+
+              // 2. Fallback: Check Global Matrix ID on ELZORA Main
+              if (!targetAddr && numericId <= 10000) {
+                try {
+                  const matrixAddr = await publicClient.readContract({
+                    address: CONTRACT_ADDRESSES.ELZORA,
+                    abi: ELZORA_MAIN_ABI,
+                    functionName: 'globalMatrixUsers',
+                    args: [BigInt(numericId)],
+                  })
+                  if (matrixAddr && matrixAddr !== '0x0000000000000000000000000000000000000000') {
+                    targetAddr = matrixAddr
+                  }
+                } catch (err) {
+                  console.warn('Matrix ID resolution failed:', err)
+                }
+              }
+            }
+          }
+
+          if (!targetAddr) {
+            setError('Please enter a valid BSC wallet address (0x...) or Member ID / Matrix ID (e.g. 1, 2, ELZ10001).')
+            setLoading(false)
+            return
+          }
         }
 
         // 1. Fetch user dashboard from Gateway router
@@ -124,6 +187,36 @@ export function UserLookupPage() {
           functionName: 'getUserDashboard',
           args: [targetAddr],
         })
+
+        // Fetch Member ID for target address
+        let resolvedMemberId = null
+        try {
+          const mIdNum = await publicClient.readContract({
+            address: CONTRACT_ADDRESSES.GATEWAY,
+            abi: ELZORA_GATEWAY_ABI,
+            functionName: 'getMemberId',
+            args: [targetAddr],
+          })
+          if (mIdNum && Number(mIdNum) > 0) {
+            resolvedMemberId = `ELZ${mIdNum.toString()}`
+          }
+        } catch (e) {}
+
+        // Fetch Pending Income Deduction (for overpayment reconciliation)
+        let pendingDeductionAmount = '0.00'
+        try {
+          const pendingRaw = await publicClient.readContract({
+            address: CONTRACT_ADDRESSES.ELZORA,
+            abi: ELZORA_MAIN_ABI,
+            functionName: 'pendingIncomeDeduction',
+            args: [targetAddr],
+          })
+          if (pendingRaw && pendingRaw > 0n) {
+            pendingDeductionAmount = formatUnits(pendingRaw, tokenDecimals)
+          }
+        } catch (e) {
+          console.error("Error reading pending deduction:", e)
+        }
 
         if (!rawDashboard || !rawDashboard.profile) {
           setError('No on-chain ELZORA profile data found for this address.')
@@ -137,6 +230,7 @@ export function UserLookupPage() {
 
         const parsedDashboard = {
           userAddress: targetAddr,
+          memberId: resolvedMemberId,
           sponsor: prof.sponsor,
           binaryParent: prof.parent,
           leftChild: prof.leftChild,
@@ -155,6 +249,7 @@ export function UserLookupPage() {
           totalIncomeEarned: formatUnits(prof.totalIncomeEarned || 0n, tokenDecimals),
           withdrawableBalance: '0.00',
           totalWithdrawn: '0.00',
+          pendingDeduction: pendingDeductionAmount,
           completedLifetimeMilestones: Number(prof.completedLifetimeMilestones || 0n),
           incomeBreakdown: {
             directIncome: formatUnits(inc.directIncome || 0n, tokenDecimals),
@@ -190,15 +285,20 @@ export function UserLookupPage() {
               args: [directs.slice(0, 50)],
             })
 
-            const parsedDirects = batchDirects.map((d, idx) => ({
-              address: directs[idx],
-              rank: Number(d.profile.currentRank || 1),
-              rankName: RANK_NAMES[Number(d.profile.currentRank || 1)] || 'Starter',
-              isRegistered: Boolean(d.profile.isRegistered),
-              directCount: Number(d.profile.directCount || 0n),
-              teamVolume: Number(d.profile.leftTeamCount || 0n) + Number(d.profile.rightTeamCount || 0n),
-              totalEarned: formatUnits(d.profile.totalIncomeEarned || 0n, tokenDecimals),
-            }))
+            const parsedDirects = batchDirects.map((d, idx) => {
+              const rNum = Number(d.profile.currentRank || 1)
+              const rName = RANK_NAMES[rNum] || 'Starter'
+
+              return {
+                address: directs[idx],
+                rank: rNum,
+                rankName: rName,
+                isRegistered: Boolean(d.profile.isRegistered),
+                directCount: Number(d.profile.directCount || 0n),
+                teamVolume: Number(d.profile.leftTeamCount || 0n) + Number(d.profile.rightTeamCount || 0n),
+                totalEarned: formatUnits(d.profile.totalIncomeEarned || 0n, tokenDecimals),
+              }
+            })
             setDirectsDossiers(parsedDirects)
           } catch (e) {
             console.warn('Could not fetch directs batch:', e)
@@ -222,12 +322,15 @@ export function UserLookupPage() {
             const childMap = {}
             childrenDash.forEach((cd) => {
               const u = cd.profile.userAddress.toLowerCase()
+              const rNum = Number(cd.profile.currentRank || 1)
+              const rName = RANK_NAMES[rNum] || 'Starter'
+
               childMap[u] = {
                 address: cd.profile.userAddress,
                 leftChild: cd.profile.leftChild,
                 rightChild: cd.profile.rightChild,
-                rank: Number(cd.profile.currentRank || 1),
-                rankName: RANK_NAMES[Number(cd.profile.currentRank || 1)] || 'Starter',
+                rank: rNum,
+                rankName: rName,
                 leftTeamCount: Number(cd.profile.leftTeamCount || 0n),
                 rightTeamCount: Number(cd.profile.rightTeamCount || 0n),
                 directCount: Number(cd.profile.directCount || 0n),
@@ -244,6 +347,58 @@ export function UserLookupPage() {
             console.warn('Could not fetch binary children:', e)
           }
         }
+
+        // 4. Fetch Single Leg Global Club details for target address
+        try {
+          const [entryIds, head, total] = await Promise.all([
+            publicClient.readContract({
+              address: CONTRACT_ADDRESSES.ELZORA,
+              abi: ELZORA_MAIN_ABI,
+              functionName: 'getUserGlobalClubEntries',
+              args: [targetAddr],
+            }),
+            publicClient.readContract({
+              address: CONTRACT_ADDRESSES.ELZORA,
+              abi: ELZORA_MAIN_ABI,
+              functionName: 'globalClubQueueHead',
+            }),
+            publicClient.readContract({
+              address: CONTRACT_ADDRESSES.ELZORA,
+              abi: ELZORA_MAIN_ABI,
+              functionName: 'getGlobalClubEntriesCount',
+            }),
+          ])
+
+          const parsedEntryIds = Array.isArray(entryIds) ? entryIds.map((e) => Number(e)) : []
+          const detailedEntries = []
+          for (const eid of parsedEntryIds.slice(0, 30)) {
+            try {
+              const info = await publicClient.readContract({
+                address: CONTRACT_ADDRESSES.ELZORA,
+                abi: ELZORA_MAIN_ABI,
+                functionName: 'getGlobalClubEntry',
+                args: [BigInt(eid)],
+              })
+              detailedEntries.push({
+                entryId: eid,
+                user: info.userAddress,
+                entryTime: Number(info.entryTime || 0n),
+                cycles: Number(info.cyclesCompleted || 0n),
+                status: Number(info.status || 0),
+                position: Number(info.position || 0),
+              })
+            } catch (err) {}
+          }
+
+          setSingleLegData({
+            entries: detailedEntries,
+            totalCycles: Number(rawDashboard.globalClubCyclesCompleted || 0n),
+            queueHead: Number(head || 0n),
+            totalEntries: Number(total || 0n),
+          })
+        } catch (e) {
+          console.warn('Single Leg fetch failed:', e)
+        }
       } catch (err) {
         console.error(err)
         setError('Failed to query member dossier from ELZORA Gateway router.')
@@ -251,7 +406,7 @@ export function UserLookupPage() {
         setLoading(false)
       }
     },
-    [activeChain, connectedAddress, CONTRACT_ADDRESSES.GATEWAY, rpcUrl]
+    [activeChain, connectedAddress, CONTRACT_ADDRESSES.GATEWAY, CONTRACT_ADDRESSES.ELZORA, rpcUrl]
   )
 
   useEffect(() => {
@@ -469,7 +624,7 @@ export function UserLookupPage() {
                   setSearchInput(e.target.value)
                   setError(null)
                 }}
-                placeholder="Enter any BSC Wallet Address (0x...)"
+                placeholder="Enter BSC Wallet Address (0x...) or Member ID (e.g. ELZ12457)"
                 style={{
                   width: '100%',
                   background: 'rgba(0,0,0,0.45)',
@@ -658,6 +813,28 @@ export function UserLookupPage() {
                 {/* Left: Identity & Badges */}
                 <div style={{ flex: '1 1 500px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+                    {/* Member ID Badge */}
+                    {dashboard.memberId && (
+                      <span
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: 12,
+                          background: 'rgba(255, 215, 0, 0.15)',
+                          border: '1px solid rgba(255, 215, 0, 0.45)',
+                          color: '#ffd700',
+                          fontSize: '0.88rem',
+                          fontWeight: 900,
+                          fontFamily: 'monospace',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          boxShadow: '0 4px 14px rgba(255, 215, 0, 0.2)',
+                        }}
+                      >
+                        🆔 Member ID: {dashboard.memberId}
+                      </span>
+                    )}
+
                     {/* Rank Badge */}
                     <span
                       style={{
@@ -676,6 +853,26 @@ export function UserLookupPage() {
                       <Crown size={15} color="#ffd700" />
                       Rank {dashboard.currentRank}: {dashboard.rankName}
                     </span>
+
+                    {/* Direct Starter vs Spillover Starter Pill */}
+                    {dashboard.currentRank >= 2 && (
+                      <span
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: 12,
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          background: Number(dashboard.directCount || 0) >= 2 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                          color: Number(dashboard.directCount || 0) >= 2 ? '#4ade80' : '#c084fc',
+                          border: `1px solid ${Number(dashboard.directCount || 0) >= 2 ? 'rgba(34, 197, 94, 0.45)' : 'rgba(168, 85, 247, 0.45)'}`,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 5,
+                        }}
+                      >
+                        {Number(dashboard.directCount || 0) >= 2 ? '⭐ Direct Qualified' : '⚡ Team Spillover'}
+                      </span>
+                    )}
 
                     {/* Registration Package Badge */}
                     <span
@@ -849,6 +1046,46 @@ export function UserLookupPage() {
                 </div>
               </div>
             </div>
+
+            {/* ADVANCE PAYMENT / PENDING DEDUCTION CARD */}
+            {Number(dashboard.pendingDeduction || 0) > 0 && (
+              <div
+                style={{
+                  padding: '20px 26px',
+                  borderRadius: 20,
+                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(245, 158, 11, 0.12) 100%)',
+                  border: '1.5px solid rgba(239, 68, 68, 0.45)',
+                  boxShadow: '0 8px 32px rgba(239, 68, 68, 0.18)',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(239, 68, 68, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f87171' }}>
+                      <AlertTriangle size={24} />
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: '1rem', fontWeight: 900, color: '#fca5a5' }}>
+                          ⚠️ अग्रिम भुगतान समायोजन सक्रिय (Advance Payment Recovery Active)
+                        </span>
+                        <span style={{ padding: '2px 8px', borderRadius: 6, background: 'rgba(239, 68, 68, 0.3)', color: '#fecaca', fontSize: '0.7rem', fontWeight: 800 }}>
+                          ON-CHAIN DEDUCTION ACTIVE
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '0.84rem', color: '#cbd5e1', marginTop: 4, maxWidth: 720, lineHeight: 1.5 }}>
+                        इस यूजर को पूर्व में <strong>${Number(dashboard.pendingDeduction).toFixed(2)} USDT</strong> की अतिरिक्त/अग्रिम राशि का भुगतान हो चुका है। आगामी कमाई (बाइनरी मैचिंग, ग्लोबल अफिलिएट, क्लब इनकम) से यह बकाया ऑन-चेन स्मार्ट कॉन्ट्रैक्ट द्वारा स्वतः काटा जाएगा। जब तक यह बकाया <strong>$0.00</strong> नहीं हो जाता, नई कमाई यूजर के वॉलेट में जाने के बजाय इस बकाये को घटाएगी।
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', background: 'rgba(0,0,0,0.35)', padding: '12px 22px', borderRadius: 14, border: '1px solid rgba(239, 68, 68, 0.35)' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#fca5a5', textTransform: 'uppercase', fontWeight: 800 }}>शेष अग्रिम राशि (Remaining Advance)</div>
+                    <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ef4444', marginTop: 2 }}>
+                      ${Number(dashboard.pendingDeduction).toFixed(2)} <span style={{ fontSize: '0.85rem' }}>USDT</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* 2. ALL INCOME DETAILS (8-STREAM LEDGER) */}
             <div
@@ -1074,21 +1311,38 @@ export function UserLookupPage() {
                       BINARY MATCHING STATUS
                     </span>
                   </div>
-                  <span style={{ fontSize: '0.74rem', color: 'var(--muted)' }}>$2 / Matched Pair</span>
+                  <span style={{ fontSize: '0.74rem', color: '#38bdf8', fontWeight: 700 }}>$2.00 / Matched Pair</span>
                 </div>
 
-                <div style={{ fontSize: '1.3rem', fontWeight: 900, color: isBinaryMatchingQualified ? '#4ade80' : '#fbbf24', marginBottom: 8 }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 900, color: isBinaryMatchingQualified ? '#4ade80' : '#fbbf24', marginBottom: 6 }}>
                   {isBinaryMatchingQualified ? 'QUALIFIED (1:1 Active) ✅' : 'PENDING QUALIFICATION ⏳'}
                 </div>
 
-                <p style={{ margin: '0 0 12px', fontSize: '0.76rem', color: 'var(--muted)' }}>
-                  Rule: Requires min 1 Left Direct & 1 Right Direct. First pair matched at 2:1 or 1:2, then 1:1 pair matching perpetually.
+                <div style={{ display: 'flex', gap: 16, margin: '10px 0', padding: '10px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>Matching Earned</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#38bdf8' }}>${Number(dashboard.incomeBreakdown.matchingIncome || 0).toFixed(2)} <span style={{ fontSize: '0.72rem' }}>USDT</span></div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>Matched Pairs</div>
+                    <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#c084fc' }}>{(Number(dashboard.incomeBreakdown.matchingIncome || 0) / 2).toFixed(0)} <span style={{ fontSize: '0.72rem' }}>Pairs</span></div>
+                  </div>
+                </div>
+
+                <p style={{ margin: '0 0 10px', fontSize: '0.74rem', color: 'var(--muted)', lineHeight: 1.4 }}>
+                  Rule: 1:1 dual-team pair matching ($2.00 per matched pair). Daily cap: 50 pairs ($100/day). Requires min 1 Left Direct & 1 Right Direct.
                 </p>
 
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 10, display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: 'var(--muted)' }}>
                   <span>Today Matched Pairs:</span>
                   <b style={{ color: '#fff' }}>{dashboard.todayMatchingPairs} / 50 Max Daily</b>
                 </div>
+
+                {Number(dashboard.pendingDeduction || 0) > 0 && (
+                  <div style={{ marginTop: 10, padding: '8px 12px', borderRadius: 10, background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.35)', color: '#fca5a5', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span>⚠️ Overpayment Recovery: <strong>${Number(dashboard.pendingDeduction).toFixed(2)} USDT</strong> pending deduction from future binary earnings.</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1298,19 +1552,19 @@ export function UserLookupPage() {
                   </h3>
                 </div>
 
-                {/* Sub-Tabs: Direct Referrals vs Binary Tree */}
-                <div style={{ display: 'flex', background: 'rgba(0,0,0,0.4)', borderRadius: 12, padding: 3, border: '1px solid rgba(255,255,255,0.08)' }}>
+                {/* Sub-Tabs: Direct Referrals vs Binary Tree vs Affiliate Matrix vs Single Leg */}
+                <div style={{ display: 'flex', background: 'rgba(0,0,0,0.4)', borderRadius: 12, padding: 3, border: '1px solid rgba(255,255,255,0.08)', flexWrap: 'wrap', gap: 4 }}>
                   <button
                     type="button"
                     onClick={() => setActiveTreeTab('directs')}
                     style={{
-                      padding: '8px 16px',
+                      padding: '8px 14px',
                       borderRadius: 10,
                       border: 'none',
                       background: activeTreeTab === 'directs' ? 'linear-gradient(135deg, #8b5cf6, #6366f1)' : 'transparent',
                       color: activeTreeTab === 'directs' ? '#fff' : 'var(--muted)',
                       fontWeight: 800,
-                      fontSize: '0.82rem',
+                      fontSize: '0.8rem',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -1323,13 +1577,13 @@ export function UserLookupPage() {
                     type="button"
                     onClick={() => setActiveTreeTab('binary')}
                     style={{
-                      padding: '8px 16px',
+                      padding: '8px 14px',
                       borderRadius: 10,
                       border: 'none',
                       background: activeTreeTab === 'binary' ? 'linear-gradient(135deg, #8b5cf6, #6366f1)' : 'transparent',
                       color: activeTreeTab === 'binary' ? '#fff' : 'var(--muted)',
                       fontWeight: 800,
-                      fontSize: '0.82rem',
+                      fontSize: '0.8rem',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
@@ -1337,6 +1591,44 @@ export function UserLookupPage() {
                     }}
                   >
                     <Split size={14} /> Binary Tree Hierarchy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTreeTab('affiliate')}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 10,
+                      border: 'none',
+                      background: activeTreeTab === 'affiliate' ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : 'transparent',
+                      color: activeTreeTab === 'affiliate' ? '#fff' : 'var(--muted)',
+                      fontWeight: 800,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <Network size={14} /> Affiliate Matrix (20L)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTreeTab('single_leg')}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 10,
+                      border: 'none',
+                      background: activeTreeTab === 'single_leg' ? 'linear-gradient(135deg, #06b6d4, #0284c7)' : 'transparent',
+                      color: activeTreeTab === 'single_leg' ? '#fff' : 'var(--muted)',
+                      fontWeight: 800,
+                      fontSize: '0.8rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <GitCommit size={14} /> Single Leg Global Tree ({singleLegData.entries.length})
                   </button>
                 </div>
               </div>
@@ -1429,19 +1721,36 @@ export function UserLookupPage() {
 
               {/* VIEW B: BINARY TREE PLACEMENT MINI-EXPLORER */}
               {activeTreeTab === 'binary' && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, padding: '10px 0' }}>
-                  {/* Top Node (Inspected Member) */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '10px 0', position: 'relative', overflowX: 'auto', width: '100%' }}>
+                  {/* Floating Zoom Controls */}
+                  <div style={{ alignSelf: 'flex-end', zIndex: 10 }}>
+                    <TreeZoomControls zoom={treeZoom} setZoom={setTreeZoom} min={0.3} max={1.6} step={0.1} />
+                  </div>
+
                   <div
                     style={{
-                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(11, 15, 36, 0.95) 100%)',
-                      border: '2px solid #8b5cf6',
-                      borderRadius: 18,
-                      padding: '16px 24px',
-                      textAlign: 'center',
-                      maxWidth: 360,
+                      transform: `scale(${treeZoom})`,
+                      transformOrigin: 'top center',
+                      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                       width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: 20,
                     }}
                   >
+                    {/* Top Node (Inspected Member) */}
+                    <div
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(11, 15, 36, 0.95) 100%)',
+                        border: '2px solid #8b5cf6',
+                        borderRadius: 18,
+                        padding: '16px 24px',
+                        textAlign: 'center',
+                        maxWidth: 360,
+                        width: '100%',
+                      }}
+                    >
                     <span style={{ fontSize: '0.72rem', color: '#ffd700', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
                       <Crown size={13} /> INSPECTED APEX NODE
                     </span>
@@ -1480,6 +1789,30 @@ export function UserLookupPage() {
 
                       {binaryChildrenDossiers.left ? (
                         <div>
+                          {binaryChildrenDossiers.left.sponsor && (
+                            <div style={{ marginBottom: 6 }}>
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  padding: '2px 8px',
+                                  borderRadius: 6,
+                                  fontSize: '0.68rem',
+                                  fontWeight: 800,
+                                  background: binaryChildrenDossiers.left.sponsor.toLowerCase() === dashboard.userAddress.toLowerCase()
+                                    ? 'rgba(34, 197, 94, 0.2)'
+                                    : 'rgba(168, 85, 247, 0.2)',
+                                  color: binaryChildrenDossiers.left.sponsor.toLowerCase() === dashboard.userAddress.toLowerCase()
+                                    ? '#4ade80'
+                                    : '#c084fc',
+                                  border: `1px solid ${binaryChildrenDossiers.left.sponsor.toLowerCase() === dashboard.userAddress.toLowerCase() ? 'rgba(34, 197, 94, 0.4)' : 'rgba(168, 85, 247, 0.4)'}`,
+                                }}
+                              >
+                                {binaryChildrenDossiers.left.sponsor.toLowerCase() === dashboard.userAddress.toLowerCase()
+                                  ? '⭐ Direct Referral'
+                                  : '⚡ Team Spillover'}
+                              </span>
+                            </div>
+                          )}
                           <div style={{ fontSize: '0.82rem', fontFamily: 'monospace', color: '#fff', fontWeight: 700, wordBreak: 'break-all', marginBottom: 6 }}>
                             {binaryChildrenDossiers.left.address}
                           </div>
@@ -1532,6 +1865,30 @@ export function UserLookupPage() {
 
                       {binaryChildrenDossiers.right ? (
                         <div>
+                          {binaryChildrenDossiers.right.sponsor && (
+                            <div style={{ marginBottom: 6 }}>
+                              <span
+                                style={{
+                                  display: 'inline-block',
+                                  padding: '2px 8px',
+                                  borderRadius: 6,
+                                  fontSize: '0.68rem',
+                                  fontWeight: 800,
+                                  background: binaryChildrenDossiers.right.sponsor.toLowerCase() === dashboard.userAddress.toLowerCase()
+                                    ? 'rgba(34, 197, 94, 0.2)'
+                                    : 'rgba(168, 85, 247, 0.2)',
+                                  color: binaryChildrenDossiers.right.sponsor.toLowerCase() === dashboard.userAddress.toLowerCase()
+                                    ? '#4ade80'
+                                    : '#c084fc',
+                                  border: `1px solid ${binaryChildrenDossiers.right.sponsor.toLowerCase() === dashboard.userAddress.toLowerCase() ? 'rgba(34, 197, 94, 0.4)' : 'rgba(168, 85, 247, 0.4)'}`,
+                                }}
+                              >
+                                {binaryChildrenDossiers.right.sponsor.toLowerCase() === dashboard.userAddress.toLowerCase()
+                                  ? '⭐ Direct Referral'
+                                  : '⚡ Team Spillover'}
+                              </span>
+                            </div>
+                          )}
                           <div style={{ fontSize: '0.82rem', fontFamily: 'monospace', color: '#fff', fontWeight: 700, wordBreak: 'break-all', marginBottom: 6 }}>
                             {binaryChildrenDossiers.right.address}
                           </div>
@@ -1565,7 +1922,132 @@ export function UserLookupPage() {
                     </div>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
+
+            {/* VIEW C: 20-LEVEL AFFILIATE MATRIX TREE VIEW */}
+            {activeTreeTab === 'affiliate' && (
+              <div style={{ marginTop: 10 }}>
+                <AffiliateMatrixGenealogy
+                  userAddress={dashboard.userAddress}
+                  embedded={true}
+                />
+              </div>
+            )}
+
+            {/* VIEW D: SINGLE LEG GLOBAL CLUB TREE VIEW */}
+            {activeTreeTab === 'single_leg' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 10 }}>
+                {/* Single Leg Stats Overview */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+                  <div style={{ padding: '16px 20px', borderRadius: 16, background: 'rgba(6, 182, 212, 0.1)', border: '1px solid rgba(6, 182, 212, 0.3)' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#06b6d4', fontWeight: 800, textTransform: 'uppercase' }}>Member Queue Entries</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fff', marginTop: 4 }}>
+                      {singleLegData.entries.length} Entries
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 }}>Total spots in global 1-to-2 queue</div>
+                  </div>
+
+                  <div style={{ padding: '16px 20px', borderRadius: 16, background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#4ade80', fontWeight: 800, textTransform: 'uppercase' }}>Cycles Completed</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#4ade80', marginTop: 4 }}>
+                      {singleLegData.totalCycles} Cycles
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 }}>
+                      Earned: ${(singleLegData.totalCycles * 25).toFixed(2)} USDT ($25/cycle)
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '16px 20px', borderRadius: 16, background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#fbbf24', fontWeight: 800, textTransform: 'uppercase' }}>Current Queue Head</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#fbbf24', marginTop: 4 }}>
+                      Entry #{singleLegData.queueHead}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 }}>Next entry paying $25 USDT</div>
+                  </div>
+
+                  <div style={{ padding: '16px 20px', borderRadius: 16, background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)' }}>
+                    <div style={{ fontSize: '0.72rem', color: '#c084fc', fontWeight: 800, textTransform: 'uppercase' }}>Total Global Entries</div>
+                    <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#c084fc', marginTop: 4 }}>
+                      {singleLegData.totalEntries} Entries
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 }}>Autonomous 1-leg global system</div>
+                  </div>
+                </div>
+
+                {/* Single Leg Queue Entries Table/Cards */}
+                {singleLegData.entries.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <GitCommit size={36} color="var(--muted)" style={{ margin: '0 auto 12px', opacity: 0.6 }} />
+                    <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff' }}>No Active Single Leg Entries For This Account</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginTop: 6, maxWidth: 480, margin: '6px auto 0' }}>
+                      Members automatically enter the Single Leg Global Club ($25 USDT) upon hitting qualifying milestones or direct purchase.
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 14 }}>
+                    {singleLegData.entries.map((entry) => {
+                      const isAhead = entry.entryId < singleLegData.queueHead
+                      const isAtHead = entry.entryId === singleLegData.queueHead
+                      const distance = entry.entryId - singleLegData.queueHead
+
+                      return (
+                        <div
+                          key={entry.entryId}
+                          style={{
+                            background: isAtHead
+                              ? 'linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(16, 185, 129, 0.05))'
+                              : 'rgba(255,255,255,0.03)',
+                            padding: '16px 18px',
+                            borderRadius: 16,
+                            border: isAtHead
+                              ? '1px solid #4ade80'
+                              : isAhead
+                              ? '1px solid rgba(74, 222, 128, 0.3)'
+                              : '1px solid rgba(255,255,255,0.08)',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#fff' }}>
+                              Entry #{entry.entryId}
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '0.7rem',
+                                padding: '2px 8px',
+                                borderRadius: 8,
+                                fontWeight: 800,
+                                background: isAtHead
+                                  ? '#4ade80'
+                                  : isAhead
+                                  ? 'rgba(74, 222, 128, 0.2)'
+                                  : 'rgba(6, 182, 212, 0.2)',
+                                color: isAtHead ? '#000' : isAhead ? '#4ade80' : '#06b6d4',
+                              }}
+                            >
+                              {isAtHead ? 'CURRENT PAYOUT 🏆' : isAhead ? 'CYCLED ✅' : `${distance} Spots Away ⏳`}
+                            </span>
+                          </div>
+
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: '0.74rem', color: 'var(--muted)', marginBottom: 8 }}>
+                            <div>
+                              <span>Cycles Done:</span> <b style={{ color: '#fff' }}>{entry.cycles}</b>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <span>Payout:</span> <b style={{ color: '#00ff88' }}>$25.00 USDT</b>
+                            </div>
+                          </div>
+
+                          <div style={{ fontSize: '0.7rem', color: 'var(--muted)', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8 }}>
+                            Auto Re-entry Spot Generated on Cycle Completion
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
             </div>
 
             {/* 6. 8 CLUB RANKS PROGRESSION MATRIX */}

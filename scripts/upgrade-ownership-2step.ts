@@ -83,7 +83,7 @@ async function main() {
   console.log(">> Pending Owner is now: ", pending);
 
   console.log(">> Canceling pending ownership transfer via cancelOwnershipTransfer()...");
-  const txCancel = await proxyAsMain.cancelOwnershipTransfer({ gasPrice });
+  const txCancel = await (proxyAsMain as any).cancelOwnershipTransfer({ gasPrice });
   await txCancel.wait();
   pending = await proxyAsMain.pendingOwner();
   console.log(">> Pending Owner reset to:", pending);

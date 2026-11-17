@@ -6,13 +6,14 @@ import { getContractAddresses, getRpcUrl, getTokenDecimals, ELZORA_GATEWAY_ABI, 
 import { formatErrorMessage } from '../utils/errorMessages'
 
 const RANK_NAMES = {
+  0: 'Member',
   1: 'Starter',
-  2: 'Bronze Club',
-  3: 'Silver Club',
-  4: 'Gold Club',
-  5: 'Platinum Club',
-  6: 'Diamond Club',
-  7: 'Crown Diamond',
+  2: 'Leader',
+  3: 'Achiever',
+  4: 'Mentor',
+  5: 'Director',
+  6: 'Elite',
+  7: 'Crown',
   8: 'Legend',
 }
 
@@ -189,6 +190,21 @@ export function useAdminMembers() {
               args: [addr],
             })
 
+            let memberId = ''
+            let memberIdRaw = 0
+            try {
+              const mId = await publicClient.readContract({
+                address: gatewayAddr,
+                abi: ELZORA_GATEWAY_ABI,
+                functionName: 'getMemberId',
+                args: [addr],
+              })
+              memberIdRaw = Number(mId || 0n)
+              if (memberIdRaw > 0) {
+                memberId = `ELZ${memberIdRaw}`
+              }
+            } catch {}
+
             const prof = dash.profile
             const inc = dash.income
 
@@ -203,12 +219,31 @@ export function useAdminMembers() {
             const withdrawable = Number(formatUnits(prof.withdrawableBalance || 0n, tokenDecimals))
             const withdrawn = Number(formatUnits(prof.totalWithdrawn || 0n, tokenDecimals))
 
+            const hasLeft = prof.leftChild && prof.leftChild !== '0x0000000000000000000000000000000000000000'
+            const hasRight = prof.rightChild && prof.rightChild !== '0x0000000000000000000000000000000000000000'
+            const hasBothChildren = Boolean(hasLeft && hasRight)
+
+            const isRoot = addr.toLowerCase() === rootLower
+            let rankName = 'Member'
+            if (isRoot) {
+              rankName = 'Leader' // Root completed Leader (4 Starters) and entered Achiever
+            } else if (currentRank >= 3) {
+              rankName = RANK_NAMES[currentRank] || 'Achiever'
+            } else if (hasBothChildren) {
+              rankName = 'Starter'
+            }
+
             return {
               id: index + 1,
+              memberId,
+              memberIdRaw,
               address: addr,
               wallet: addr,
               sponsor: prof.sponsor || '0x0000000000000000000000000000000000000000',
-              binaryParent: prof.binaryParent || '0x0000000000000000000000000000000000000000',
+              binaryParent: prof.binaryParent || prof.parent || '0x0000000000000000000000000000000000000000',
+              leftChild: prof.leftChild || '0x0000000000000000000000000000000000000000',
+              rightChild: prof.rightChild || '0x0000000000000000000000000000000000000000',
+              hasBothChildren,
               position: Number(prof.position || 1),
               active: isReg,
               status: isReg ? 'ACTIVE' : 'INACTIVE',
@@ -218,7 +253,7 @@ export function useAdminMembers() {
               investment: isReg ? 50 : 0,
               currentRank,
               rank: currentRank,
-              rankName: RANK_NAMES[currentRank] || 'Starter',
+              rankName,
               directCount,
               leftDirectCount: Number(prof.leftDirectCount || 0n),
               rightDirectCount: Number(prof.rightDirectCount || 0n),
@@ -261,7 +296,7 @@ export function useAdminMembers() {
               investment: addr.toLowerCase() === rootLower ? 50 : 0,
               currentRank: 1,
               rank: 1,
-              rankName: 'Starter',
+              rankName: 'Member',
               directCount: 0,
               leftDirectCount: 0,
               rightDirectCount: 0,

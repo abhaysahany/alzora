@@ -17,6 +17,7 @@ import { ReferralPage } from './pages/ReferralPage'
 import { TeamPage } from './pages/TeamPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { TreePage } from './pages/TreePage'
+import { AffiliateMatrixPage } from './pages/AffiliateMatrixPage'
 import { WithdrawalPage } from './pages/WithdrawalPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminProtectedRoute } from './components/AdminProtectedRoute'
@@ -28,6 +29,8 @@ import { AdminWithdrawalsPage } from './pages/admin/AdminWithdrawalsPage'
 import { AdminTransactionsPage } from './pages/admin/AdminTransactionsPage'
 import { AdminControlsPage } from './pages/admin/AdminControlsPage'
 import { AdminTreePage } from './pages/admin/AdminTreePage'
+import { AdminAffiliateMatrixPage } from './pages/admin/AdminAffiliateMatrixPage'
+import { AdminUserLookupPage } from './pages/admin/AdminUserLookupPage'
 import { ReferralListener } from './components/ReferralListener'
 import { PlanExplainerPage } from './pages/PlanExplainerPage'
 import { SentinelGuardChat } from './components/SentinelGuardChat'
@@ -136,6 +139,14 @@ export default function App() {
           }
         />
         <Route
+          path="/affiliate-matrix"
+          element={
+            <ProtectedRoute>
+              <AffiliateMatrixPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/withdrawal"
           element={<Navigate to="/dashboard" replace />}
         />
@@ -162,10 +173,34 @@ export default function App() {
           }
         />
         <Route
+          path="/admin/lookup"
+          element={
+            <AdminProtectedRoute>
+              <AdminUserLookupPage />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/user-lookup"
+          element={
+            <AdminProtectedRoute>
+              <AdminUserLookupPage />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/tree"
           element={
             <AdminProtectedRoute>
               <AdminTreePage />
+            </AdminProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/affiliate-matrix"
+          element={
+            <AdminProtectedRoute>
+              <AdminAffiliateMatrixPage />
             </AdminProtectedRoute>
           }
         />

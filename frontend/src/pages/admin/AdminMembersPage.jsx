@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { AdminLayout } from '../../components/AdminLayout'
 import { useAdminMembers } from '../../hooks/useAdminMembers'
 import {
@@ -79,8 +80,9 @@ export function AdminMembersPage() {
         const matchWallet = m.wallet.toLowerCase().includes(term)
         const matchSponsor = m.sponsor.toLowerCase().includes(term)
         const matchId = `#${m.id}`.includes(term) || `${m.id}` === term
+        const matchMemberId = Boolean(m.memberId && m.memberId.toLowerCase().includes(term))
         const matchPackage = m.packageName.toLowerCase().includes(term)
-        return matchWallet || matchSponsor || matchId || matchPackage
+        return matchWallet || matchSponsor || matchId || matchMemberId || matchPackage
       })
       .sort((a, b) => {
         if (sortBy === 'id-asc') return a.id - b.id
@@ -105,9 +107,10 @@ export function AdminMembersPage() {
   // CSV Export helper
   const handleExportCSV = () => {
     if (members.length === 0) return
-    const headers = ['ID', 'Wallet Address', 'Sponsor Address', 'Status', 'Package', 'Investment USD', 'Total Income USD', 'Remaining Cap USD', 'Directs', 'Team Volume USD', 'Rank', 'Registration Date']
+    const headers = ['ID', 'Member ID', 'Wallet Address', 'Sponsor Address', 'Status', 'Package', 'Investment USD', 'Total Income USD', 'Remaining Cap USD', 'Directs', 'Team Volume USD', 'Rank', 'Registration Date']
     const rows = members.map((m) => [
       m.id,
+      m.memberId || '',
       m.wallet,
       m.sponsor,
       m.status,
@@ -719,6 +722,27 @@ export function AdminMembersPage() {
                                 <ExternalLink size={13} />
                               </a>
                             </div>
+                            {m.memberId && (
+                              <div style={{ marginTop: 2 }}>
+                                <span
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    padding: '1px 6px',
+                                    borderRadius: 4,
+                                    fontSize: '0.72rem',
+                                    fontWeight: 800,
+                                    fontFamily: 'monospace',
+                                    background: 'rgba(234, 179, 8, 0.15)',
+                                    border: '1px solid rgba(234, 179, 8, 0.35)',
+                                    color: '#facc15',
+                                    letterSpacing: '0.04em',
+                                  }}
+                                >
+                                  🆔 {m.memberId}
+                                </span>
+                              </div>
+                            )}
                             {m.isRoot && (
                               <span style={{ fontSize: '0.72rem', color: '#ffd700', fontWeight: 700 }}>
                                 👑 Root Node
@@ -870,23 +894,46 @@ export function AdminMembersPage() {
 
                       {/* ACTIONS */}
                       <td style={{ padding: '14px', textAlign: 'right' }}>
-                        <button
-                          onClick={() => handleOpenDetails(m)}
-                          className="btn btn-ghost"
-                          style={{
-                            padding: '6px 12px',
-                            fontSize: '0.8rem',
-                            borderRadius: 10,
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 6,
-                            border: '1px solid rgba(255,255,255,0.12)',
-                          }}
-                        >
-                          <Eye size={13} />
-                          <span>Inspect</span>
-                        </button>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                          <Link
+                            to={`/admin/lookup?id=${m.wallet}`}
+                            className="btn btn-ghost"
+                            style={{
+                              padding: '6px 12px',
+                              fontSize: '0.8rem',
+                              borderRadius: 10,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              border: '1px solid rgba(56, 189, 248, 0.35)',
+                              background: 'rgba(56, 189, 248, 0.1)',
+                              color: '#38bdf8',
+                              textDecoration: 'none',
+                            }}
+                          >
+                            <Search size={13} />
+                            <span>Lookup</span>
+                          </Link>
+
+                          <button
+                            onClick={() => handleOpenDetails(m)}
+                            className="btn btn-ghost"
+                            style={{
+                              padding: '6px 12px',
+                              fontSize: '0.8rem',
+                              borderRadius: 10,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 6,
+                              border: '1px solid rgba(255,255,255,0.12)',
+                            }}
+                          >
+                            <Eye size={13} />
+                            <span>Inspect</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -1098,6 +1145,23 @@ export function AdminMembersPage() {
                   >
                     {selectedMember.status}
                   </span>
+                  {selectedMember.memberId && (
+                    <span
+                      style={{
+                        padding: '3px 10px',
+                        borderRadius: 20,
+                        fontSize: '0.74rem',
+                        fontWeight: 800,
+                        background: 'rgba(234, 179, 8, 0.18)',
+                        color: '#facc15',
+                        border: '1px solid rgba(234, 179, 8, 0.4)',
+                        fontFamily: 'monospace',
+                        letterSpacing: '0.04em',
+                      }}
+                    >
+                      🆔 {selectedMember.memberId}
+                    </span>
+                  )}
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: 2 }}>
                   Registered on {selectedMember.regTimeFormatted}
@@ -1268,6 +1332,14 @@ export function AdminMembersPage() {
                 </div>
               </div>
 
+              {/* BINARY MATCHING INCOME */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', padding: 14, borderRadius: 14 }}>
+                <div style={{ color: 'var(--muted)', fontSize: '0.74rem', textTransform: 'uppercase' }}>Binary Matching ($2/pr)</div>
+                <div style={{ fontWeight: 800, color: '#38bdf8', marginTop: 4 }}>
+                  ${Number(selectedMember.matchingIncome || 0).toFixed(2)} USDT <span style={{ fontSize: '0.75rem', color: '#c084fc' }}>({(Number(selectedMember.matchingIncome || 0) / 2).toFixed(0)} Pairs)</span>
+                </div>
+              </div>
+
               {/* DIRECTS BREAKDOWN */}
               <div style={{ background: 'rgba(255,255,255,0.03)', padding: 14, borderRadius: 14 }}>
                 <div style={{ color: 'var(--muted)', fontSize: '0.74rem', textTransform: 'uppercase' }}>Direct Referrals</div>
@@ -1349,6 +1421,72 @@ export function AdminMembersPage() {
                   ))}
                 </div>
               )}
+              {/* MODAL ACTION BAR */}
+              <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+                <Link
+                  to={`/admin/lookup?id=${selectedMember.wallet}`}
+                  style={{
+                    flex: 1,
+                    minWidth: 160,
+                    padding: '10px 16px',
+                    borderRadius: 12,
+                    background: 'linear-gradient(135deg, #0284c7, #06b6d4)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.84rem',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Search size={14} />
+                  <span>Deep User Lookup</span>
+                </Link>
+
+                <Link
+                  to={`/admin/tree?focus=${selectedMember.wallet}&tab=binary`}
+                  style={{
+                    flex: 1,
+                    minWidth: 160,
+                    padding: '10px 16px',
+                    borderRadius: 12,
+                    background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.84rem',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <span>Binary Tree</span>
+                </Link>
+
+                <Link
+                  to={`/admin/affiliate-matrix?focus=${selectedMember.wallet}`}
+                  style={{
+                    flex: 1,
+                    minWidth: 160,
+                    padding: '10px 16px',
+                    borderRadius: 12,
+                    background: 'linear-gradient(135deg, #059669, #10b981)',
+                    color: '#fff',
+                    fontWeight: 800,
+                    fontSize: '0.84rem',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <span>Affiliate Matrix</span>
+                </Link>
+              </div>
             </div>
           </div>
         </div>

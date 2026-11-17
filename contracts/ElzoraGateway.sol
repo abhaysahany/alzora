@@ -401,6 +401,14 @@ contract ElzoraGateway {
         return _elzoraMain.getNextGlobalMatrixPlacement();
     }
 
+    function findVacantBinaryPlacement(address startNode, IElzora.BinaryPosition side) external view returns (address parent, IElzora.BinaryPosition position) {
+        return _elzoraMain.findVacantBinaryPlacement(startNode, side);
+    }
+
+    function pendingIncomeDeduction(address user) external view returns (uint256) {
+        return _elzoraMain.pendingIncomeDeduction(user);
+    }
+
     // 4. Club Ranks (Starter to Legend)
     function clubRanks(uint256 index) external view returns (
         string memory name,
@@ -513,5 +521,14 @@ contract ElzoraGateway {
 
     function getCurrentMonthEpoch() external view returns (uint256) {
         return _elzoraMain.getCurrentMonthEpoch();
+    }
+
+    // 8. Member ID Resolution (Option 1: e.g. ELZ12457 stored as uint256 12457)
+    function getMemberId(address user) external view returns (uint256) {
+        return _elzoraMain.getMemberId(user);
+    }
+
+    function getAddressByMemberId(uint256 memberId) external view returns (address) {
+        return _elzoraMain.getAddressByMemberId(memberId);
     }
 }

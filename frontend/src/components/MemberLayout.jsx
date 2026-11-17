@@ -16,6 +16,7 @@ import {
   Share2,
   Receipt,
   GitCommit,
+  Network,
   LogOut,
   Menu,
   X,
@@ -97,6 +98,7 @@ export function MemberLayout({ children, pageTitle = 'Dashboard' }) {
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/tree', label: 'Sponsor Tree & Directs', icon: GitCommit },
+    { path: '/affiliate-matrix', label: 'Affiliate Matrix (20L)', icon: Network },
     { path: '/ranks', label: '8 Club Ranks', icon: Award },
     { path: '/packages', label: 'Single Leg / Global ($25)', icon: RefreshCw },
     { path: '/history', label: 'Transaction History', icon: History },

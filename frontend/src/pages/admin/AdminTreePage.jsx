@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AdminLayout } from '../../components/AdminLayout'
 import { useWalletAuth } from '../../hooks/useWalletAuth'
+import { useAdminMembers } from '../../hooks/useAdminMembers'
 import { useChainId } from 'wagmi'
-import { createPublicClient, http as viemHttp, isAddress } from 'viem'
+import { createPublicClient, http as viemHttp, isAddress, getAddress } from 'viem'
 import { bsc, bscTestnet } from 'viem/chains'
 import {
   getContractAddresses,
@@ -32,16 +34,21 @@ import {
   Network,
   FolderPlus,
   FolderMinus,
+  Trophy,
 } from 'lucide-react'
+import { TreeZoomControls } from '../../components/TreeZoomControls'
+import { CascadingClubMatrixView } from '../../components/CascadingClubMatrixView'
+import { AffiliateMatrixGenealogy } from '../../components/AffiliateMatrixGenealogy'
 
 const CLUB_RANKS = {
+  0: 'Member',
   1: 'Starter',
-  2: 'Bronze Club',
-  3: 'Silver Club',
-  4: 'Gold Club',
-  5: 'Platinum Club',
-  6: 'Diamond Club',
-  7: 'Crown Diamond',
+  2: 'Leader',
+  3: 'Achiever',
+  4: 'Mentor',
+  5: 'Director',
+  6: 'Elite',
+  7: 'Crown',
   8: 'Legend',
 }
 
@@ -58,6 +65,11 @@ const RANK_BADGE_COLORS = {
 }
 
 export function AdminTreePage() {
+  const [searchParams] = useSearchParams()
+  const initialFocusParam = searchParams.get('focus') || searchParams.get('address') || searchParams.get('id')
+  const initialTabParam = searchParams.get('tab')
+
+  const { members = [] } = useAdminMembers()
   const chainId = useChainId()
   const activeChainId = Number(chainId) === 56 ? 56 : 97
   const activeChain = activeChainId === 97 ? bscTestnet : bsc
@@ -65,9 +77,12 @@ export function AdminTreePage() {
   const CONTRACT_ADDRESSES = getContractAddresses(activeChainId)
   const rootAddress = CONTRACT_ADDRESSES.ROOT_ID || '0x23cC13FF391bBcbF573467138d5DF4D9174B64Eb'
 
-  const [activeTab, setActiveTab] = useState('binary') // 'binary', 'sponsor', or 'single_leg'
-  const [focusAddress, setFocusAddress] = useState(rootAddress)
+  const [activeTab, setActiveTab] = useState(initialTabParam || 'binary') // 'binary', 'sponsor', 'single_leg', 'affiliate', or 'club_matrix'
+  const [binaryZoom, setBinaryZoom] = useState(1)
+  const [sponsorZoom, setSponsorZoom] = useState(1)
+  const [focusAddress, setFocusAddress] = useState(initialFocusParam && /^0x[a-fA-F0-9]{40}$/i.test(initialFocusParam) ? initialFocusParam : rootAddress)
   const [searchInput, setSearchInput] = useState('')
+  const [searchError, setSearchError] = useState(null)
   const [copiedAddr, setCopiedAddr] = useState(null)
   const [loading, setLoading] = useState(false)
   const [maxDepth, setMaxDepth] = useState(4) // default 4 levels for binary tree
@@ -78,8 +93,9 @@ export function AdminTreePage() {
   const [levelCounts, setLevelCounts] = useState({ left: 0, right: 0, total: 0 })
 
   // Sponsor Tree (Genealogy / Directs) State
-  const [sponsorFocusAddress, setSponsorFocusAddress] = useState(rootAddress)
+  const [sponsorFocusAddress, setSponsorFocusAddress] = useState(initialFocusParam && /^0x[a-fA-F0-9]{40}$/i.test(initialFocusParam) ? initialFocusParam : rootAddress)
   const [sponsorSearchInput, setSponsorSearchInput] = useState('')
+  const [sponsorSearchError, setSponsorSearchError] = useState(null)
   const [sponsorLoading, setSponsorLoading] = useState(false)
   const [sponsorMaxDepth, setSponsorMaxDepth] = useState(5)
   const [sponsorExpandedNodes, setSponsorExpandedNodes] = useState({})
@@ -144,7 +160,13 @@ export function AdminTreePage() {
   // Load Binary Tree BFS starting from focusAddress
   const loadBinaryTree = useCallback(
     async (startAddr = focusAddress) => {
-      if (!startAddr || !isAddress(startAddr)) return
+      if (!startAddr) return
+      let cleanAddr = startAddr.trim()
+      if (/^0x[a-fA-F0-9]{40}$/i.test(cleanAddr)) {
+        try { cleanAddr = getAddress(cleanAddr) } catch {}
+      } else {
+        return
+      }
       setLoading(true)
 
       try {
@@ -154,7 +176,7 @@ export function AdminTreePage() {
         })
 
         const visited = new Set()
-        const queue = [{ address: startAddr, depth: 0 }]
+        const queue = [{ address: cleanAddr, depth: 0 }]
         const newNodesMap = {}
         const defaultExpanded = {}
 
@@ -269,6 +291,12 @@ export function AdminTreePage() {
   const loadSponsorGenealogy = useCallback(
     async (rootAddr = sponsorFocusAddress, targetDepth = sponsorMaxDepth) => {
       if (!rootAddr || !CONTRACT_ADDRESSES.GATEWAY) return
+      let cleanRoot = rootAddr.trim()
+      if (/^0x[a-fA-F0-9]{40}$/i.test(cleanRoot)) {
+        try { cleanRoot = getAddress(cleanRoot) } catch {}
+      } else {
+        return
+      }
       setSponsorLoading(true)
 
       try {
@@ -392,10 +420,77 @@ export function AdminTreePage() {
     }
   }, [activeTab, loadSingleLegData])
 
-  const handleSearch = (e) => {
+  // Helper to safely resolve a user address from query (0x address, Member ID, etc.)
+  const resolveUserAddress = useCallback(
+    async (inputStr) => {
+      if (!inputStr) return null
+      const raw = inputStr.trim()
+      const q = raw.toLowerCase()
+
+      // 1. Check in loaded members array
+      if (Array.isArray(members) && members.length > 0) {
+        const matched = members.find(
+          (m) =>
+            m.wallet?.toLowerCase() === q ||
+            m.address?.toLowerCase() === q ||
+            (m.memberId && m.memberId.toLowerCase() === q) ||
+            (m.memberIdRaw && String(m.memberIdRaw) === q) ||
+            `elz${m.memberIdRaw}` === q ||
+            `#${m.memberIdRaw}` === q ||
+            `#${m.id}` === q ||
+            String(m.id) === q
+        )
+        if (matched) {
+          const addr = matched.wallet || matched.address
+          try { return getAddress(addr) } catch { return addr }
+        }
+      }
+
+      // 2. Check if valid 40-hex char 0x address
+      if (/^0x[a-fA-F0-9]{40}$/i.test(raw)) {
+        try {
+          return getAddress(raw)
+        } catch {
+          return raw
+        }
+      }
+
+      // 3. Check if numeric or ELZ Member ID on chain
+      const numStr = raw.replace(/^#|^elz/i, '').trim()
+      if (/^\d+$/.test(numStr)) {
+        try {
+          const client = createPublicClient({ chain: activeChain, transport: viemHttp(rpcUrl) })
+          const resolved = await client.readContract({
+            address: CONTRACT_ADDRESSES.GATEWAY,
+            abi: ELZORA_GATEWAY_ABI,
+            functionName: 'getAddressByMemberId',
+            args: [BigInt(numStr)],
+          })
+          if (resolved && resolved !== '0x0000000000000000000000000000000000000000') {
+            try { return getAddress(resolved) } catch { return resolved }
+          }
+        } catch (err) {
+          console.warn('Failed to resolve member ID on chain:', err)
+        }
+      }
+
+      return null
+    },
+    [members, activeChain, rpcUrl, CONTRACT_ADDRESSES.GATEWAY]
+  )
+
+  const handleSearch = async (e) => {
     e.preventDefault()
-    if (!searchInput || !isAddress(searchInput)) return
-    setFocusAddress(searchInput)
+    setSearchError(null)
+    if (!searchInput.trim()) return
+
+    const target = await resolveUserAddress(searchInput)
+    if (target) {
+      setFocusAddress(target)
+      loadBinaryTree(target)
+    } else {
+      setSearchError(`No member found for "${searchInput.trim()}". Please enter a valid 0x wallet address or Member ID.`)
+    }
   }
 
   const toggleNode = (addr, e) => {
@@ -407,12 +502,51 @@ export function AdminTreePage() {
     }))
   }
 
-  const handleSponsorSearch = (e) => {
+  const expandAllNodes = () => {
+    const all = {}
+    Object.keys(binaryNodesMap).forEach((k) => {
+      all[k] = true
+    })
+    setExpandedNodes(all)
+  }
+
+  const collapseAllNodes = () => {
+    const rootKey = focusAddress?.toLowerCase()
+    setExpandedNodes(rootKey ? { [rootKey]: true } : {})
+  }
+
+  const expandToDepth = (targetLvl) => {
+    const all = {}
+    const visited = new Set()
+    const queue = [{ addr: focusAddress?.toLowerCase(), depth: 0 }]
+    while (queue.length > 0) {
+      const item = queue.shift()
+      if (!item || !item.addr || visited.has(item.addr)) continue
+      visited.add(item.addr)
+      if (item.depth < targetLvl - 1) {
+        all[item.addr] = true
+        const node = binaryNodesMap[item.addr]
+        if (node?.leftChild) queue.push({ addr: node.leftChild.toLowerCase(), depth: item.depth + 1 })
+        if (node?.rightChild) queue.push({ addr: node.rightChild.toLowerCase(), depth: item.depth + 1 })
+      }
+    }
+    setExpandedNodes(all)
+  }
+
+  const handleSponsorSearch = async (e) => {
     e.preventDefault()
-    if (!sponsorSearchInput || !isAddress(sponsorSearchInput)) return
-    setSponsorBreadcrumbs((prev) => [...prev, sponsorFocusAddress])
-    setSponsorFocusAddress(sponsorSearchInput.trim())
-    setSponsorSearchInput('')
+    setSponsorSearchError(null)
+    if (!sponsorSearchInput.trim()) return
+
+    const target = await resolveUserAddress(sponsorSearchInput)
+    if (target) {
+      setSponsorBreadcrumbs((prev) => [...prev, sponsorFocusAddress])
+      setSponsorFocusAddress(target)
+      loadSponsorGenealogy(target)
+      setSponsorSearchInput('')
+    } else {
+      setSponsorSearchError(`No member found for "${sponsorSearchInput.trim()}". Please enter a valid 0x wallet address or Member ID.`)
+    }
   }
 
   const handleSponsorDrillDown = (memberAddr) => {
@@ -692,21 +826,40 @@ export function AdminTreePage() {
   // Recursive Binary Tree Node Component
   const renderBinaryNode = (addr, positionLabel = 'ROOT', depth = 0) => {
     if (!addr) {
+      const posColor = positionLabel === 'LEFT' ? '#38bdf8' : positionLabel === 'RIGHT' ? '#a855f7' : '#ffd700'
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.4, margin: '8px 12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 6px' }}>
           <div
             style={{
-              padding: '10px 18px',
-              borderRadius: 14,
-              border: '1px dashed rgba(255, 255, 255, 0.15)',
+              minWidth: 200,
+              maxWidth: 240,
+              width: 220,
+              padding: '16px 14px',
+              borderRadius: 16,
+              border: `1px dashed ${posColor}55`,
               background: 'rgba(255, 255, 255, 0.02)',
-              fontSize: '0.75rem',
-              color: 'var(--muted)',
               textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 6,
+              opacity: 0.55,
             }}
           >
-            <span style={{ fontWeight: 800 }}>{positionLabel}</span>
-            <div style={{ fontSize: '0.7rem', marginTop: 2 }}>[ Vacant Spot ]</div>
+            <span
+              style={{
+                fontSize: '0.68rem',
+                fontWeight: 900,
+                color: posColor,
+                background: `${posColor}18`,
+                padding: '2px 8px',
+                borderRadius: 10,
+              }}
+            >
+              {positionLabel}
+            </span>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--muted)' }}>[ Vacant {positionLabel} ]</div>
+            <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)' }}>Available for placement</div>
           </div>
         </div>
       )
@@ -719,9 +872,10 @@ export function AdminTreePage() {
     const hasChildren = node && (node.leftChild || node.rightChild)
 
     const posColor = positionLabel === 'LEFT' ? '#38bdf8' : positionLabel === 'RIGHT' ? '#a855f7' : '#ffd700'
+    const rankStyle = RANK_BADGE_COLORS[node?.rankName] || RANK_BADGE_COLORS.Starter
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 10px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '8px 6px' }}>
         {/* Node Card */}
         <div
           className="glass-card"
@@ -756,9 +910,37 @@ export function AdminTreePage() {
             >
               {positionLabel}
             </span>
-            <span style={{ fontSize: '0.72rem', color: '#ffd700', fontWeight: 800 }}>
-              {node?.rankName || 'Starter'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span
+                style={{
+                  fontSize: '0.7rem',
+                  fontWeight: 800,
+                  color: rankStyle.text,
+                  background: rankStyle.bg,
+                  border: `1px solid ${rankStyle.border}`,
+                  padding: '2px 8px',
+                  borderRadius: 8,
+                }}
+              >
+                {node?.rankName || 'Starter'}
+              </span>
+              {node && (Number(node.currentRank || 0) >= 2 || node.rankName === 'Starter') && (
+                <span
+                  title={Number(node.directCount || 0) >= 2 ? 'Directly Qualified Starter' : 'Achieved Starter via Team Spillover'}
+                  style={{
+                    fontSize: '0.62rem',
+                    fontWeight: 800,
+                    padding: '2px 6px',
+                    borderRadius: 6,
+                    background: Number(node.directCount || 0) >= 2 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(168, 85, 247, 0.2)',
+                    color: Number(node.directCount || 0) >= 2 ? '#4ade80' : '#c084fc',
+                    border: `1px solid ${Number(node.directCount || 0) >= 2 ? 'rgba(34, 197, 94, 0.4)' : 'rgba(168, 85, 247, 0.4)'}`,
+                  }}
+                >
+                  {Number(node.directCount || 0) >= 2 ? '⭐ Direct' : '⚡ Spillover'}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Address */}
@@ -824,25 +1006,47 @@ export function AdminTreePage() {
           )}
         </div>
 
-        {/* Binary Children: Left & Right */}
+        {/* Binary Children: Left & Right Symmetrical Matrix Branches */}
         {hasChildren && isExpanded && depth < maxDepth && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-            {/* Connector Line */}
-            <div style={{ width: 2, height: 16, background: 'rgba(139, 92, 246, 0.4)' }} />
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 24, position: 'relative' }}>
-              {/* Branch connecting bar */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: '25%',
-                  right: '25%',
-                  height: 2,
-                  background: 'rgba(139, 92, 246, 0.4)',
-                }}
-              />
-              {renderBinaryNode(node.leftChild, 'LEFT', depth + 1)}
-              {renderBinaryNode(node.rightChild, 'RIGHT', depth + 1)}
+            {/* Vertical stem from parent */}
+            <div style={{ width: 2, height: 18, background: 'rgba(139, 92, 246, 0.5)' }} />
+
+            {/* Matrix Dual-Branch Row */}
+            <div style={{ display: 'flex', width: '100%', minWidth: 'max-content' }}>
+              {/* LEFT BRANCH (50% width) */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 4px' }}>
+                <div style={{ width: '100%', display: 'flex', height: 16 }}>
+                  <div style={{ flex: 1 }} />
+                  <div
+                    style={{
+                      width: '50%',
+                      borderTop: '2px solid rgba(139, 92, 246, 0.5)',
+                      borderLeft: '2px solid rgba(139, 92, 246, 0.5)',
+                      height: '100%',
+                      borderTopLeftRadius: 6,
+                    }}
+                  />
+                </div>
+                {renderBinaryNode(node.leftChild, 'LEFT', depth + 1)}
+              </div>
+
+              {/* RIGHT BRANCH (50% width) */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 4px' }}>
+                <div style={{ width: '100%', display: 'flex', height: 16 }}>
+                  <div
+                    style={{
+                      width: '50%',
+                      borderTop: '2px solid rgba(139, 92, 246, 0.5)',
+                      borderRight: '2px solid rgba(139, 92, 246, 0.5)',
+                      height: '100%',
+                      borderTopRightRadius: 6,
+                    }}
+                  />
+                  <div style={{ flex: 1 }} />
+                </div>
+                {renderBinaryNode(node.rightChild, 'RIGHT', depth + 1)}
+              </div>
             </div>
           </div>
         )}
@@ -922,6 +1126,25 @@ export function AdminTreePage() {
               </button>
 
               <button
+                onClick={() => setActiveTab('affiliate')}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: activeTab === 'affiliate' ? 'linear-gradient(135deg, #06b6d4, #3b82f6)' : 'transparent',
+                  color: activeTab === 'affiliate' ? '#fff' : 'var(--muted)',
+                  fontWeight: 800,
+                  fontSize: '0.86rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Network size={16} /> Affiliate Matrix (20L)
+              </button>
+
+              <button
                 onClick={() => setActiveTab('sponsor')}
                 style={{
                   padding: '10px 20px',
@@ -937,7 +1160,7 @@ export function AdminTreePage() {
                   gap: 8,
                 }}
               >
-                <Network size={16} /> Sponsor Lineage Tree (Directs)
+                <Users size={16} /> Sponsor Lineage Tree (Directs)
               </button>
 
               <button
@@ -957,6 +1180,25 @@ export function AdminTreePage() {
                 }}
               >
                 <GitFork size={16} /> Single Leg Global Club ($25)
+              </button>
+
+              <button
+                onClick={() => setActiveTab('club_matrix')}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: activeTab === 'club_matrix' ? 'linear-gradient(135deg, #f59e0b, #d946ef)' : 'transparent',
+                  color: activeTab === 'club_matrix' ? '#fff' : 'var(--muted)',
+                  fontWeight: 800,
+                  fontSize: '0.86rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Trophy size={16} /> 8 Cascading Club Matrices
               </button>
             </div>
           </div>
@@ -984,7 +1226,7 @@ export function AdminTreePage() {
                   <Search size={16} color="var(--muted)" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }} />
                   <input
                     type="text"
-                    placeholder="Search any 0x... wallet address to inspect subtree"
+                    placeholder="Search any 0x... wallet address or Member ID to inspect subtree"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     style={{
@@ -1016,9 +1258,33 @@ export function AdminTreePage() {
                 </button>
               </form>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <Link
+                  to={`/admin/lookup?id=${focusAddress}`}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(56, 189, 248, 0.35)',
+                    background: 'rgba(56, 189, 248, 0.12)',
+                    color: '#38bdf8',
+                    fontWeight: 800,
+                    fontSize: '0.82rem',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Search size={14} />
+                  <span>Deep Lookup User</span>
+                </Link>
+
                 <button
-                  onClick={() => setFocusAddress(rootAddress)}
+                  onClick={() => {
+                    setSearchError(null)
+                    setFocusAddress(rootAddress)
+                    loadBinaryTree(rootAddress)
+                  }}
                   style={{
                     padding: '10px 16px',
                     borderRadius: 12,
@@ -1056,6 +1322,24 @@ export function AdminTreePage() {
               </div>
             </div>
 
+            {searchError && (
+              <div
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  color: '#fca5a5',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <span>⚠️ {searchError}</span>
+              </div>
+            )}
+
             {/* FOCUS NODE STATS PILLS */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
               <div className="glass-card" style={{ padding: 18, borderRadius: 16, background: 'rgba(11, 15, 36, 0.85)', border: '1px solid rgba(251, 191, 36, 0.25)' }}>
@@ -1066,6 +1350,26 @@ export function AdminTreePage() {
                 <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: 4 }}>
                   {focusAddress.toLowerCase() === rootAddress.toLowerCase() ? 'System 1st ID (Master Root)' : 'Downline Sub-Root'}
                 </div>
+                <Link
+                  to={`/admin/lookup?id=${focusAddress}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 5,
+                    marginTop: 8,
+                    padding: '4px 10px',
+                    borderRadius: 8,
+                    background: 'rgba(56, 189, 248, 0.15)',
+                    border: '1px solid rgba(56, 189, 248, 0.3)',
+                    color: '#38bdf8',
+                    fontSize: '0.72rem',
+                    fontWeight: 800,
+                    textDecoration: 'none',
+                  }}
+                >
+                  <Search size={11} />
+                  <span>Deep Lookup Member</span>
+                </Link>
               </div>
 
               <div className="glass-card" style={{ padding: 18, borderRadius: 16, background: 'rgba(11, 15, 36, 0.85)', border: '1px solid rgba(56, 189, 248, 0.25)' }}>
@@ -1097,24 +1401,128 @@ export function AdminTreePage() {
             <div
               className="glass-card"
               style={{
-                padding: 36,
+                padding: '24px 20px',
                 borderRadius: 24,
                 background: 'rgba(11, 15, 36, 0.85)',
-                minHeight: 460,
+                minHeight: 520,
                 overflowX: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                overflowY: 'auto',
+                position: 'relative',
               }}
             >
+              {/* Floating Toolbar: Depth + Expand All + Collapse All + Zoom Controls */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: 12,
+                  marginBottom: 20,
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 20,
+                  background: 'rgba(11, 15, 36, 0.95)',
+                  padding: '10px 16px',
+                  borderRadius: 16,
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  backdropFilter: 'blur(10px)',
+                }}
+              >
+                {/* Depth & Expansion Actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--muted)', fontWeight: 700 }}>Depth:</span>
+                  {[2, 3, 4, 5].map((lvl) => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => {
+                        setMaxDepth(lvl)
+                        expandToDepth(lvl)
+                      }}
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: 8,
+                        fontSize: '0.76rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        border: maxDepth === lvl ? '1px solid #7c3aed' : '1px solid rgba(255,255,255,0.1)',
+                        background: maxDepth === lvl ? 'rgba(124, 58, 237, 0.3)' : 'rgba(255,255,255,0.04)',
+                        color: maxDepth === lvl ? '#fff' : 'var(--muted)',
+                      }}
+                    >
+                      {lvl} Levels
+                    </button>
+                  ))}
+
+                  <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />
+
+                  <button
+                    type="button"
+                    onClick={expandAllNodes}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: 8,
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Expand All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={collapseAllNodes}
+                    style={{
+                      padding: '4px 10px',
+                      borderRadius: 8,
+                      fontSize: '0.74rem',
+                      fontWeight: 700,
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: 'var(--muted)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Collapse All
+                  </button>
+                </div>
+
+                {/* Tree Zoom Controls */}
+                <TreeZoomControls zoom={binaryZoom} setZoom={setBinaryZoom} min={0.3} max={1.6} step={0.1} />
+              </div>
+
               {loading ? (
                 <div style={{ padding: 80, textAlign: 'center', color: 'var(--cyan)' }}>
                   <RefreshCw size={36} className="spin" style={{ margin: '0 auto 16px' }} />
                   <div style={{ fontWeight: 700 }}>Traversing Blockchain Binary Tree from 1st ID...</div>
                 </div>
               ) : (
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                  {renderBinaryNode(focusAddress, 'ROOT', 0)}
+                <div
+                  style={{
+                    width: '100%',
+                    overflowX: 'auto',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    padding: '10px 20px 40px',
+                  }}
+                >
+                  <div
+                    style={{
+                      transform: `scale(${binaryZoom})`,
+                      transformOrigin: 'top center',
+                      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      minWidth: 'max-content',
+                      display: 'inline-flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {renderBinaryNode(focusAddress, 'ROOT', 0)}
+                  </div>
                 </div>
               )}
             </div>
@@ -1175,11 +1583,33 @@ export function AdminTreePage() {
                 </button>
               </form>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                <Link
+                  to={`/admin/lookup?id=${sponsorFocusAddress}`}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: 12,
+                    border: '1px solid rgba(236, 72, 153, 0.4)',
+                    background: 'rgba(236, 72, 153, 0.12)',
+                    color: '#f472b6',
+                    fontWeight: 800,
+                    fontSize: '0.82rem',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                  }}
+                >
+                  <Search size={14} />
+                  <span>Deep Lookup User</span>
+                </Link>
+
                 <button
                   onClick={() => {
+                    setSponsorSearchError(null)
                     setSponsorBreadcrumbs([])
                     setSponsorFocusAddress(rootAddress)
+                    loadSponsorGenealogy(rootAddress)
                   }}
                   style={{
                     padding: '10px 16px',
@@ -1268,8 +1698,28 @@ export function AdminTreePage() {
                 >
                   <RefreshCw size={16} className={sponsorLoading ? 'spin' : ''} />
                 </button>
+
+                <TreeZoomControls zoom={sponsorZoom} setZoom={setSponsorZoom} min={0.3} max={1.6} step={0.1} />
               </div>
             </div>
+
+            {sponsorSearchError && (
+              <div
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: 12,
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  color: '#fca5a5',
+                  fontSize: '0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <span>⚠️ {sponsorSearchError}</span>
+              </div>
+            )}
 
             {/* BREADCRUMB NAVIGATION */}
             {sponsorBreadcrumbs.length > 0 && (
@@ -1318,14 +1768,13 @@ export function AdminTreePage() {
             <div
               className="glass-card"
               style={{
-                padding: 36,
+                padding: '24px 20px',
                 borderRadius: 24,
                 background: 'rgba(11, 15, 36, 0.85)',
-                minHeight: 460,
+                minHeight: 520,
                 overflowX: 'auto',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
+                overflowY: 'auto',
+                position: 'relative',
               }}
             >
               {sponsorLoading ? (
@@ -1334,8 +1783,28 @@ export function AdminTreePage() {
                   <div style={{ fontWeight: 700 }}>Traversing Blockchain Sponsor Lineage & Directs...</div>
                 </div>
               ) : (
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                  {renderSponsorNode(sponsorFocusAddress, 0)}
+                <div
+                  style={{
+                    width: '100%',
+                    overflowX: 'auto',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    padding: '10px 20px 40px',
+                  }}
+                >
+                  <div
+                    style={{
+                      transform: `scale(${sponsorZoom})`,
+                      transformOrigin: 'top center',
+                      transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      minWidth: 'max-content',
+                      display: 'inline-flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {renderSponsorNode(sponsorFocusAddress, 0)}
+                  </div>
                 </div>
               )}
             </div>
@@ -1526,6 +1995,30 @@ export function AdminTreePage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* TAB 4: AFFILIATE 20-LEVEL AUTO-MATRIX GENEALOGY */}
+        {activeTab === 'affiliate' && (
+          <div style={{ marginTop: 10 }}>
+            <AffiliateMatrixGenealogy
+              isAdmin={true}
+              userAddress={focusAddress || rootAddress}
+              embedded={true}
+            />
+          </div>
+        )}
+
+        {/* TAB 5: 8 CASCADING CLUB MATRICES EXPLORER */}
+        {activeTab === 'club_matrix' && (
+          <CascadingClubMatrixView
+            targetAddress={focusAddress || rootAddress}
+            title="8 Cascading Club Matrices (Admin Lineage Audit)"
+            isAdmin={true}
+            showSearch={true}
+            onSelectMember={(addr) => {
+              setFocusAddress(addr)
+            }}
+          />
         )}
 
       </div>

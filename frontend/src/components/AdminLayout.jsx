@@ -21,11 +21,14 @@ import {
   Activity,
   Wallet,
   GitCommit,
+  Network,
+  Search,
   Volume2,
 } from 'lucide-react'
 import { ConnectWalletButton } from './ConnectWalletButton'
 import { useWalletAuth } from '../hooks/useWalletAuth'
 import { useTetherStream } from '../hooks/useTetherStream'
+import { useChainId, useSwitchChain } from 'wagmi'
 import { CONTRACT_ADDRESSES } from '../web3/contracts'
 
 export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
@@ -34,6 +37,17 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
   const navigate = useNavigate()
   const { isConnected, logout, address } = useWalletAuth()
   const { isAdmin, isPendingOwner, contractPaused, memberInfo, overview } = useTetherStream()
+  const chainId = useChainId()
+  const { switchChain } = useSwitchChain()
+
+  const isMainnet = Number(chainId) === 56
+  const isTestnet = Number(chainId) === 97
+  const networkLabel = isMainnet
+    ? 'BSC Mainnet (Chain ID 56)'
+    : isTestnet
+    ? 'BSC Testnet (Chain ID 97)'
+    : `Unsupported Network (${chainId || 'Unknown'})`
+  const networkDotColor = isMainnet ? '#22c55e' : isTestnet ? '#f59e0b' : '#ef4444'
 
   useEffect(() => {
     if (!isConnected || isPendingOwner) {
@@ -44,7 +58,9 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
   const navItems = [
     { label: 'Overview', path: '/admin', icon: LayoutDashboard },
     { label: 'Members Audit', path: '/admin/members', icon: Users },
+    { label: 'User Deep Lookup', path: '/admin/lookup', icon: Search },
     { label: 'Genealogy & Trees', path: '/admin/tree', icon: GitCommit },
+    { label: 'Affiliate Matrix (20L)', path: '/admin/affiliate-matrix', icon: Network },
     { label: 'Packages & Tiers', path: '/admin/packages', icon: Package },
     { label: '8-Stream Income', path: '/admin/income', icon: BadgeDollarSign },
     { label: 'Live Transactions', path: '/admin/transactions', icon: Receipt },
@@ -283,22 +299,35 @@ export function AdminLayout({ children, pageTitle = 'Admin Portal' }) {
             {/* Live Network Badge (desktop) */}
             <div
               className="admin-network-badge"
+              onClick={() => {
+                if (!isMainnet && switchChain) {
+                  switchChain({ chainId: 56 })
+                }
+              }}
+              title={!isMainnet ? 'Click to switch to BSC Mainnet (Chain ID 56)' : 'Connected to BSC Mainnet'}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
                 padding: '6px 14px',
                 borderRadius: 20,
-                background: 'rgba(139, 92, 246, 0.12)',
-                border: '1px solid rgba(139, 92, 246, 0.25)',
+                background: isMainnet ? 'rgba(34, 197, 94, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                border: isMainnet ? '1px solid rgba(34, 197, 94, 0.35)' : '1px solid rgba(245, 158, 11, 0.35)',
                 fontSize: '0.8rem',
                 color: '#fff',
                 fontWeight: 700,
                 whiteSpace: 'nowrap',
+                cursor: !isMainnet ? 'pointer' : 'default',
+                transition: 'all 0.2s ease',
               }}
             >
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80' }} />
-              <span>BSC Testnet (Chain ID 97)</span>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: networkDotColor, boxShadow: `0 0 8px ${networkDotColor}` }} />
+              <span>{networkLabel}</span>
+              {!isMainnet && (
+                <span style={{ fontSize: '0.7rem', color: '#f59e0b', textDecoration: 'underline', marginLeft: 4 }}>
+                  Switch to Mainnet
+                </span>
+              )}
             </div>
 
             {contractPaused && (

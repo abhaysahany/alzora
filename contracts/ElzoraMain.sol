@@ -51,8 +51,13 @@ contract ElzoraMain is
     // Time constants
     uint256 public constant SECONDS_PER_DAY = 86400;
     uint256 public constant SECONDS_PER_WEEK = 7 * 86400;
-    // Sunday 00:00:00 UTC epoch anchor (Jan 4, 1970 was a Sunday)
-    uint256 public constant WEEK_EPOCH_ANCHOR = 259200; // Thursday Jan 1 1970 + 3 days = Sunday Jan 4 1970
+
+    bytes32 private constant REASON_NO_UPLINE = "No upline";
+    bytes32 private constant REASON_UPLINE_INACTIVE = "Upline inactive";
+    bytes32 private constant REASON_MISSING_DIRECTS = "Missing directs";
+    bytes32 private constant REASON_SPONSOR_INACTIVE = "Sponsor inactive";
+    bytes32 private constant REASON_NO_CHAMPION = "No Champion qualifiers";
+    bytes32 private constant REASON_NO_WEEKLY = "No Weekly qualifiers";
 
     // --- State Variables ---
     address public paymentToken;
@@ -134,6 +139,14 @@ contract ElzoraMain is
     address[] public globalMatrixUsers; // 1-indexed (index 0 is address(0))
     mapping(address => uint256) public userGlobalMatrixId;
 
+    // Random Member ID Mappings (Option 1: e.g. ELZ12457, stored as 5-digit uint256)
+    mapping(uint256 => address) public memberIdToAddress;
+    mapping(address => uint256) public addressToMemberId;
+    uint256 private _memberIdNonce;
+
+    // Provision for Overpaid Deductions (deducted from future earnings)
+    mapping(address => uint256) public pendingIncomeDeduction;
+
     // --- Modifiers ---
     modifier onlyAuthorized() {
         if (msg.sender != owner() && msg.sender != gatewayContract && !isAuthorizedGateway[msg.sender]) {
@@ -170,8 +183,6 @@ contract ElzoraMain is
         systemStartTime = block.timestamp;
 
         _updateTokenDecimals(initialPaymentToken);
-        _initializeClubRanks();
-        _initializeLifetimeMilestones();
         _initializeRootMember(initialRoot);
     }
 
@@ -183,10 +194,6 @@ contract ElzoraMain is
         uint8 dec = IERC20Metadata(token).decimals();
         tokenUnit = 10 ** dec;
     }
-
-    function _initializeClubRanks() internal {}
-
-    function _initializeLifetimeMilestones() internal {}
 
     function _initializeRootMember(address root) internal {
         UserProfile storage u = _users[root];
@@ -217,57 +224,8 @@ contract ElzoraMain is
      * @notice Initializes the Global 2xN Auto-Matrix with existing users.
      * @dev Only callable once by owner. Synchronizes binary tree pointers and level teams.
      */
-    function initializeGlobalMatrix(address[] calldata initialUsers) external onlyOwner {
-        if (globalMatrixUsers.length > 0) revert AlreadyInitialized();
-        if (initialUsers.length == 0) revert ZeroAddress();
-
-        globalMatrixUsers.push(address(0)); // 1-based indexing (0 is dummy)
-
-        for (uint256 i = 0; i < initialUsers.length; i++) {
-            address u = initialUsers[i];
-            if (u == address(0)) revert ZeroAddress();
-            globalMatrixUsers.push(u);
-            userGlobalMatrixId[u] = i + 1;
-        }
-
-        // Link parent-child pointers for complete 2xN binary tree
-        for (uint256 i = 1; i <= initialUsers.length; i++) {
-            address pAddr = initialUsers[i - 1];
-            uint256 leftIdx = 2 * i;
-            uint256 rightIdx = 2 * i + 1;
-
-            if (leftIdx <= initialUsers.length) {
-                address lAddr = initialUsers[leftIdx - 1];
-                _users[pAddr].leftChild = lAddr;
-                _users[lAddr].parent = pAddr;
-                _users[lAddr].position = BinaryPosition.Left;
-            } else {
-                _users[pAddr].leftChild = address(0);
-            }
-
-            if (rightIdx <= initialUsers.length) {
-                address rAddr = initialUsers[rightIdx - 1];
-                _users[pAddr].rightChild = rAddr;
-                _users[rAddr].parent = pAddr;
-                _users[rAddr].position = BinaryPosition.Right;
-            } else {
-                _users[pAddr].rightChild = address(0);
-            }
-        }
-
-        _users[initialUsers[0]].parent = address(0);
-        _users[initialUsers[0]].position = BinaryPosition.None;
-
-        // Calculate exact team counts from bottom to top
-        for (uint256 i = initialUsers.length; i >= 1; i--) {
-            address u = initialUsers[i - 1];
-            address l = _users[u].leftChild;
-            address r = _users[u].rightChild;
-            _users[u].leftTeamCount = (l == address(0)) ? 0 : 1 + _users[l].leftTeamCount + _users[l].rightTeamCount;
-            _users[u].rightTeamCount = (r == address(0)) ? 0 : 1 + _users[r].leftTeamCount + _users[r].rightTeamCount;
-        }
-
-        emit GlobalMatrixInitialized(initialUsers.length);
+    function initializeGlobalMatrix(address[] calldata) external pure {
+        revert AlreadyInitialized();
     }
 
     function register(
@@ -288,6 +246,15 @@ contract ElzoraMain is
         _register(user, sponsor, parent, position);
     }
 
+    function _generateMemberId(address user) internal returns (uint256) {
+        _memberIdNonce++;
+        uint256 randNum = (uint256(keccak256(abi.encodePacked(block.timestamp, user, _memberIdNonce))) % 90000) + 10000;
+        if (memberIdToAddress[randNum] == address(0)) {
+            return randNum;
+        }
+        return 10000 + totalUsers + _memberIdNonce;
+    }
+
     function _register(
         address user,
         address sponsor,
@@ -299,21 +266,26 @@ contract ElzoraMain is
         if (sponsor == user) revert CannotSponsorSelf();
         if (!_users[sponsor].isRegistered) revert SponsorNotActive();
 
-        // Model C: Global 2xN Auto-Matrix Placement
-        uint256 newId = globalMatrixUsers.length;
-        parent = globalMatrixUsers[newId / 2];
-        position = (newId % 2 == 0) ? BinaryPosition.Left : BinaryPosition.Right;
-        globalMatrixUsers.push(user);
-        userGlobalMatrixId[user] = newId;
-
-        UserProfile storage pNode = _users[parent];
-        if (position == BinaryPosition.Left) {
-            if (pNode.leftChild != address(0)) revert PositionAlreadyOccupied();
-            pNode.leftChild = user;
-        } else {
-            if (pNode.rightChild != address(0)) revert PositionAlreadyOccupied();
-            pNode.rightChild = user;
+        // 1. Resolve Binary Placement:
+        // Respect user's selected position (Left or Right)
+        BinaryPosition binaryPos = (position == BinaryPosition.Right) ? BinaryPosition.Right : BinaryPosition.Left;
+        address binaryParent = parent;
+        if (binaryParent == address(0) || !_users[binaryParent].isRegistered) {
+            binaryParent = sponsor;
         }
+
+        // Automatic Extreme Spillover on chosen leg if slot is occupied
+        (binaryParent, binaryPos) = findVacantBinaryPlacement(binaryParent, binaryPos);
+        if (binaryPos == BinaryPosition.Left) {
+            _users[binaryParent].leftChild = user;
+        } else {
+            _users[binaryParent].rightChild = user;
+        }
+
+        // 2. Independent Global 2xN Auto-Matrix Placement (for Affiliate Income & 8 Club Progression)
+        uint256 newGlobalId = globalMatrixUsers.length;
+        globalMatrixUsers.push(user);
+        userGlobalMatrixId[user] = newGlobalId;
 
         _checkCircularReferral(user, sponsor);
 
@@ -321,14 +293,20 @@ contract ElzoraMain is
         uint256 regFee = REGISTRATION_USD * tokenUnit;
         IERC20(paymentToken).safeTransferFrom(msg.sender, address(this), regFee);
 
-        // Initialize User Profile
+        // Initialize User Profile with Binary Tree hierarchy
         UserProfile storage u = _users[user];
         u.userAddress = user;
         u.sponsor = sponsor;
-        u.parent = parent;
-        u.position = position;
+        u.parent = binaryParent;
+        u.position = binaryPos;
         u.isRegistered = true;
         u.currentRank = 1; // Starter
+
+        // Assign random 5-digit Member ID (Option 1: e.g. ELZ12457)
+        uint256 mId = _generateMemberId(user);
+        memberIdToAddress[mId] = user;
+        addressToMemberId[user] = mId;
+        emit MemberIdAssigned(user, mId);
 
         totalUsers++;
         totalRegistrationVolume += regFee;
@@ -344,8 +322,8 @@ contract ElzoraMain is
         } else if (directSide == BinaryPosition.Right) {
             _users[sponsor].rightDirectCount++;
         } else {
-            // User placed outside direct subtree due to global auto-matrix
-            if (_users[sponsor].leftDirectCount <= _users[sponsor].rightDirectCount) {
+            // Direct side matches the chosen binary leg
+            if (binaryPos == BinaryPosition.Left) {
                 _users[sponsor].leftDirectCount++;
             } else {
                 _users[sponsor].rightDirectCount++;
@@ -376,10 +354,10 @@ contract ElzoraMain is
         }
 
         // Update Binary Tree Placement Hierarchy (Cumulative Counts & Carry Volumes)
-        _propagateBinaryPlacement(parent, position);
+        _propagateBinaryPlacement(binaryParent, binaryPos);
 
-        // Process Personal Team Club Progression for parent
-        _notifyTeamClubProgression(parent, 0);
+        // Process Personal Team Club Progression for personal binary parent (strictly personal team)
+        _notifyTeamClubProgression(binaryParent, 0);
 
         // Check and award Lifetime Milestones for sponsor (in case new direct qualifies sponsor)
         _checkAndAwardLifetimeMilestones(sponsor);
@@ -387,7 +365,7 @@ contract ElzoraMain is
         // Distribute 100% of the $50 registration across 7 streams
         _distributeRegistrationFunds(user, sponsor);
 
-        emit UserRegistered(user, sponsor, parent, position, block.timestamp);
+        emit UserRegistered(user, sponsor, binaryParent, binaryPos, block.timestamp);
     }
 
     // --- Placement & Hierarchy Traversal ---
@@ -423,7 +401,7 @@ contract ElzoraMain is
 
     function _determineDirectSide(address target, address sponsor) internal view returns (BinaryPosition) {
         address curr = target;
-        for (uint256 i = 0; i < 50; i++) {
+        for (uint256 i = 0; i < 150; i++) {
             if (curr == address(0)) break;
             address p = _users[curr].parent;
             if (p == sponsor) {
@@ -484,14 +462,14 @@ contract ElzoraMain is
 
             if (ancestorId == 0) {
                 // If upline doesn't exist in global matrix (above Root ID 1), send to Treasury
-                _sendMissedToTreasury(address(0), levelAmount, 2, "No upline");
+                _sendMissedToTreasury(address(0), levelAmount, 2, REASON_NO_UPLINE);
             } else {
                 address ancestorAddr = globalMatrixUsers[ancestorId];
                 if (_users[ancestorAddr].isRegistered) {
                     _creditIncome(ancestorAddr, levelAmount, 2);
                     emit AffiliateIncomePaid(ancestorAddr, user, lvl, levelAmount);
                 } else {
-                    _sendMissedToTreasury(ancestorAddr, levelAmount, 2, "Upline inactive");
+                    _sendMissedToTreasury(ancestorAddr, levelAmount, 2, REASON_UPLINE_INACTIVE);
                 }
                 ancestorId = ancestorId / 2;
             }
@@ -532,7 +510,7 @@ contract ElzoraMain is
                 emit MatchingIncomePaid(user, matchablePairs, matchAmount, u.leftCarryVolume, u.rightCarryVolume);
             } else {
                 // Missed Income goes directly to Treasury Wallet
-                _sendMissedToTreasury(user, matchAmount, 3, "Missing directs");
+                _sendMissedToTreasury(user, matchAmount, 3, REASON_MISSING_DIRECTS);
             }
         }
     }
@@ -565,7 +543,7 @@ contract ElzoraMain is
                 if (sponsor != address(0) && _users[sponsor].isRegistered) {
                     _creditIncome(sponsor, sponsorBonus, 4);
                 } else {
-                    _sendMissedToTreasury(sponsor, sponsorBonus, 4, "Sponsor inactive");
+                    _sendMissedToTreasury(sponsor, sponsorBonus, 4, REASON_SPONSOR_INACTIVE);
                 }
             }
 
@@ -577,12 +555,31 @@ contract ElzoraMain is
                 sponsorBonus
             );
 
-            // Promote to next rank: upline's parent receives credit for next rank
+            // Promote to next rank: credit flows to the target level upline ancestor
             if (rankIndex < 7) {
-                address nextUpline = _users[upline].parent;
+                address nextUpline = _getClubTargetUpline(upline, rankIndex + 1);
                 _notifyTeamClubProgression(nextUpline, rankIndex + 1);
             }
         }
+    }
+
+    function _getClubTargetUpline(address startUser, uint256 targetRankIndex) internal view returns (address) {
+        address curr = startUser;
+        uint256 requiredLevels = targetRankIndex + 1;
+
+        for (uint256 i = 0; i < requiredLevels; i++) {
+            address p = _users[curr].parent;
+            if (p == address(0)) {
+                return rootAddress;
+            }
+            curr = p;
+        }
+
+        while (curr != address(0) && userRankCompleted[curr][targetRankIndex]) {
+            curr = _users[curr].parent;
+        }
+
+        return curr != address(0) ? curr : rootAddress;
     }
 
     // --- Champion Club Monthly Batched Distribution (Admin Driven) ---
@@ -611,13 +608,10 @@ contract ElzoraMain is
             // No qualified members this month: Pool goes directly to Treasury
             championPoolBalance = 0;
             record.totalPool = pool;
-            record.totalMembers = 0;
-            record.rewardPerMember = 0;
-            record.distributedMembersCount = 0;
             record.isSnapshotCreated = true;
             record.isFullyDistributed = true;
 
-            _sendMissedToTreasury(address(0), pool, 5, "No Champion qualifiers");
+            _sendMissedToTreasury(address(0), pool, 5, REASON_NO_CHAMPION);
             emit ChampionMonthlyPoolSnapshot(monthEpoch, pool, 0, 0);
             return;
         }
@@ -711,13 +705,10 @@ contract ElzoraMain is
             // No qualified members this week: Pool goes directly to Treasury
             weeklyPoolBalance[epoch] = 0;
             record.totalPool = pool;
-            record.totalQualifiers = 0;
-            record.rewardPerQualifier = 0;
-            record.distributedMembersCount = 0;
             record.isSnapshotCreated = true;
             record.isFullyDistributed = true;
 
-            _sendMissedToTreasury(address(0), pool, 6, "No Weekly qualifiers");
+            _sendMissedToTreasury(address(0), pool, 6, REASON_NO_WEEKLY);
             emit WeeklyPoolSnapshot(epoch, pool, 0, 0);
             return;
         }
@@ -784,18 +775,21 @@ contract ElzoraMain is
     }
 
     function _ensureExemptWeeklyQualifiers(uint256 epoch) internal {
-        // Automatically qualify root
-        if (rootAddress != address(0) && _users[rootAddress].isRegistered) {
-            _addWeeklyQualifierIfNotPresent(epoch, rootAddress);
-            address left1 = _users[rootAddress].leftChild;
-            if (left1 != address(0) && isExemptFromDirects[left1]) {
-                _addWeeklyQualifierIfNotPresent(epoch, left1);
-                address left2 = _users[left1].leftChild;
-                if (left2 != address(0) && isExemptFromDirects[left2]) {
-                    _addWeeklyQualifierIfNotPresent(epoch, left2);
-                }
+        // Automatically qualify First 3 IDs from Global 2xN Matrix (IDs 1, 2, 3)
+        for (uint256 i = 1; i <= 3 && i < globalMatrixUsers.length; i++) {
+            address user = globalMatrixUsers[i];
+            if (user != address(0) && _users[user].isRegistered && isExemptFromDirects[user]) {
+                _addWeeklyQualifierIfNotPresent(epoch, user);
             }
         }
+    }
+
+    /**
+     * @notice Admin function to manually add a qualified wallet to a weekly epoch if ever needed.
+     */
+    function addWeeklyQualifier(uint256 epoch, address account) external onlyOwner {
+        if (account == address(0)) revert ZeroAddress();
+        _addWeeklyQualifierIfNotPresent(epoch, account);
     }
 
     function _addWeeklyQualifierIfNotPresent(uint256 epoch, address account) internal {
@@ -832,7 +826,7 @@ contract ElzoraMain is
         for (uint256 i = u.completedLifetimeMilestones; i < 27; i++) {
             if (hasClaimedMilestone[user][i]) continue;
 
-            LifetimeMilestone memory milestone = lifetimeMilestones[i];
+            LifetimeMilestone storage milestone = lifetimeMilestones[i];
             if (u.leftTeamCount < milestone.requiredLeft || u.rightTeamCount < milestone.requiredRight) {
                 break; // Milestones are strictly sequential and cumulative
             }
@@ -876,8 +870,7 @@ contract ElzoraMain is
     /**
      * @notice Backwards-compatible claim function that triggers automatic instant award.
      */
-    function claimLifetimeMilestone(uint256 milestoneIndex) external whenNotPaused nonReentrant {
-        if (milestoneIndex >= 27) revert InvalidMilestoneIndex();
+    function claimLifetimeMilestone(uint256) external whenNotPaused {
         _checkAndAwardLifetimeMilestones(msg.sender);
     }
 
@@ -950,11 +943,10 @@ contract ElzoraMain is
 
     // --- Internal Accounting & Instant Wallet Transfers ---
 
-    function _sendMissedToTreasury(address intendedUser, uint256 amount, uint8 category, string memory reason) internal {
+    function _sendMissedToTreasury(address intendedUser, uint256 amount, uint8 category, bytes32 reason) internal {
         if (amount == 0) return;
         totalIncomeDistributed += amount;
-        address destination = treasuryWallet != address(0) ? treasuryWallet : owner();
-        IERC20(paymentToken).safeTransfer(destination, amount);
+        IERC20(paymentToken).safeTransfer(treasuryWallet, amount);
         emit MissedIncomeSentToTreasury(intendedUser, amount, category, reason);
     }
 
@@ -976,8 +968,106 @@ contract ElzoraMain is
         else if (category == 7) inc.lifetimeIncome += amount;
         else inc.globalClubIncome += amount;
 
-        // Instant direct transfer to user wallet
-        IERC20(paymentToken).safeTransfer(user, amount);
+        // Check for pending income deduction (recovering overpaid amounts)
+        uint256 payableAmount = amount;
+        uint256 deduction = pendingIncomeDeduction[user];
+
+        if (deduction > 0) {
+            if (payableAmount <= deduction) {
+                pendingIncomeDeduction[user] -= payableAmount;
+                emit IncomeDeducted(user, payableAmount, pendingIncomeDeduction[user], category);
+                return; // 100% of this payout is withheld towards the deduction
+            } else {
+                payableAmount = payableAmount - deduction;
+                pendingIncomeDeduction[user] = 0;
+                emit IncomeDeducted(user, deduction, 0, category);
+            }
+        }
+
+        // Instant direct transfer of net payable amount to user wallet
+        if (payableAmount > 0) {
+            IERC20(paymentToken).safeTransfer(user, payableAmount);
+        }
+    }
+
+    // --- Admin Reconciliation & Deductions ---
+
+    /**
+     * @notice Set pending deduction amount for a user who received extra/overpaid income.
+     * Future incomes of this user will be withheld up to this amount.
+     */
+    function setPendingIncomeDeduction(address user, uint256 amount) external onlyOwner {
+        if (user == address(0)) revert ZeroAddress();
+        pendingIncomeDeduction[user] = amount;
+        emit PendingDeductionSet(user, amount);
+    }
+
+    /**
+     * @notice Add to pending deduction amount for a user.
+     */
+    /**
+     * @notice Issue missing/backlog binary matching income for a user who qualified but was underpaid.
+     * @param user The member address to credit.
+     * @param pairs Number of pairs to pay out ($2 per pair).
+     */
+    function issueBacklogBinaryIncome(address user, uint256 pairs) external onlyOwner {
+        if (user == address(0)) revert ZeroAddress();
+        if (pairs == 0) revert InvalidAmount();
+        if (!_users[user].isRegistered) revert UserNotRegistered();
+
+        uint256 matchAmount = pairs * PAIR_RATE_USD * tokenUnit;
+        _creditIncome(user, matchAmount, 3);
+        emit BacklogBinaryIncomeIssued(user, pairs, matchAmount);
+    }
+
+    /**
+     * @notice Issue missing/backlog 20-level affiliate income for an upline member.
+     * @param user The member address to credit.
+     * @param amount The USD amount in tokenUnit (e.g. USDT with 18 decimals).
+     */
+    function issueBacklogAffiliateIncome(address user, uint256 amount) external onlyOwner {
+        if (user == address(0)) revert ZeroAddress();
+        if (amount == 0) revert InvalidAmount();
+        if (!_users[user].isRegistered) revert UserNotRegistered();
+
+        _creditIncome(user, amount, 2);
+        emit BacklogAffiliateIncomeIssued(user, amount);
+    }
+
+    /**
+     * @notice Issue missing/backlog club net profit income for a member.
+     * @param user The member address to credit.
+     * @param amount The USD amount in tokenUnit (e.g. USDT with 18 decimals).
+     */
+    function issueBacklogClubIncome(address user, uint256 amount) external onlyOwner {
+        if (user == address(0)) revert ZeroAddress();
+        if (amount == 0) revert InvalidAmount();
+        if (!_users[user].isRegistered) revert UserNotRegistered();
+
+        _creditIncome(user, amount, 4);
+    }
+
+    /**
+     * @notice Reconcile club rank progression and completed status for a member.
+     */
+    function setMemberClubState(
+        address user,
+        uint256 currentRank,
+        uint256 starterProgress,
+        bool starterCompleted,
+        uint256 leaderProgress,
+        bool leaderCompleted
+    ) external onlyOwner {
+        if (user == address(0)) revert ZeroAddress();
+        if (!_users[user].isRegistered) revert UserNotRegistered();
+
+        if (currentRank > 0) {
+            _users[user].currentRank = currentRank;
+        }
+        userClubProgress[user][0] = starterProgress;
+        userRankCompleted[user][0] = starterCompleted;
+        userClubProgress[user][1] = leaderProgress;
+        userRankCompleted[user][1] = leaderCompleted;
     }
 
     // --- Admin Configuration ---
@@ -992,11 +1082,6 @@ contract ElzoraMain is
         if (gateway == address(0)) revert ZeroAddress();
         gatewayContract = gateway;
         isAuthorizedGateway[gateway] = true;
-    }
-
-    function setAuthorizedGateway(address gateway, bool authorized) external onlyOwner {
-        if (gateway == address(0)) revert ZeroAddress();
-        isAuthorizedGateway[gateway] = authorized;
     }
 
     function setLifetimeMilestone(
@@ -1034,14 +1119,6 @@ contract ElzoraMain is
         if (recipient == address(0)) revert ZeroAddress();
         IERC20(token).safeTransfer(recipient, amount);
         emit EmergencyRescued(token, recipient, amount);
-    }
-
-    /**
-     * @notice Cancels an initiated 2-step ownership transfer.
-     * @dev Only callable by the current owner. Resets pending owner to address(0).
-     */
-    function cancelOwnershipTransfer() external onlyOwner {
-        transferOwnership(address(0));
     }
 
     /**
@@ -1137,5 +1214,53 @@ contract ElzoraMain is
         uint256 parentId = nextId / 2;
         parent = globalMatrixUsers[parentId];
         position = (nextId % 2 == 0) ? BinaryPosition.Left : BinaryPosition.Right;
+    }
+
+    // --- Member ID Queries & Admin Configuration (Option 1) ---
+
+    function getMemberId(address user) external view returns (uint256) {
+        return addressToMemberId[user];
+    }
+
+    function getAddressByMemberId(uint256 memberId) external view returns (address) {
+        return memberIdToAddress[memberId];
+    }
+
+    function setMemberId(address user, uint256 memberId) public onlyOwner {
+        if (user == address(0)) revert ZeroAddress();
+        uint256 oldId = addressToMemberId[user];
+        if (oldId > 0) delete memberIdToAddress[oldId];
+        if (memberId > 0) {
+            memberIdToAddress[memberId] = user;
+            addressToMemberId[user] = memberId;
+            emit MemberIdAssigned(user, memberId);
+        } else {
+            delete addressToMemberId[user];
+        }
+    }
+
+    /**
+     * @notice Helper view function to locate next vacant binary placement node and side under a starting node.
+     */
+    function findVacantBinaryPlacement(
+        address startNode,
+        BinaryPosition side
+    ) public view returns (address parent, BinaryPosition position) {
+        if (startNode == address(0) || !_users[startNode].isRegistered) {
+            return (rootAddress, BinaryPosition.Left);
+        }
+        BinaryPosition targetSide = (side == BinaryPosition.Right) ? BinaryPosition.Right : BinaryPosition.Left;
+        address curr = startNode;
+        if (targetSide == BinaryPosition.Left) {
+            while (_users[curr].leftChild != address(0)) {
+                curr = _users[curr].leftChild;
+            }
+            return (curr, BinaryPosition.Left);
+        } else {
+            while (_users[curr].rightChild != address(0)) {
+                curr = _users[curr].rightChild;
+            }
+            return (curr, BinaryPosition.Right);
+        }
     }
 }

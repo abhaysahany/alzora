@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useWalletAuth } from '../hooks/useWalletAuth'
 import { useTetherStream } from '../hooks/useTetherStream'
+import { WalletDisconnectModal } from './WalletDisconnectModal'
 import {
   Menu,
   X,
@@ -22,6 +23,7 @@ export function PublicNavbar() {
   const { isConnected, address, chain } = useWalletAuth()
   const { profile } = useTetherStream()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [walletModalOpen, setWalletModalOpen] = useState(false)
 
   const isRegistered = Boolean(profile?.isRegistered || profile?.active)
 
@@ -49,11 +51,9 @@ export function PublicNavbar() {
 
   const shortAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : ''
   const miniAddress = address ? `${address.slice(0, 4)}...${address.slice(-4)}` : ''
-  const chainName = chain?.id === 56 
-    ? 'BNB SMART CHAIN' 
-    : chain?.id === 97 
-      ? 'BNB SMART CHAIN TESTNET' 
-      : (chain?.name || 'BNB SMART CHAIN TESTNET').toUpperCase()
+  const chainName = chain?.id === 97 
+    ? 'BNB SMART CHAIN TESTNET' 
+    : 'BNB SMART CHAIN'
 
   return (
     <>
@@ -150,11 +150,16 @@ export function PublicNavbar() {
                   <span>{chainName}</span>
                 </div>
 
-                {/* 2. Connected Wallet Address in Short with Icon (Single Display) */}
-                <div className="navbar-account-pill">
+                {/* 2. Connected Wallet Address in Short with Icon (Click to open Disconnect Modal) */}
+                <button
+                  type="button"
+                  onClick={() => setWalletModalOpen(true)}
+                  className="navbar-account-pill navbar-account-pill-clickable"
+                  title="Click to view wallet details & disconnect"
+                >
                   <ShieldCheck size={15} color="#ffd700" />
                   <span>{shortAddress}</span>
-                </div>
+                </button>
 
                 {/* 3. Go to Dashboard Button */}
                 <button
@@ -247,16 +252,36 @@ export function PublicNavbar() {
               </div>
 
               {isConnected && address && (
-                <div style={{ marginBottom: 20, padding: 12, borderRadius: 12, background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: '#34d399', marginBottom: 6, fontWeight: 700 }}>
-                    <span className="navbar-chain-dot" />
-                    <span>{chainName}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    setWalletModalOpen(true)
+                  }}
+                  style={{
+                    width: '100%',
+                    marginBottom: 20,
+                    padding: 12,
+                    borderRadius: 12,
+                    background: 'rgba(245, 158, 11, 0.08)',
+                    border: '1px solid rgba(245, 158, 11, 0.25)',
+                    textAlign: 'left',
+                    cursor: 'pointer',
+                    display: 'block',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem', color: '#34d399', fontWeight: 700 }}>
+                      <span className="navbar-chain-dot" />
+                      <span>{chainName}</span>
+                    </div>
+                    <span style={{ fontSize: '0.72rem', color: '#fbbf24', textDecoration: 'underline' }}>Disconnect</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', color: '#ffd700', fontFamily: 'monospace', fontWeight: 800 }}>
                     <ShieldCheck size={14} color="#ffd700" />
                     <span>{shortAddress}</span>
                   </div>
-                </div>
+                </button>
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontSize: '0.95rem', fontWeight: 700 }}>
@@ -305,6 +330,12 @@ export function PublicNavbar() {
           </div>
         </>
       )}
+
+      {/* Disconnect & Account Modal matching Image 2 */}
+      <WalletDisconnectModal
+        isOpen={walletModalOpen}
+        onClose={() => setWalletModalOpen(false)}
+      />
     </>
   )
 }

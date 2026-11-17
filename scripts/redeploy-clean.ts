@@ -97,7 +97,7 @@ async function main() {
   console.log(">> Pending Owner replaced:", pendingNow);
 
   console.log(">> Canceling pending ownership transfer...");
-  const txCancel = await elzoraMain.cancelOwnershipTransfer({ gasPrice });
+  const txCancel = await (elzoraMain as any).cancelOwnershipTransfer({ gasPrice });
   await txCancel.wait();
   pendingNow = await elzoraMain.pendingOwner();
   console.log(">> Pending Owner reset to:", pendingNow);

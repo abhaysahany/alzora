@@ -68,7 +68,7 @@ export function FaqPage() {
       category: 'CLUBS',
       question: 'How do the 8 Cascading Club Matrices function?',
       answer:
-        'Every registered member automatically enters Club 1 (Starter). When your personal team members advance, you cycle through the 8 Club ranks (Starter → Bronze → Silver → Gold → Platinum → Diamond → Crown Diamond → Legend). At each rank, you receive an instant net profit to your wallet while an automated portion funds your upgrade to the subsequent higher club with zero out-of-pocket re-investment.',
+        'Every registered member automatically enters Club 1 (Starter). When your personal team members advance, you cycle through the 8 Club ranks (Starter → Leader → Achiever → Mentor → Director → Elite → Crown → Legend). At each rank, you receive an instant net profit to your wallet while an automated portion funds your upgrade to the subsequent higher club with zero out-of-pocket re-investment.',
     },
     {
       id: 7,

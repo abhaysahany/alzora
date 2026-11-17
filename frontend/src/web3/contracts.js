@@ -6,7 +6,7 @@ export const CHAIN_CONTRACTS = {
     TETHER_STREAM: import.meta.env.VITE_ELZORA_ADDRESS || '0xAA449d6f4Dad92C1F2D08f7115f9d32B2647Cd2C',
     XMLM: import.meta.env.VITE_ELZORA_ADDRESS || '0xAA449d6f4Dad92C1F2D08f7115f9d32B2647Cd2C',
     AVX: import.meta.env.VITE_USDT_CONTRACT_ADDRESS || '0x55d398326f99059fF775485246999027B3197955',
-    GATEWAY: import.meta.env.VITE_ELZORA_GATEWAY_ADDRESS || '0x83Dbde1504Bdc545E419dB1ff7431ba90Cee55d5',
+    GATEWAY: import.meta.env.VITE_ELZORA_GATEWAY_ADDRESS || '0x002cB5BbD07163DEf13c41bFaE034866E5d23b5B',
     TREASURY: import.meta.env.VITE_TREASURY_WALLET || '0x067c2aa4C1576388F835C160E79Db88ebE02Ee92',
     ROOT_ID: import.meta.env.VITE_ROOT_ID || '0xE60746348b128D3D99546d78E646946599a0311e',
     OWNER_ADDRESS: import.meta.env.VITE_OWNER_ADDRESS || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5',
@@ -579,6 +579,25 @@ export const ELZORA_GATEWAY_ABI = [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "memberId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getAddressByMemberId",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "user",
         "type": "address"
@@ -851,6 +870,25 @@ export const ELZORA_GATEWAY_ABI = [
         "internalType": "struct IElzora.IncomeBreakdown",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getMemberId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -2279,6 +2317,43 @@ export const ELZORA_GATEWAY_ABI = [
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "pendingIncomeDeduction",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "setPendingIncomeDeduction",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]
 
@@ -2930,6 +3005,25 @@ export const ELZORA_MAIN_ABI = [
       {
         "indexed": true,
         "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "memberId",
+        "type": "uint256"
+      }
+    ],
+    "name": "MemberIdAssigned",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "intendedUser",
         "type": "address"
       },
@@ -2947,9 +3041,9 @@ export const ELZORA_MAIN_ABI = [
       },
       {
         "indexed": false,
-        "internalType": "string",
+        "internalType": "bytes32",
         "name": "reason",
-        "type": "string"
+        "type": "bytes32"
       }
     ],
     "name": "MissedIncomeSentToTreasury",
@@ -3443,7 +3537,38 @@ export const ELZORA_MAIN_ABI = [
   },
   {
     "inputs": [],
-    "name": "WEEK_EPOCH_ANCHOR",
+    "name": "acceptOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "epoch",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "addWeeklyQualifier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "addressToMemberId",
     "outputs": [
       {
         "internalType": "uint256",
@@ -3455,15 +3580,19 @@ export const ELZORA_MAIN_ABI = [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "acceptOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "cancelOwnershipTransfer",
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "users",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "memberIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "batchSetMemberIds",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -3713,6 +3842,25 @@ export const ELZORA_MAIN_ABI = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "memberId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getAddressByMemberId",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "getChampionMembers",
     "outputs": [
@@ -3916,6 +4064,25 @@ export const ELZORA_MAIN_ABI = [
         "internalType": "struct IElzora.IncomeBreakdown",
         "name": "",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getMemberId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -4560,6 +4727,25 @@ export const ELZORA_MAIN_ABI = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "memberIdToAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -4705,24 +4891,6 @@ export const ELZORA_MAIN_ABI = [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "gateway",
-        "type": "address"
-      },
-      {
-        "internalType": "bool",
-        "name": "authorized",
-        "type": "bool"
-      }
-    ],
-    "name": "setAuthorizedGateway",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "index",
         "type": "uint256"
@@ -4818,6 +4986,24 @@ export const ELZORA_MAIN_ABI = [
       }
     ],
     "name": "setLifetimeMilestone",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "memberId",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMemberId",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -5172,6 +5358,43 @@ export const ELZORA_MAIN_ABI = [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "pendingIncomeDeduction",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "setPendingIncomeDeduction",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]

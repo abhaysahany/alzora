@@ -12,6 +12,7 @@ import {
   Award,
   DollarSign,
   AlertCircle,
+  AlertTriangle,
   Sparkles,
   CheckCircle2,
   Share2,
@@ -31,12 +32,14 @@ export function DashboardPage() {
   const {
     address,
     profile,
+    memberId,
     incomeBreakdown,
     overview,
     champion,
     weekly,
     matching,
     globalClub,
+    pendingDeduction,
     milestoneStatus,
     claimLifetimeMilestone,
     usdtBalance,
@@ -49,7 +52,10 @@ export function DashboardPage() {
 
   const [copiedLeg, setCopiedLeg] = useState(null)
   const [copiedAddress, setCopiedAddress] = useState(false)
+  const [copiedMemberId, setCopiedMemberId] = useState(false)
   const [txSuccessMsg, setTxSuccessMsg] = useState('')
+
+  const activeMemberId = memberId || profile?.memberId
 
   const leftTeam = Number(profile?.leftTeamCount || 0)
   const rightTeam = Number(profile?.rightTeamCount || 0)
@@ -95,6 +101,13 @@ export function DashboardPage() {
     navigator.clipboard.writeText(address)
     setCopiedAddress(true)
     setTimeout(() => setCopiedAddress(false), 2000)
+  }
+
+  const copyMemberId = () => {
+    if (!activeMemberId) return
+    navigator.clipboard.writeText(activeMemberId)
+    setCopiedMemberId(true)
+    setTimeout(() => setCopiedMemberId(false), 2000)
   }
 
   const withdrawableVal = parseFloat(profile?.withdrawableBalance || '0')
@@ -183,6 +196,30 @@ export function DashboardPage() {
                   {copiedAddress ? <Check size={13} color="#22c55e" /> : <Copy size={13} color="#94a3b8" />}
                 </span>
 
+                {activeMemberId && (
+                  <span
+                    onClick={copyMemberId}
+                    title="Click to copy Member ID"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(245, 158, 11, 0.12))',
+                      border: '1px solid rgba(234, 179, 8, 0.45)',
+                      color: '#facc15',
+                      padding: '4px 10px',
+                      borderRadius: 8,
+                      fontSize: '0.88rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                    }}
+                  >
+                    <span>🆔 Member ID:</span>
+                    <b style={{ fontFamily: 'monospace', letterSpacing: '0.06em' }}>{activeMemberId}</b>
+                    {copiedMemberId ? <Check size={13} color="#22c55e" /> : <Copy size={13} color="#eab308" />}
+                  </span>
+                )}
+
                 {profile?.sponsor && profile.sponsor !== '0x0000000000000000000000000000000000000000' && (
                   <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>
                     • Sponsor: <b style={{ color: '#c084fc', fontFamily: 'monospace' }}>{profile.sponsor.slice(0, 6)}...{profile.sponsor.slice(-4)}</b>
@@ -210,6 +247,19 @@ export function DashboardPage() {
                 <div>
                   <div style={{ fontSize: '0.7rem', color: '#cbd5e1', fontWeight: 700, letterSpacing: '0.06em' }}>CURRENT RANK</div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#f8fafc' }}>{profile?.rankName || 'Starter'}</div>
+                  {Number(profile?.currentRank || 1) >= 2 && (
+                    <div style={{ marginTop: 3 }}>
+                      {Number(profile?.directCount || 0) >= 2 ? (
+                        <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '2px 7px', borderRadius: 6, background: 'rgba(34, 197, 94, 0.25)', color: '#4ade80', border: '1px solid rgba(34, 197, 94, 0.45)' }}>
+                          ⭐ Direct Qualified
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.65rem', fontWeight: 800, padding: '2px 7px', borderRadius: 6, background: 'rgba(168, 85, 247, 0.25)', color: '#c084fc', border: '1px solid rgba(168, 85, 247, 0.45)' }}>
+                          ⚡ Team Spillover
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -247,6 +297,46 @@ export function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* PENDING DEDUCTION / ADVANCE PAYMENT RECOVERY ALERT CARD */}
+        {Number(pendingDeduction || 0) > 0 && (
+          <div
+            style={{
+              padding: '18px 24px',
+              borderRadius: 18,
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.16) 0%, rgba(245, 158, 11, 0.12) 100%)',
+              border: '1px solid rgba(239, 68, 68, 0.45)',
+              boxShadow: '0 8px 30px rgba(239, 68, 68, 0.18)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(239, 68, 68, 0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f87171' }}>
+                  <AlertTriangle size={22} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 900, color: '#fca5a5' }}>
+                      ⚠️ अग्रिम भुगतान समायोजन सक्रिय (Advance Payment Recovery Active)
+                    </span>
+                    <span style={{ padding: '2px 8px', borderRadius: 6, background: 'rgba(239, 68, 68, 0.3)', color: '#fecaca', fontSize: '0.7rem', fontWeight: 800 }}>
+                      AUTO-DEDUCTING
+                    </span>
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: '#cbd5e1', marginTop: 4, maxWidth: 680, lineHeight: 1.5 }}>
+                    आपके खाते में <strong>${Number(pendingDeduction).toFixed(2)} USDT</strong> की अतिरिक्त/अग्रिम राशि दर्ज है। आगामी कमाई (बाइनरी, अफिलिएट या क्लब) से यह बकाया स्वतः कटकर कम होता जाएगा। जब तक यह बकाया <strong>$0.00</strong> नहीं हो जाता, नई आय सीधे वॉलेट में जाने के बजाय इस बकाये को घटाएगी।
+                  </div>
+                </div>
+              </div>
+              <div style={{ textAlign: 'right', background: 'rgba(0,0,0,0.35)', padding: '10px 18px', borderRadius: 12, border: '1px solid rgba(239, 68, 68, 0.35)' }}>
+                <div style={{ fontSize: '0.7rem', color: '#fca5a5', textTransform: 'uppercase', fontWeight: 800 }}>शेष अग्रिम राशि (Remaining Advance)</div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#ef4444', marginTop: 2 }}>
+                  ${Number(pendingDeduction).toFixed(2)} <span style={{ fontSize: '0.85rem' }}>USDT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* NOTIFICATIONS */}
         {claimableMilestoneIdx >= 0 && (
@@ -440,13 +530,46 @@ export function DashboardPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.76rem', padding: '8px 12px', borderRadius: 10, background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)' }}>
-              <span style={{ color: '#cbd5e1', fontWeight: 600 }}>1:1 Pair Matching:</span>
-              <span style={{ fontWeight: 800, color: (profile?.leftDirectCount >= 1 && profile?.rightDirectCount >= 1) ? '#10b981' : '#f59e0b', display: 'flex', alignItems: 'center', gap: 4 }}>
-                {(profile?.leftDirectCount >= 1 && profile?.rightDirectCount >= 1) ? 'QUALIFIED (1L & 1R Active) ✅' : 'PENDING (Need 1L & 1R) ⏳'}
-              </span>
+              {/* Financial Binary Match Stats */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+                <div style={{ background: 'rgba(6, 8, 20, 0.6)', padding: '8px 10px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--muted)' }}>Matching Earned</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#38bdf8' }}>${Number(incomeBreakdown?.matchingIncome || 0).toFixed(2)}</div>
+                </div>
+                <div style={{ background: 'rgba(6, 8, 20, 0.6)', padding: '8px 10px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--muted)' }}>Matched Pairs</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#c084fc' }}>{(Number(incomeBreakdown?.matchingIncome || 0) / 2).toFixed(0)} <span style={{ fontSize: '0.7rem' }}>Pairs</span></div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem', padding: '8px 12px', borderRadius: 10, background: 'rgba(99, 102, 241, 0.12)', border: '1px solid rgba(99, 102, 241, 0.25)', marginBottom: 8 }}>
+                <span style={{ color: '#cbd5e1', fontWeight: 600 }}>1:1 Pair Matching:</span>
+                <span style={{ fontWeight: 800, color: (profile?.leftDirectCount >= 1 && profile?.rightDirectCount >= 1) ? '#10b981' : '#f59e0b', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  {(profile?.leftDirectCount >= 1 && profile?.rightDirectCount >= 1) ? 'QUALIFIED (1L & 1R) ✅' : 'PENDING (Need 1L & 1R) ⏳'}
+                </span>
+              </div>
+
+              <Link
+                to="/tree?tab=binary"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 6,
+                  padding: '6px 10px',
+                  borderRadius: 8,
+                  background: 'rgba(99, 102, 241, 0.18)',
+                  border: '1px solid rgba(99, 102, 241, 0.35)',
+                  color: '#818cf8',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                }}
+              >
+                <span>View Binary Tree Genealogy</span>
+                <ArrowRight size={13} />
+              </Link>
             </div>
-          </div>
 
           {/* Card 3: Global Club ($25 Re-entry System) */}
           <div
@@ -762,7 +885,7 @@ export function DashboardPage() {
             {/* Stream 4: Binary Matching */}
             <div style={{ background: 'rgba(13, 18, 45, 0.75)', border: '1px solid rgba(74, 222, 128, 0.25)', borderRadius: 18, padding: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.05em' }}>4. BINARY MATCHING (20%)</span>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.05em' }}>4. BINARY MATCHING ($2 / Pair)</span>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80' }} />
               </div>
               <div style={{ fontSize: '1.6rem', fontWeight: 900, color: '#f8fafc', margin: '2px 0 6px' }}>
