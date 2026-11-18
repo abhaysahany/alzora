@@ -86,7 +86,7 @@ scripts/
 | :--- | :--- | :--- |
 | **ElzoraGateway** | `0x002cB5BbD07163DEf13c41bFaE034866E5d23b5B` | **PERMANENT / NEVER REDEPLOY** |
 | **ElzoraMain (UUPS Proxy)** | `0xAA449d6f4Dad92C1F2D08f7115f9d32B2647Cd2C` | Core logic & state proxy |
-| **ElzoraMain (Current Impl)** | `0x90a1F8a046d78Be8081CA2A31A6B5c8cEbA7CA0b` | Implementation contract |
+| **ElzoraMain (Current Impl)** | `0x2aaE4D004035CDAb285c92d8fA53b54dF4f3E3ec` | Implementation contract (True MLM Binary & Milestone Decoupled) |
 | **USDT (BEP-20)** | `0x55d398326f99059fF775485246999027B3197955` | BSC Mainnet USDT |
 | **Treasury Wallet** | `0x067c2aa4C1576388F835C160E79Db88ebE02Ee92` | Platform treasury |
 

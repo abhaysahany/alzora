@@ -220,14 +220,6 @@ contract ElzoraMain is
 
     // --- External Registration Functions ---
 
-    /**
-     * @notice Initializes the Global 2xN Auto-Matrix with existing users.
-     * @dev Only callable once by owner. Synchronizes binary tree pointers and level teams.
-     */
-    function initializeGlobalMatrix(address[] calldata) external pure {
-        revert AlreadyInitialized();
-    }
-
     function register(
         address sponsor,
         address parent,
@@ -1058,9 +1050,6 @@ contract ElzoraMain is
         uint256 leaderProgress,
         bool leaderCompleted
     ) external onlyOwner {
-        if (user == address(0)) revert ZeroAddress();
-        if (!_users[user].isRegistered) revert UserNotRegistered();
-
         if (currentRank > 0) {
             _users[user].currentRank = currentRank;
         }
@@ -1068,6 +1057,39 @@ contract ElzoraMain is
         userRankCompleted[user][0] = starterCompleted;
         userClubProgress[user][1] = leaderProgress;
         userRankCompleted[user][1] = leaderCompleted;
+    }
+
+    /**
+     * @notice Reconcile binary tree pointers and level teams to decouple from Global 2xN auto-matrix.
+     */
+    function batchReconcileBinaryUsers(BinaryAdjustment[] calldata adjustments) external onlyOwner {
+        for (uint256 i = 0; i < adjustments.length; i++) {
+            BinaryAdjustment calldata adj = adjustments[i];
+            UserProfile storage u = _users[adj.user];
+            u.parent = adj.parent;
+            u.leftChild = adj.leftChild;
+            u.rightChild = adj.rightChild;
+            u.position = adj.position;
+            u.leftCarryVolume = uint64(adj.leftCarry);
+            u.rightCarryVolume = uint64(adj.rightCarry);
+            u.leftTeamCount = uint64(adj.leftTeam);
+            u.rightTeamCount = uint64(adj.rightTeam);
+            u.leftDirectCount = uint64(adj.leftDirectCount);
+            u.rightDirectCount = uint64(adj.rightDirectCount);
+        }
+    }
+
+    /**
+     * @notice Reconcile lifetime milestone completed count and claimed status for a member.
+     */
+    function setMemberMilestoneState(
+        address user,
+        uint256 completedMilestones,
+        uint256 milestoneIndex,
+        bool isClaimed
+    ) external onlyOwner {
+        _users[user].completedLifetimeMilestones = completedMilestones;
+        hasClaimedMilestone[user][milestoneIndex] = isClaimed;
     }
 
     // --- Admin Configuration ---

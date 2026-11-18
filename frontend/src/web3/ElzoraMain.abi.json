@@ -1401,6 +1401,76 @@
   {
     "inputs": [
       {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "parent",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "leftChild",
+            "type": "address"
+          },
+          {
+            "internalType": "address",
+            "name": "rightChild",
+            "type": "address"
+          },
+          {
+            "internalType": "enum IElzora.BinaryPosition",
+            "name": "position",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftCarry",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightCarry",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftTeam",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightTeam",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "leftDirectCount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "rightDirectCount",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct IElzora.BinaryAdjustment[]",
+        "name": "adjustments",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "batchReconcileBinaryUsers",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
@@ -2416,19 +2486,6 @@
   {
     "inputs": [
       {
-        "internalType": "address[]",
-        "name": "",
-        "type": "address[]"
-      }
-    ],
-    "name": "initializeGlobalMatrix",
-    "outputs": [],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
         "name": "",
         "type": "address"
@@ -2945,6 +3002,34 @@
       }
     ],
     "name": "setMemberId",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "completedMilestones",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "milestoneIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isClaimed",
+        "type": "bool"
+      }
+    ],
+    "name": "setMemberMilestoneState",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

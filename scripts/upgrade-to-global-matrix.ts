@@ -56,7 +56,7 @@ async function main() {
   ];
 
   console.log(`\n2. Preparing initialization calldata for ${initialUsers.length} users...`);
-  const initCallData = newImpl.interface.encodeFunctionData("initializeGlobalMatrix", [
+  const initCallData = (newImpl.interface as any).encodeFunctionData("initializeGlobalMatrix", [
     initialUsers,
   ]);
 

@@ -95,6 +95,8 @@ interface IElzora {
         uint256 rightCarry;
         uint256 leftTeam;
         uint256 rightTeam;
+        uint256 leftDirectCount;
+        uint256 rightDirectCount;
     }
 
     struct ClubAdjustment {
