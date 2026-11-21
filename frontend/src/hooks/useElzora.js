@@ -705,9 +705,9 @@ export function useElzora() {
     try {
       const parsedAmount = parseUnits(amount.toString(), tokenDecimals)
       const tx = await writeContractAsync({
-        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        address: CONTRACT_ADDRESSES.ELZORA,
         abi: ELZORA_MAIN_ABI,
-        functionName: 'emergencyTokenRescue',
+        functionName: 'emergencyRescue',
         args: [tokenAddress, recipient, parsedAmount],
         chain: activeChain,
       })
@@ -1022,6 +1022,7 @@ export function useElzora() {
     unpauseContract,
     setGatewayContract,
     setTreasuryWallet,
+    emergencyRescue: emergencyTokenRescue,
     emergencyTokenRescue,
     contractOwnerAddress,
     pendingOwnerAddress,

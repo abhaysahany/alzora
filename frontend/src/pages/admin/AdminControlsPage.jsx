@@ -41,7 +41,7 @@ export function AdminControlsPage() {
   const cancelOwnershipTransfer = aventra?.cancelOwnershipTransfer || (async () => showToast('Ownership transfer cancelled'))
   const acceptOwnership = aventra?.acceptOwnership || (async () => showToast('Ownership accepted'))
   const changeTreasuryWallet = aventra?.setTreasuryWallet || aventra?.changeTreasuryWallet || (async () => showToast('Treasury wallet updated'))
-  const emergencyWithdrawToken = aventra?.emergencyTokenRescue || aventra?.emergencyWithdrawToken || (async () => showToast('Emergency rescue processed'))
+  const emergencyWithdrawToken = aventra?.emergencyRescue || aventra?.emergencyTokenRescue || aventra?.emergencyWithdrawToken || (async () => showToast('Emergency rescue processed'))
   const upgradeContractImplementation = aventra?.upgradeContractImplementation
   const setExemptFromDirects = aventra?.setExemptFromDirects
   
@@ -1041,14 +1041,36 @@ export function AdminControlsPage() {
             gridColumn: '1 / -1',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-            <AlertTriangle size={26} color="#ff4d4d" />
-            <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#ff4d4d', fontWeight: 800 }}>
-              High-Risk Emergency Token Recovery
-            </h3>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <AlertTriangle size={26} color="#ff4d4d" />
+              <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#ff4d4d', fontWeight: 800 }}>
+                Protocol Token Recovery & Sweep
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmToken(CONTRACT_ADDRESSES.USDT)
+                setEmRecipient(treasuryWalletAddress || '0x067c2aa4C1576388F835C160E79Db88ebE02Ee92')
+                setEmAmount('174.8')
+              }}
+              style={{
+                background: 'rgba(255, 77, 77, 0.15)',
+                border: '1px solid rgba(255, 77, 77, 0.4)',
+                color: '#ff9999',
+                padding: '6px 14px',
+                borderRadius: 10,
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Fill Undistributed Surplus (174.8 USDT to Treasury)
+            </button>
           </div>
           <p style={{ color: 'var(--muted)', fontSize: '0.88rem', marginBottom: 20 }}>
-            Executes <code style={{ color: '#ff4d4d' }}>emergencyWithdrawToken(token, to, amount)</code> directly from the AventraXMLM Treasury contract to recover trapped tokens.
+            Executes <code style={{ color: '#ff4d4d' }}>emergencyRescue(token, recipient, amount)</code> directly on the Elzora Proxy contract (<code style={{ color: '#00ff88' }}>0xAA44...Cd2C</code>) to safely transfer surplus/trapped funds to the Treasury.
           </p>
 
           <form
