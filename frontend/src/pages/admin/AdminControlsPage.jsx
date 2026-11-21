@@ -356,6 +356,62 @@ export function AdminControlsPage() {
         </div>
       )}
 
+      {/* INDIAN STANDARD TIME (IST) TIMEZONE & EPOCH SCHEDULE BANNER */}
+      <div
+        className="glass-card"
+        style={{
+          padding: '16px 24px',
+          borderRadius: 18,
+          marginBottom: 24,
+          border: '1px solid rgba(56, 189, 248, 0.35)',
+          background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 16,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ padding: 10, borderRadius: 12, background: 'rgba(56, 189, 248, 0.15)', color: '#38bdf8' }}>
+            <Clock size={22} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: '0.98rem', fontWeight: 800, color: '#fff' }}>
+                Indian Standard Time (IST — UTC+05:30)
+              </span>
+              <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: 8, background: 'rgba(0, 255, 136, 0.15)', color: '#00ff88', fontWeight: 800, border: '1px solid rgba(0, 255, 136, 0.3)' }}>
+                Active System Schedule
+              </span>
+            </div>
+            <p style={{ margin: '3px 0 0', color: 'var(--muted)', fontSize: '0.82rem' }}>
+              All weekly & monthly pools operate strictly on Indian Standard Time. Epoch cycles roll over every 7 days (Weekly) and 30 days (Monthly).
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+              Week #1 End / Closing (IST)
+            </div>
+            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#f43f5e' }}>
+              Friday, 27 Nov 2026, 05:40 PM IST
+            </div>
+          </div>
+          <div style={{ width: 1, height: 32, background: 'rgba(255,255,255,0.1)' }} />
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>
+              Month #1 End / Closing (IST)
+            </div>
+            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#fbbf24' }}>
+              Sunday, 13 Dec 2026, 05:40 PM IST
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* TOP ROW: 2 POOL BATCH DISTRIBUTION CARDS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 480px), 1fr))', gap: 24, marginBottom: 24 }}>
 
