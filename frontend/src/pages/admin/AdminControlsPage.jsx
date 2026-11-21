@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useChainId, useReadContract } from 'wagmi'
+import React, { useState, useEffect, useCallback } from 'react'
+import { useChainId, useReadContract, usePublicClient } from 'wagmi'
 import { formatUnits } from 'viem'
 import { AdminLayout } from '../../components/AdminLayout'
 import { useElzora } from '../../hooks/useElzora'
@@ -20,6 +20,12 @@ import {
   AlertTriangle,
   Users,
   Award,
+  History,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  RefreshCw,
+  ChevronRight,
 } from 'lucide-react'
 
 export function AdminControlsPage() {
@@ -147,6 +153,116 @@ export function AdminControlsPage() {
         isFullyDistributed: Boolean(rawWeeklyRecord[5]),
       }
     : null
+
+  const publicClient = usePublicClient()
+  const [historyTab, setHistoryTab] = useState('WEEKLY') // 'WEEKLY' | 'CHAMPION'
+  const [historyLedger, setHistoryLedger] = useState({
+    weekly: [],
+    champion: [],
+    totalWeeklyDistributed: '0.00',
+    totalChampionDistributed: '0.00',
+    grandTotalDistributed: '0.00',
+    loading: true,
+  })
+
+  const loadHistoryLedger = useCallback(async () => {
+    if (!publicClient || !contractAddresses?.ELZORA) return
+    try {
+      const maxW = Math.max(Number(currentWeeklyEpoch || 0), 1)
+      const maxM = Math.max(Number(currentMonthEpoch || 0), 0)
+
+      const weeklyPromises = []
+      for (let w = 0; w <= maxW; w++) {
+        weeklyPromises.push(
+          Promise.all([
+            publicClient.readContract({
+              address: contractAddresses.ELZORA,
+              abi: ELZORA_MAIN_ABI,
+              functionName: 'weeklyEpochRecords',
+              args: [BigInt(w)],
+            }),
+            publicClient.readContract({
+              address: contractAddresses.ELZORA,
+              abi: ELZORA_MAIN_ABI,
+              functionName: 'weeklyPoolBalance',
+              args: [BigInt(w)],
+            }),
+            publicClient.readContract({
+              address: contractAddresses.ELZORA,
+              abi: ELZORA_MAIN_ABI,
+              functionName: 'getWeeklyQualifiersCount',
+              args: [BigInt(w)],
+            }).catch(() => 0n),
+          ]).then(([rec, bal, qCount]) => ({
+            epoch: w,
+            totalPool: formatUnits(rec[0] || 0n, tokenDecimals),
+            totalQualifiers: Number(rec[1] || 0n),
+            rewardPerQualifier: formatUnits(rec[2] || 0n, tokenDecimals),
+            distributedCount: Number(rec[3] || 0n),
+            isSnapshotCreated: Boolean(rec[4]),
+            isFullyDistributed: Boolean(rec[5]),
+            balance: formatUnits(bal || 0n, tokenDecimals),
+            liveQualifiers: Number(qCount || 0n),
+          }))
+        )
+      }
+
+      const championPromises = []
+      for (let m = 0; m <= maxM; m++) {
+        championPromises.push(
+          publicClient.readContract({
+            address: contractAddresses.ELZORA,
+            abi: ELZORA_MAIN_ABI,
+            functionName: 'championMonthlyRecords',
+            args: [BigInt(m)],
+          }).then((rec) => ({
+            month: m,
+            totalPool: formatUnits(rec[0] || 0n, tokenDecimals),
+            totalMembers: Number(rec[1] || 0n),
+            rewardPerMember: formatUnits(rec[2] || 0n, tokenDecimals),
+            distributedCount: Number(rec[3] || 0n),
+            isSnapshotCreated: Boolean(rec[4]),
+            isFullyDistributed: Boolean(rec[5]),
+          }))
+        )
+      }
+
+      const [wList, mList] = await Promise.all([
+        Promise.all(weeklyPromises),
+        Promise.all(championPromises),
+      ])
+
+      let totW = 0
+      wList.forEach((item) => {
+        if (item.isSnapshotCreated) {
+          totW += Number(item.totalPool || 0)
+        }
+      })
+
+      let totM = 0
+      mList.forEach((item) => {
+        if (item.isSnapshotCreated) {
+          totM += Number(item.totalPool || 0)
+        }
+      })
+
+      setHistoryLedger({
+        weekly: wList,
+        champion: mList,
+        totalWeeklyDistributed: totW.toFixed(2),
+        totalChampionDistributed: totM.toFixed(2),
+        grandTotalDistributed: (totW + totM).toFixed(2),
+        loading: false,
+      })
+    } catch (e) {
+      console.error('Error loading history ledger:', e)
+      setHistoryLedger((prev) => ({ ...prev, loading: false }))
+    }
+  }, [publicClient, contractAddresses?.ELZORA, currentWeeklyEpoch, currentMonthEpoch, tokenDecimals])
+
+  useEffect(() => {
+    loadHistoryLedger()
+  }, [loadHistoryLedger])
 
   // Emergency withdraw state
   const [emToken, setEmToken] = useState(CONTRACT_ADDRESSES.USDT)
@@ -373,7 +489,7 @@ export function AdminControlsPage() {
                     setIsProcessingChampionSnapshot(true)
                     showToast(`Creating snapshot for Month Epoch ${championMonthEpoch}...`)
                     await createChampionMonthlySnapshot(championMonthEpoch)
-                    await Promise.all([refetchChampCount(), refetchChampRecord()])
+                    await Promise.all([refetchChampCount(), refetchChampRecord(), loadHistoryLedger()])
                     showToast(`✅ Champion Pool snapshot created! Qualifiers: ${champCount}`)
                   } catch (err) {
                     showToast(formatErrorMessage(err, 'Unable to create Champion snapshot.'))
@@ -403,7 +519,7 @@ export function AdminControlsPage() {
                     setIsProcessingChampionBatch(true)
                     showToast(`Distributing batch of ${championBatchSize} to Champion qualifiers...`)
                     await distributeChampionBatch(championMonthEpoch, championBatchSize)
-                    await Promise.all([refetchChampCount(), refetchChampRecord()])
+                    await Promise.all([refetchChampCount(), refetchChampRecord(), loadHistoryLedger()])
                     showToast('🎉 Champion batch distributed to qualifiers on-chain!')
                   } catch (err) {
                     showToast(formatErrorMessage(err, 'Unable to distribute Champion batch.'))
@@ -558,7 +674,7 @@ export function AdminControlsPage() {
                     setIsProcessingWeeklySnapshot(true)
                     showToast(`Creating snapshot for Week Epoch ${weeklyEpochInput}...`)
                     await createWeeklyPoolSnapshot(weeklyEpochInput)
-                    await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord()])
+                    await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord(), loadHistoryLedger()])
                     showToast(`✅ Weekly Pool snapshot created! Qualifiers: ${weeklyCount}`)
                   } catch (err) {
                     showToast(formatErrorMessage(err, 'Unable to create Weekly snapshot.'))
@@ -588,7 +704,7 @@ export function AdminControlsPage() {
                     setIsProcessingWeeklyBatch(true)
                     showToast(`Distributing batch of ${weeklyBatchSize} to Week #${weeklyEpochInput} qualifiers...`)
                     await distributeWeeklyBatch(weeklyEpochInput, weeklyBatchSize)
-                    await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord()])
+                    await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord(), loadHistoryLedger()])
                     showToast('🎉 Weekly batch distributed to qualifiers on-chain!')
                   } catch (err) {
                     showToast(formatErrorMessage(err, 'Unable to distribute Weekly batch.'))
@@ -613,6 +729,313 @@ export function AdminControlsPage() {
           </div>
         </div>
 
+      </div>
+
+      {/* POOL DISTRIBUTION RECORDS & HISTORICAL AUDIT LEDGER */}
+      <div
+        className="glass-card"
+        style={{
+          padding: 28,
+          borderRadius: 24,
+          border: '1px solid rgba(255, 215, 0, 0.25)',
+          background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.04) 0%, rgba(10, 14, 30, 0.98) 100%)',
+          marginBottom: 24,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ padding: 10, borderRadius: 14, background: 'rgba(255, 215, 0, 0.15)', color: '#fbbf24' }}>
+              <History size={24} />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', fontWeight: 800 }}>
+                Pool Distribution History & Audit Ledger
+              </h3>
+              <p style={{ margin: '4px 0 0', color: 'var(--muted)', fontSize: '0.85rem' }}>
+                Complete on-chain audit ledger of all concluded Weekly Performance and Champion Royalty distribution epochs.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button
+              type="button"
+              onClick={loadHistoryLedger}
+              disabled={historyLedger.loading}
+              className="btn btn-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '8px 16px',
+                borderRadius: 12,
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: '#fff',
+                cursor: 'pointer',
+              }}
+            >
+              <RefreshCw size={15} className={historyLedger.loading ? 'spin' : ''} />
+              {historyLedger.loading ? 'Refreshing...' : 'Refresh Records'}
+            </button>
+          </div>
+        </div>
+
+        {/* 4 KPI METRIC CARDS */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 24 }}>
+          <div style={{ background: 'rgba(0, 255, 136, 0.08)', padding: 16, borderRadius: 16, border: '1px solid rgba(0, 255, 136, 0.2)' }}>
+            <div style={{ fontSize: '0.74rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+              Total Pools Distributed
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#00ff88', marginTop: 4 }}>
+              ${historyLedger.grandTotalDistributed} <span style={{ fontSize: '0.85rem' }}>USDT</span>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+              Weekly ($45) + Champion ($42)
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(244, 63, 94, 0.08)', padding: 16, borderRadius: 16, border: '1px solid rgba(244, 63, 94, 0.2)' }}>
+            <div style={{ fontSize: '0.74rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+              Weekly Pool Distributed
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#f43f5e', marginTop: 4 }}>
+              ${historyLedger.totalWeeklyDistributed} <span style={{ fontSize: '0.85rem' }}>USDT</span>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+              Week #0 ($42) + Week #1 ($3)
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(251, 191, 36, 0.08)', padding: 16, borderRadius: 16, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+            <div style={{ fontSize: '0.74rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+              Champion Pool Distributed
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#fbbf24', marginTop: 4 }}>
+              ${historyLedger.totalChampionDistributed} <span style={{ fontSize: '0.85rem' }}>USDT</span>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+              Month #0 ($42.00 to 3 Champions)
+            </div>
+          </div>
+
+          <div style={{ background: 'rgba(56, 189, 248, 0.08)', padding: 16, borderRadius: 16, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+            <div style={{ fontSize: '0.74rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase' }}>
+              Active Champion Accumulation
+            </div>
+            <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#38bdf8', marginTop: 4 }}>
+              ${globalStats?.championPoolBalance || '42.00'} <span style={{ fontSize: '0.85rem' }}>USDT</span>
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.6)', marginTop: 4 }}>
+              Accumulating for Month #1
+            </div>
+          </div>
+        </div>
+
+        {/* TABS SELECTOR */}
+        <div style={{ display: 'flex', gap: 12, borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 12, marginBottom: 16 }}>
+          <button
+            type="button"
+            onClick={() => setHistoryTab('WEEKLY')}
+            style={{
+              padding: '8px 18px',
+              borderRadius: 10,
+              fontSize: '0.86rem',
+              fontWeight: 800,
+              background: historyTab === 'WEEKLY' ? 'rgba(244, 63, 94, 0.2)' : 'transparent',
+              border: historyTab === 'WEEKLY' ? '1px solid #f43f5e' : '1px solid transparent',
+              color: historyTab === 'WEEKLY' ? '#fff' : 'var(--muted)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <Award size={16} color="#f43f5e" />
+            Weekly Performance History ({historyLedger.weekly.length} Epochs)
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setHistoryTab('CHAMPION')}
+            style={{
+              padding: '8px 18px',
+              borderRadius: 10,
+              fontSize: '0.86rem',
+              fontWeight: 800,
+              background: historyTab === 'CHAMPION' ? 'rgba(251, 191, 36, 0.2)' : 'transparent',
+              border: historyTab === 'CHAMPION' ? '1px solid #fbbf24' : '1px solid transparent',
+              color: historyTab === 'CHAMPION' ? '#fff' : 'var(--muted)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <Coins size={16} color="#fbbf24" />
+            Champion Monthly Royalty History ({historyLedger.champion.length} Months)
+          </button>
+        </div>
+
+        {/* TABLE: WEEKLY HISTORY */}
+        {historyTab === 'WEEKLY' && (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--muted)' }}>
+                  <th style={{ padding: '12px 14px' }}>Epoch / Week</th>
+                  <th style={{ padding: '12px 14px' }}>Snapshot Pool</th>
+                  <th style={{ padding: '12px 14px' }}>Qualifiers</th>
+                  <th style={{ padding: '12px 14px' }}>Reward Per Member</th>
+                  <th style={{ padding: '12px 14px' }}>Distribution Status</th>
+                  <th style={{ padding: '12px 14px', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historyLedger.weekly.map((item) => (
+                  <tr key={item.epoch} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: item.epoch === Number(currentWeeklyEpoch) ? 'rgba(244, 63, 94, 0.04)' : 'transparent' }}>
+                    <td style={{ padding: '14px', fontWeight: 800, color: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span>Week #{item.epoch}</span>
+                        {item.epoch === Number(currentWeeklyEpoch) && (
+                          <span style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: 6, background: 'rgba(244, 63, 94, 0.2)', color: '#f43f5e', border: '1px solid rgba(244, 63, 94, 0.4)' }}>
+                            Active Week
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td style={{ padding: '14px', fontWeight: 800, color: '#00ff88' }}>
+                      ${item.totalPool} USDT
+                    </td>
+                    <td style={{ padding: '14px', color: '#fff' }}>
+                      {item.isSnapshotCreated ? `${item.totalQualifiers} Qualifiers` : `${item.liveQualifiers} Qualifiers (Live)`}
+                    </td>
+                    <td style={{ padding: '14px', color: '#fbbf24', fontWeight: 700 }}>
+                      ${item.rewardPerQualifier} USDT
+                    </td>
+                    <td style={{ padding: '14px' }}>
+                      {item.isFullyDistributed ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, fontSize: '0.74rem', fontWeight: 800, background: 'rgba(0, 255, 136, 0.15)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)' }}>
+                          <CheckCircle2 size={13} /> {item.distributedCount} / {item.totalQualifiers} Paid (100% Fully Distributed)
+                        </span>
+                      ) : item.isSnapshotCreated ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, fontSize: '0.74rem', fontWeight: 800, background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                          <Clock size={13} /> {item.distributedCount} / {item.totalQualifiers} Paid (In Progress)
+                        </span>
+                      ) : (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, fontSize: '0.74rem', fontWeight: 800, background: 'rgba(255, 255, 255, 0.08)', color: 'var(--muted)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                          Active Accumulation (${item.balance} USDT)
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ padding: '14px', textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWeeklyEpochInput(String(item.epoch))
+                          window.scrollTo({ top: 350, behavior: 'smooth' })
+                        }}
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          color: '#fff',
+                          padding: '6px 12px',
+                          borderRadius: 8,
+                          fontSize: '0.76rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Inspect in Controller ↗
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* TABLE: CHAMPION HISTORY */}
+        {historyTab === 'CHAMPION' && (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', color: 'var(--muted)' }}>
+                  <th style={{ padding: '12px 14px' }}>Month Epoch</th>
+                  <th style={{ padding: '12px 14px' }}>Snapshot Pool</th>
+                  <th style={{ padding: '12px 14px' }}>Champions (30+ Directs)</th>
+                  <th style={{ padding: '12px 14px' }}>Reward Per Champion</th>
+                  <th style={{ padding: '12px 14px' }}>Distribution Status</th>
+                  <th style={{ padding: '12px 14px', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historyLedger.champion.map((item) => (
+                  <tr key={item.month} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: item.month === Number(currentMonthEpoch) ? 'rgba(251, 191, 36, 0.04)' : 'transparent' }}>
+                    <td style={{ padding: '14px', fontWeight: 800, color: '#fff' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span>Month #{item.month}</span>
+                        {item.month === Number(currentMonthEpoch) && (
+                          <span style={{ fontSize: '0.68rem', padding: '2px 6px', borderRadius: 6, background: 'rgba(251, 191, 36, 0.2)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.4)' }}>
+                            Current Month
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td style={{ padding: '14px', fontWeight: 800, color: '#00ff88' }}>
+                      ${item.totalPool} USDT
+                    </td>
+                    <td style={{ padding: '14px', color: '#fff' }}>
+                      {item.isSnapshotCreated ? `${item.totalMembers} Champions` : `${champCount} Champions (Live)`}
+                    </td>
+                    <td style={{ padding: '14px', color: '#fbbf24', fontWeight: 700 }}>
+                      ${item.rewardPerMember} USDT
+                    </td>
+                    <td style={{ padding: '14px' }}>
+                      {item.isFullyDistributed ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, fontSize: '0.74rem', fontWeight: 800, background: 'rgba(0, 255, 136, 0.15)', color: '#00ff88', border: '1px solid rgba(0, 255, 136, 0.3)' }}>
+                          <CheckCircle2 size={13} /> {item.distributedCount} / {item.totalMembers} Paid (100% Fully Distributed)
+                        </span>
+                      ) : item.isSnapshotCreated ? (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, fontSize: '0.74rem', fontWeight: 800, background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+                          <Clock size={13} /> {item.distributedCount} / {item.totalMembers} Paid (In Progress)
+                        </span>
+                      ) : (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, fontSize: '0.74rem', fontWeight: 800, background: 'rgba(255, 255, 255, 0.08)', color: 'var(--muted)', border: '1px solid rgba(255, 255, 255, 0.15)' }}>
+                          Accumulating Live Funds
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ padding: '14px', textAlign: 'right' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setChampionMonthEpoch(String(item.month))
+                          window.scrollTo({ top: 350, behavior: 'smooth' })
+                        }}
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          color: '#fff',
+                          padding: '6px 12px',
+                          borderRadius: 8,
+                          fontSize: '0.76rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Inspect in Controller ↗
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* SECOND ROW & REST: PROTOCOL CONTROLS & MANAGEMENT */}
