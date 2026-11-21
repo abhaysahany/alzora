@@ -588,7 +588,7 @@ contract ElzoraMain is
      * @notice Admin creates snapshot and calculation table of monthly Champion Pool
      */
     function createChampionMonthlySnapshot(uint256 monthEpoch) external onlyOwner {
-        if (monthEpoch > getCurrentMonthEpoch()) revert MonthNotClosed();
+        if (monthEpoch >= getCurrentMonthEpoch()) revert MonthNotClosed();
         ChampionMonthRecord storage record = championMonthlyRecords[monthEpoch];
         if (record.isSnapshotCreated) revert MonthAlreadyDistributed();
 
@@ -682,7 +682,7 @@ contract ElzoraMain is
      * @notice Admin creates snapshot and calculation table of concluded Weekly Pool (Sunday Morning)
      */
     function createWeeklyPoolSnapshot(uint256 epoch) external onlyOwner {
-        if (epoch > getCurrentWeeklyEpoch()) revert WeekNotClosed();
+        if (epoch >= getCurrentWeeklyEpoch()) revert WeekNotClosed();
         WeeklyEpochRecord storage record = weeklyEpochRecords[epoch];
         if (record.isSnapshotCreated) revert WeekAlreadyDistributed();
 
@@ -760,6 +760,17 @@ contract ElzoraMain is
         }
 
         emit WeeklyBatchDistributed(epoch, startIndex, endIndex, paidCount, totalBatchAmount);
+    }
+
+    /**
+     * @notice Admin function to rollover undistributed or trapped weekly pool funds from one epoch to another
+     */
+    function rolloverWeeklyPool(uint256 fromEpoch, uint256 toEpoch) external onlyOwner {
+        uint256 amt = weeklyPoolBalance[fromEpoch];
+        if (amt == 0) revert NothingToWithdraw();
+        weeklyPoolBalance[fromEpoch] = 0;
+        weeklyPoolBalance[toEpoch] += amt;
+        emit WeeklyPoolRollover(fromEpoch, toEpoch, amt);
     }
 
     function getWeeklyQualifiersCount(uint256 epoch) external view returns (uint256) {
@@ -1059,25 +1070,7 @@ contract ElzoraMain is
         userRankCompleted[user][1] = leaderCompleted;
     }
 
-    /**
-     * @notice Reconcile binary tree pointers and level teams to decouple from Global 2xN auto-matrix.
-     */
-    function batchReconcileBinaryUsers(BinaryAdjustment[] calldata adjustments) external onlyOwner {
-        for (uint256 i = 0; i < adjustments.length; i++) {
-            BinaryAdjustment calldata adj = adjustments[i];
-            UserProfile storage u = _users[adj.user];
-            u.parent = adj.parent;
-            u.leftChild = adj.leftChild;
-            u.rightChild = adj.rightChild;
-            u.position = adj.position;
-            u.leftCarryVolume = uint64(adj.leftCarry);
-            u.rightCarryVolume = uint64(adj.rightCarry);
-            u.leftTeamCount = uint64(adj.leftTeam);
-            u.rightTeamCount = uint64(adj.rightTeam);
-            u.leftDirectCount = uint64(adj.leftDirectCount);
-            u.rightDirectCount = uint64(adj.rightDirectCount);
-        }
-    }
+
 
     /**
      * @notice Reconcile lifetime milestone completed count and claimed status for a member.

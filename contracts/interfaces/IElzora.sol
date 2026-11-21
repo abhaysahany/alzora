@@ -234,6 +234,12 @@ interface IElzora {
         uint256 totalBatchAmount
     );
 
+    event WeeklyPoolRollover(
+        uint256 indexed fromEpoch,
+        uint256 indexed toEpoch,
+        uint256 amount
+    );
+
     event LifetimeRewardClaimed(
         address indexed user,
         uint256 indexed milestoneIndex,

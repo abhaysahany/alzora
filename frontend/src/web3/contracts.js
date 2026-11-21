@@ -3808,6 +3808,24 @@ export const ELZORA_MAIN_ABI = [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "fromEpoch",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "toEpoch",
+        "type": "uint256"
+      }
+    ],
+    "name": "rolloverWeeklyPool",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "token",
         "type": "address"

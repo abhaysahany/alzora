@@ -926,6 +926,32 @@ export function useElzora() {
     }
   }
 
+  const rolloverWeeklyPool = async (fromEpoch, toEpoch) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const tx = await writeContractAsync({
+        address: CONTRACT_ADDRESSES.TETHER_STREAM,
+        abi: ELZORA_MAIN_ABI,
+        functionName: 'rolloverWeeklyPool',
+        args: [BigInt(fromEpoch), BigInt(toEpoch)],
+        chain: activeChain,
+      })
+      if (publicClient && tx) {
+        await publicClient.waitForTransactionReceipt({ hash: tx })
+      }
+      await refreshAll()
+      setLoading(false)
+      return tx
+    } catch (err) {
+      console.error('Rollover Weekly pool failed:', err)
+      const cleanMsg = decodeElzoraError(err, 'Unable to rollover weekly pool.')
+      setError(cleanMsg)
+      setLoading(false)
+      throw new Error(cleanMsg)
+    }
+  }
+
   const upgradeContractImplementation = async (newImplementationAddress) => {
     setLoading(true)
     setError(null)
@@ -1034,6 +1060,7 @@ export function useElzora() {
     distributeChampionBatch,
     createWeeklyPoolSnapshot,
     distributeWeeklyBatch,
+    rolloverWeeklyPool,
     upgradeContractImplementation,
     setExemptFromDirects,
     // Shorthands & Registration Flags

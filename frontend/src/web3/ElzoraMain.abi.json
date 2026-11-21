@@ -1044,6 +1044,31 @@
       {
         "indexed": true,
         "internalType": "uint256",
+        "name": "fromEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "toEpoch",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "WeeklyPoolRollover",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
         "name": "weekEpoch",
         "type": "uint256"
       },
@@ -1396,76 +1421,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "user",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "parent",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "leftChild",
-            "type": "address"
-          },
-          {
-            "internalType": "address",
-            "name": "rightChild",
-            "type": "address"
-          },
-          {
-            "internalType": "enum IElzora.BinaryPosition",
-            "name": "position",
-            "type": "uint8"
-          },
-          {
-            "internalType": "uint256",
-            "name": "leftCarry",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "rightCarry",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "leftTeam",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "rightTeam",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "leftDirectCount",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "rightDirectCount",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct IElzora.BinaryAdjustment[]",
-        "name": "adjustments",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "batchReconcileBinaryUsers",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -2831,6 +2786,24 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "fromEpoch",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "toEpoch",
+        "type": "uint256"
+      }
+    ],
+    "name": "rolloverWeeklyPool",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
