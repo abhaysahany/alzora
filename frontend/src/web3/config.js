@@ -37,7 +37,7 @@ const connectors = connectorsForWallets(
     },
   ],
   {
-    appName: 'AventraX Coin Ecosystem',
+    appName: 'Elzora Ecosystem',
     projectId,
   }
 )

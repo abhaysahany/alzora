@@ -185,7 +185,7 @@ export function AdminProtectedRoute({ children }) {
             Unauthorized Access
           </h2>
           <p style={{ color: 'var(--muted)', fontSize: '0.94rem', marginBottom: 28, lineHeight: '1.5' }}>
-            The connected wallet is not registered as an Admin or Operator in the AventraX Smart Contract.
+            The connected wallet is not registered as an Admin or Operator in the Elzora Smart Contract.
             Access to administrative routes is strictly restricted.
           </p>
 

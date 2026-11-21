@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useChainId, useReadContract } from 'wagmi'
 import { formatUnits } from 'viem'
 import { AdminLayout } from '../../components/AdminLayout'
-import { useAventraContracts } from '../../hooks/useAventraContracts'
+import { useElzora } from '../../hooks/useElzora'
 import { getContractAddresses, getTokenDecimals, CONTRACT_ADDRESSES, ELZORA_MAIN_ABI } from '../../web3/contracts'
 import { useWalletAuth } from '../../hooks/useWalletAuth'
 import { formatErrorMessage } from '../../utils/errorMessages'
@@ -29,30 +29,30 @@ export function AdminControlsPage() {
   const isMainnet = Number(chainId) === 56
   const tokenDecimals = getTokenDecimals(chainId)
   const networkLabel = isMainnet ? 'BSC Mainnet (Chain ID: 56)' : 'BSC Testnet (Chain ID: 97)'
-  const aventra = useAventraContracts()
-  const contractPaused = aventra?.contractPaused ?? false
-  const treasuryWalletAddress = aventra?.treasuryWalletAddress || contractAddresses?.TREASURY || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
-  const pendingOwnerAddress = aventra?.pendingOwnerAddress || '0x0000000000000000000000000000000000000000'
-  const isPendingOwner = aventra?.isPendingOwner ?? false
-  const contractOwnerAddress = aventra?.contractOwnerAddress || aventra?.overview?.rootAddress || contractAddresses?.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
-  const pauseContract = aventra?.pauseContract || (async () => showToast('Protocol paused'))
-  const unpauseContract = aventra?.unpauseContract || (async () => showToast('Protocol unpaused'))
-  const transferOwnership = aventra?.transferOwnership || (async () => showToast('Ownership transfer proposed'))
-  const cancelOwnershipTransfer = aventra?.cancelOwnershipTransfer || (async () => showToast('Ownership transfer cancelled'))
-  const acceptOwnership = aventra?.acceptOwnership || (async () => showToast('Ownership accepted'))
-  const changeTreasuryWallet = aventra?.setTreasuryWallet || aventra?.changeTreasuryWallet || (async () => showToast('Treasury wallet updated'))
-  const emergencyWithdrawToken = aventra?.emergencyRescue || aventra?.emergencyTokenRescue || aventra?.emergencyWithdrawToken || (async () => showToast('Emergency rescue processed'))
-  const upgradeContractImplementation = aventra?.upgradeContractImplementation
-  const setExemptFromDirects = aventra?.setExemptFromDirects
+  const elzora = useElzora()
+  const contractPaused = elzora?.contractPaused ?? false
+  const treasuryWalletAddress = elzora?.treasuryWalletAddress || contractAddresses?.TREASURY || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
+  const pendingOwnerAddress = elzora?.pendingOwnerAddress || '0x0000000000000000000000000000000000000000'
+  const isPendingOwner = elzora?.isPendingOwner ?? false
+  const contractOwnerAddress = elzora?.contractOwnerAddress || elzora?.overview?.rootAddress || contractAddresses?.ROOT_ID || '0x1AD6f582C38C0Ee6036b4EBCd9Af2Be3376D3DE5'
+  const pauseContract = elzora?.pauseContract || (async () => showToast('Protocol paused'))
+  const unpauseContract = elzora?.unpauseContract || (async () => showToast('Protocol unpaused'))
+  const transferOwnership = elzora?.transferOwnership || (async () => showToast('Ownership transfer proposed'))
+  const cancelOwnershipTransfer = elzora?.cancelOwnershipTransfer || (async () => showToast('Ownership transfer cancelled'))
+  const acceptOwnership = elzora?.acceptOwnership || (async () => showToast('Ownership accepted'))
+  const changeTreasuryWallet = elzora?.setTreasuryWallet || elzora?.changeTreasuryWallet || (async () => showToast('Treasury wallet updated'))
+  const emergencyWithdrawToken = elzora?.emergencyRescue || elzora?.emergencyTokenRescue || elzora?.emergencyWithdrawToken || (async () => showToast('Emergency rescue processed'))
+  const upgradeContractImplementation = elzora?.upgradeContractImplementation
+  const setExemptFromDirects = elzora?.setExemptFromDirects
   
   // Pool distribution methods
-  const createChampionMonthlySnapshot = aventra?.createChampionMonthlySnapshot
-  const distributeChampionBatch = aventra?.distributeChampionBatch
-  const createWeeklyPoolSnapshot = aventra?.createWeeklyPoolSnapshot
-  const distributeWeeklyBatch = aventra?.distributeWeeklyBatch
+  const createChampionMonthlySnapshot = elzora?.createChampionMonthlySnapshot
+  const distributeChampionBatch = elzora?.distributeChampionBatch
+  const createWeeklyPoolSnapshot = elzora?.createWeeklyPoolSnapshot
+  const distributeWeeklyBatch = elzora?.distributeWeeklyBatch
 
-  const globalStats = aventra?.overview || {}
-  const loading = aventra?.loading || false
+  const globalStats = elzora?.overview || {}
+  const loading = elzora?.loading || false
 
   const [toastMsg, setToastMsg] = useState(null)
   const [copiedField, setCopiedField] = useState(null)
