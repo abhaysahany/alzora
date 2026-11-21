@@ -386,7 +386,7 @@ export function AdminControlsPage() {
               </span>
             </div>
             <p style={{ margin: '3px 0 0', color: 'var(--muted)', fontSize: '0.82rem' }}>
-              All weekly & monthly pools operate strictly on Indian Standard Time. Epoch cycles roll over every 7 days (Weekly) and 30 days (Monthly).
+              Weekly pools close every <strong>Saturday at 11:59:59 PM IST (Midnight)</strong>. New Weekly Epoch starts every <strong>Sunday at 00:00:00 AM IST</strong>.
             </p>
           </div>
         </div>
@@ -394,19 +394,19 @@ export function AdminControlsPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>
-              Week #1 End / Closing (IST)
+              Week #1 Closing (Tonight IST)
             </div>
             <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#f43f5e' }}>
-              Friday, 27 Nov 2026, 05:40 PM IST
+              Saturday, 21 Nov 2026, 11:59:59 PM IST
             </div>
           </div>
           <div style={{ width: 1, height: 32, background: 'rgba(255,255,255,0.1)' }} />
           <div style={{ textAlign: 'right' }}>
             <div style={{ fontSize: '0.72rem', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700 }}>
-              Month #1 End / Closing (IST)
+              Week #2 Starts (Sunday IST)
             </div>
-            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#fbbf24' }}>
-              Sunday, 13 Dec 2026, 05:40 PM IST
+            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#00ff88' }}>
+              Sunday, 22 Nov 2026, 00:00:00 AM IST
             </div>
           </div>
         </div>
@@ -616,7 +616,7 @@ export function AdminControlsPage() {
             </div>
 
             <p style={{ color: 'var(--muted)', fontSize: '0.86rem', marginBottom: 16, lineHeight: 1.5 }}>
-              Distributed every Sunday morning to members who sponsored 3+ directs in that week's epoch. Admin closes the epoch snapshot and dispatches safe on-chain batches.
+              Closes every <strong>Saturday at 11:59:59 PM IST (Midnight)</strong>. Distributed every Sunday to members who sponsored 3+ directs in that week's epoch. New week starts Sunday 00:00:00 AM IST.
             </p>
 
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: 14, borderRadius: 14, border: '1px solid rgba(244, 63, 94, 0.15)', marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
