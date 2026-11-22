@@ -270,10 +270,6 @@ export function AdminControlsPage() {
   const [emRecipient, setEmRecipient] = useState('')
   const [emAmount, setEmAmount] = useState('')
 
-  // Weekly rollover state
-  const [rolloverFromEpoch, setRolloverFromEpoch] = useState('0')
-  const [rolloverToEpoch, setRolloverToEpoch] = useState('2')
-  const [isProcessingRollover, setIsProcessingRollover] = useState(false)
 
   const showToast = (msg) => {
     setToastMsg(msg)
@@ -672,7 +668,9 @@ export function AdminControlsPage() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#f43f5e' }}>
-                    {weeklyRecord?.isSnapshotCreated ? `${weeklyRecord.totalQualifiers} Qualifiers` : `${weeklyCount} Qualifiers`}
+                    {weeklyRecord?.isSnapshotCreated
+                      ? `${weeklyRecord.totalQualifiers} Qualifiers`
+                      : `${Math.max(weeklyCount, 3)} Qualifiers (${weeklyCount <= 3 ? '3 Default' : `3 Default + ${weeklyCount - 3} Performance`})`}
                   </span>
                   <span style={{
                     fontSize: '0.7rem',
@@ -833,75 +831,6 @@ export function AdminControlsPage() {
               >
                 {weeklyRecord?.isFullyDistributed ? 'Fully Distributed ✅' : isProcessingWeeklyBatch ? 'Distributing...' : '2. Distribute Batch'}
               </button>
-            </div>
-
-            {/* ROLLOVER UNDISTRIBUTED FUNDS SECTION */}
-            <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 700 }}>
-                  🔄 Rollover Undistributed Weekly Funds
-                </span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, alignItems: 'center' }}>
-                <input
-                  type="number"
-                  placeholder="From Epoch"
-                  value={rolloverFromEpoch}
-                  onChange={(e) => setRolloverFromEpoch(e.target.value)}
-                  style={{
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: '#fff',
-                    fontSize: '0.8rem',
-                  }}
-                />
-                <input
-                  type="number"
-                  placeholder="To Epoch"
-                  value={rolloverToEpoch}
-                  onChange={(e) => setRolloverToEpoch(e.target.value)}
-                  style={{
-                    padding: '8px 10px',
-                    borderRadius: 8,
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: '#fff',
-                    fontSize: '0.8rem',
-                  }}
-                />
-                <button
-                  type="button"
-                  disabled={isProcessingRollover || loading}
-                  onClick={async () => {
-                    try {
-                      setIsProcessingRollover(true)
-                      showToast(`Rolling over weekly pool from Week #${rolloverFromEpoch} to Week #${rolloverToEpoch}...`)
-                      await rolloverWeeklyPool(rolloverFromEpoch, rolloverToEpoch)
-                      await Promise.all([refetchWeeklyCount(), refetchWeeklyRecord(), loadHistoryLedger()])
-                      showToast(`✅ Successfully rolled over funds into Week #${rolloverToEpoch}!`)
-                    } catch (err) {
-                      showToast(formatErrorMessage(err, 'Unable to rollover weekly pool.'))
-                    } finally {
-                      setIsProcessingRollover(false)
-                    }
-                  }}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: 8,
-                    background: 'rgba(251, 191, 36, 0.15)',
-                    border: '1px solid #fbbf24',
-                    color: '#fbbf24',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {isProcessingRollover ? 'Processing...' : 'Execute Rollover'}
-                </button>
-              </div>
             </div>
           </div>
         </div>
