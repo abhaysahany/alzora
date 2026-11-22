@@ -542,11 +542,30 @@ export function AdminControlsPage() {
               </div>
             </div>
 
+            {/* STATUS BANNER FOR CURRENT ACTIVE MONTH */}
+            {Number(championMonthEpoch) >= Number(currentMonthEpoch) && (
+              <div style={{
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: 'rgba(251, 191, 36, 0.1)',
+                border: '1px solid rgba(251, 191, 36, 0.3)',
+                color: '#fbbf24',
+                fontSize: '0.78rem',
+                lineHeight: 1.4,
+              }}>
+                ⏳ <strong>Month #{championMonthEpoch} is currently active!</strong> Registrations are accumulating. On-chain snapshot will open once this monthly epoch closes.
+              </div>
+            )}
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <button
                 type="button"
-                disabled={isProcessingChampionSnapshot || loading}
+                disabled={isProcessingChampionSnapshot || loading || Number(championMonthEpoch) >= Number(currentMonthEpoch)}
                 onClick={async () => {
+                  if (Number(championMonthEpoch) >= Number(currentMonthEpoch)) {
+                    showToast(`⚠️ Month #${championMonthEpoch} is still active! Snapshot can only be created after the month concludes.`)
+                    return
+                  }
                   try {
                     setIsProcessingChampionSnapshot(true)
                     showToast(`Creating snapshot for Month Epoch ${championMonthEpoch}...`)
@@ -564,13 +583,17 @@ export function AdminControlsPage() {
                   borderRadius: 12,
                   fontWeight: 800,
                   fontSize: '0.82rem',
-                  background: 'rgba(251, 191, 36, 0.15)',
-                  border: '1px solid #fbbf24',
-                  color: '#fbbf24',
-                  cursor: 'pointer',
+                  background: Number(championMonthEpoch) >= Number(currentMonthEpoch) ? 'rgba(255, 255, 255, 0.08)' : 'rgba(251, 191, 36, 0.15)',
+                  border: Number(championMonthEpoch) >= Number(currentMonthEpoch) ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #fbbf24',
+                  color: Number(championMonthEpoch) >= Number(currentMonthEpoch) ? 'var(--muted)' : '#fbbf24',
+                  cursor: Number(championMonthEpoch) >= Number(currentMonthEpoch) ? 'not-allowed' : 'pointer',
                 }}
               >
-                {isProcessingChampionSnapshot ? 'Processing...' : '1. Create Snapshot'}
+                {Number(championMonthEpoch) >= Number(currentMonthEpoch)
+                  ? 'Active Month (Opens at Month End)'
+                  : isProcessingChampionSnapshot
+                  ? 'Processing...'
+                  : '1. Create Snapshot'}
               </button>
 
               <button
@@ -727,11 +750,30 @@ export function AdminControlsPage() {
               </div>
             </div>
 
+            {/* STATUS BANNER FOR CURRENT ACTIVE WEEK */}
+            {Number(weeklyEpochInput) >= Number(currentWeeklyEpoch) && (
+              <div style={{
+                padding: '10px 14px',
+                borderRadius: 10,
+                background: 'rgba(251, 191, 36, 0.1)',
+                border: '1px solid rgba(251, 191, 36, 0.3)',
+                color: '#fbbf24',
+                fontSize: '0.78rem',
+                lineHeight: 1.4,
+              }}>
+                ⏳ <strong>Week #{weeklyEpochInput} is currently active!</strong> Registrations are live until Saturday 11:59:59 PM IST. On-chain snapshot will open on Sunday morning.
+              </div>
+            )}
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <button
                 type="button"
-                disabled={isProcessingWeeklySnapshot || loading}
+                disabled={isProcessingWeeklySnapshot || loading || Number(weeklyEpochInput) >= Number(currentWeeklyEpoch)}
                 onClick={async () => {
+                  if (Number(weeklyEpochInput) >= Number(currentWeeklyEpoch)) {
+                    showToast(`⚠️ Week #${weeklyEpochInput} is still open! It closes Saturday Midnight IST. Snapshot can be taken on Sunday.`)
+                    return
+                  }
                   try {
                     setIsProcessingWeeklySnapshot(true)
                     showToast(`Creating snapshot for Week Epoch ${weeklyEpochInput}...`)
@@ -749,13 +791,17 @@ export function AdminControlsPage() {
                   borderRadius: 12,
                   fontWeight: 800,
                   fontSize: '0.82rem',
-                  background: 'rgba(244, 63, 94, 0.15)',
-                  border: '1px solid #f43f5e',
-                  color: '#f43f5e',
-                  cursor: 'pointer',
+                  background: Number(weeklyEpochInput) >= Number(currentWeeklyEpoch) ? 'rgba(255, 255, 255, 0.08)' : 'rgba(244, 63, 94, 0.15)',
+                  border: Number(weeklyEpochInput) >= Number(currentWeeklyEpoch) ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #f43f5e',
+                  color: Number(weeklyEpochInput) >= Number(currentWeeklyEpoch) ? 'var(--muted)' : '#f43f5e',
+                  cursor: Number(weeklyEpochInput) >= Number(currentWeeklyEpoch) ? 'not-allowed' : 'pointer',
                 }}
               >
-                {isProcessingWeeklySnapshot ? 'Processing...' : '1. Create Snapshot'}
+                {Number(weeklyEpochInput) >= Number(currentWeeklyEpoch)
+                  ? 'Active Week (Opens Sunday)'
+                  : isProcessingWeeklySnapshot
+                  ? 'Processing...'
+                  : '1. Create Snapshot'}
               </button>
 
               <button
