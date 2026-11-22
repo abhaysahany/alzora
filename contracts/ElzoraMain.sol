@@ -773,6 +773,27 @@ contract ElzoraMain is
         emit WeeklyPoolRollover(fromEpoch, toEpoch, amt);
     }
 
+    /**
+     * @notice Distribute undistributed weekly pool balance immediately to default qualifiers (First 3 IDs)
+     * @param fromEpoch The epoch containing undistributed funds (e.g. Epoch 2 where $39 is stored)
+     */
+    function distributeUndistributedWeeklyToDefaultQualifiers(uint256 fromEpoch) external onlyOwner nonReentrant {
+        uint256 total = weeklyPoolBalance[fromEpoch];
+        if (total == 0) revert NothingToWithdraw();
+
+        weeklyPoolBalance[fromEpoch] = 0;
+
+        uint256 perUser = total / 3;
+
+        for (uint256 i = 1; i <= 3 && i < globalMatrixUsers.length; i++) {
+            address user = globalMatrixUsers[i];
+            if (user != address(0) && _users[user].isRegistered) {
+                _creditIncome(user, perUser, 6);
+                emit WeeklyRewardClaimed(user, fromEpoch, perUser);
+            }
+        }
+    }
+
     function getWeeklyQualifiersCount(uint256 epoch) external view returns (uint256) {
         return _weeklyQualifiers[epoch].length;
     }
